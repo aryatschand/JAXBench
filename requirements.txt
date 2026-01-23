@@ -1,0 +1,24 @@
+# Modal for cloud TPU allocation
+modal>=0.64.0
+
+# AWS Bedrock for Claude Opus 4.5
+boto3>=1.34.0
+
+# JAX with TPU support (install on TPU instances)
+# jax[tpu] - installed via Modal image
+
+# Common JAX libraries
+flax>=0.8.0
+optax>=0.2.0
+orbax-checkpoint>=0.5.0
+
+# Utilities
+numpy>=1.24.0
+tqdm>=4.65.0
+pyyaml>=6.0
+python-dotenv>=1.0.0
+
+# For benchmarking
+pandas>=2.0.0
+matplotlib>=3.7.0
+
