@@ -45,8 +45,11 @@ env/
 logs/
 *.log
 outputs/
-results/
 .cache/
+
+# Results - keep checkpoint files but ignore intermediate results
+results/jaxbench_*.json
+!results/checkpoint_*.json
 
 # OS
 .DS_Store

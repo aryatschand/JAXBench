@@ -4,13 +4,14 @@ GCP TPU Test Script for JAXBench.
 Tests TPU allocation and JAX execution on Google Cloud TPUs.
 
 Usage:
-    python gcp_tpu_test.py
+    python scripts/test_tpu.py
 """
 
 import os
 import json
 import subprocess
 import time
+from pathlib import Path
 from google.cloud import tpu_v2
 from google.oauth2 import service_account
 from google.api_core import exceptions
@@ -19,7 +20,8 @@ from google.api_core import exceptions
 PROJECT_ID = "jaxbench"
 ZONE = "us-central1-a"  # TPU availability zone
 TPU_NAME = "jaxbench-test-tpu"
-CREDENTIALS_FILE = "credentials.json"
+BASE_DIR = Path(__file__).parent.parent  # Go up one level from scripts/
+CREDENTIALS_FILE = str(BASE_DIR / "credentials.json")
 
 # TPU configurations (cheapest options)
 # v2-8 is the cheapest, followed by v3-8
@@ -44,9 +46,8 @@ TPU_ZONES = {
 
 def get_credentials():
     """Load GCP credentials from service account file."""
-    creds_path = os.path.join(os.path.dirname(__file__), CREDENTIALS_FILE)
     credentials = service_account.Credentials.from_service_account_file(
-        creds_path,
+        CREDENTIALS_FILE,
         scopes=["https://www.googleapis.com/auth/cloud-platform"]
     )
     return credentials

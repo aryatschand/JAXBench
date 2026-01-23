@@ -1,0 +1,19 @@
+{
+  "timestamp": "2026-01-22T18:55:19.517589",
+  "provider": "bedrock",
+  "model": "opus",
+  "level": 2,
+  "tasks": [
+    {
+      "task_id": "3",
+      "task_name": "ConvTranspose3d_Sum_LayerNorm_AvgPool_GELU",
+      "compilation_success": true,
+      "correctness_success": true,
+      "jax_ms": 9.238,
+      "pytorch_xla_ms": 8.89,
+      "speedup": 0.96,
+      "error": "Input type (torch.FloatTensor) and weight type (XLAFloatType) should be the same or input should be a MKLDNN tensor and weight is a dense tensor",
+      "attempts": 2
+    }
+  ]
+}

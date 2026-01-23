@@ -309,22 +309,22 @@ Both JAX and PyTorch/XLA ultimately compile to XLA and run on the same TPU hardw
 pip install -r requirements.txt
 
 # Run on first 10 Level 1 tasks
-python run_jaxbench.py --level 1 --tasks 10 --keep-tpu
+python scripts/run_benchmark.py --level 1 --tasks 10 --keep-tpu
 
 # Run ALL Level 1 tasks (100 tasks)
-python run_jaxbench.py --level 1 --all --keep-tpu
+python scripts/run_benchmark.py --level 1 --all --keep-tpu
 
 # Run ALL Level 2 tasks (100 tasks)
-python run_jaxbench.py --level 2 --all --keep-tpu
+python scripts/run_benchmark.py --level 2 --all --keep-tpu
 
 # Run specific tasks
-python run_jaxbench.py --level 2 --task-ids "1,5,10" --keep-tpu
+python scripts/run_benchmark.py --level 2 --task-ids "1,5,10" --keep-tpu
 ```
 
 ## Command Line Options
 
 ```bash
-python run_jaxbench.py [OPTIONS]
+python scripts/run_benchmark.py [OPTIONS]
 
 Options:
   --level N          KernelBench level: 1, 2, or 3 (default: 1)
@@ -387,7 +387,7 @@ Results are saved to:
 
 ```bash
 # Generate histograms of speedups and correctness
-python visualize_results.py results/jaxbench_bedrock_*.json
+python scripts/visualize_results.py results/jaxbench_bedrock_*.json
 ```
 
 ## Example Results
@@ -414,17 +414,51 @@ python visualize_results.py results/jaxbench_bedrock_*.json
 
 ```
 JAXBench/
-├── run_jaxbench.py       # Main pipeline script
-├── visualize_results.py  # Results visualization
+├── scripts/
+│   ├── run_benchmark.py      # Main benchmark pipeline script
+│   └── visualize_results.py  # Results visualization
 ├── src/
-│   └── llm_client.py     # LLM client (Bedrock/Gemini)
+│   ├── llm_client.py         # LLM client (Bedrock/Gemini)
+│   ├── tpu_manager.py        # TPU VM lifecycle management
+│   ├── translator.py         # PyTorch → JAX translation
+│   ├── validator.py          # TPU validation logic
+│   └── pipeline.py           # Pipeline orchestration
+├── tests/
+│   ├── run_all_tests.py           # Run all tests
+│   ├── test_tpu_connection.py     # TPU connectivity tests
+│   ├── test_matmul_benchmark.py   # JAX vs PyTorch/XLA benchmark test
+│   ├── test_llm_client.py         # LLM API tests
+│   ├── test_manual_kernels.py     # Manual kernel testing utility
+│   └── test_tpu.py                # TPU allocation utility
 ├── jaxbench/
-│   ├── level1/           # Translated JAX workloads (Level 1)
-│   └── level2/           # Translated JAX workloads (Level 2)
-├── KernelBench/          # Cloned PyTorch reference
-├── results/              # Benchmark results (JSON)
-├── .cache/               # Translation cache
+│   ├── level1/               # Translated JAX workloads (Level 1)
+│   └── level2/               # Translated JAX workloads (Level 2)
+├── KernelBench/              # Cloned PyTorch reference
+├── results/                  # Benchmark results (JSON)
+├── logs/                     # Execution logs
+├── .cache/                   # Translation cache
 └── requirements.txt
+```
+
+## Testing
+
+Run tests to verify your setup is correct:
+
+```bash
+# Run all tests
+python tests/run_all_tests.py
+
+# Quick tests (skip TPU benchmark)
+python tests/run_all_tests.py --quick
+
+# Test TPU connection only
+python tests/test_tpu_connection.py
+
+# Test matmul benchmark (JAX + PyTorch/XLA)
+python tests/test_matmul_benchmark.py
+
+# Test LLM clients
+python tests/test_llm_client.py
 ```
 
 ## Extending with Pallas

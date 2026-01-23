@@ -11,9 +11,9 @@ Optimizations:
 - Saves progress incrementally
 
 Usage:
-    python run_jaxbench.py --tasks 10 --provider bedrock --model opus
-    python run_jaxbench.py --level 1 --all  # Run all Level 1 tasks
-    python run_jaxbench.py --level 2 --all  # Run all Level 2 tasks
+    python scripts/run_benchmark.py --tasks 10 --provider bedrock --model opus
+    python scripts/run_benchmark.py --level 1 --all  # Run all Level 1 tasks
+    python scripts/run_benchmark.py --level 2 --all  # Run all Level 2 tasks
 """
 
 import os
@@ -27,19 +27,22 @@ from datetime import datetime
 from typing import List, Dict, Optional
 import logging
 
-# Add src to path
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+# Add project root and src to path
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
+sys.path.insert(0, PROJECT_ROOT)
 
 from google.oauth2 import service_account
 from google.cloud import tpu_v2, storage
 from google.api_core import exceptions
 
 # Configuration
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = PROJECT_ROOT
 KERNELBENCH_DIR = os.path.join(BASE_DIR, "KernelBench", "KernelBench", "level1")
 OUTPUT_DIR = os.path.join(BASE_DIR, "jaxbench", "level1")
 RESULTS_DIR = os.path.join(BASE_DIR, "results")
 CACHE_DIR = os.path.join(BASE_DIR, ".cache")
+LOGS_DIR = os.path.join(BASE_DIR, "logs")
 
 def get_dirs_for_level(level: int):
     """Get the input/output directories for a given level."""
@@ -59,7 +62,8 @@ SSH_USER = "REDACTED_SSH_USER"
 import logging
 
 # Setup logging to both file and console
-LOG_FILE = os.path.join(BASE_DIR, "jaxbench_run.log")
+os.makedirs(LOGS_DIR, exist_ok=True)
+LOG_FILE = os.path.join(LOGS_DIR, "jaxbench_run.log")
 logging.basicConfig(
     level=logging.INFO,
     format='[%(asctime)s] [%(levelname)s] %(message)s',

@@ -13,7 +13,7 @@ from datetime import datetime
 from pathlib import Path
 
 # Configuration
-BASE_DIR = Path(__file__).parent
+BASE_DIR = Path(__file__).parent.parent  # Go up one level from scripts/
 CREDENTIALS_FILE = BASE_DIR / "credentials.json"
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = str(CREDENTIALS_FILE)
 
