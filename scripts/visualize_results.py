@@ -1,308 +1,123 @@
 #!/usr/bin/env python3
 """
-JAXBench Results Visualization
-
-Generates histograms showing:
-1. Level 1 speedups (JAX vs PyTorch/XLA)
-2. Level 1 numerical differences (max_diff)
-3. Level 2 speedups
-4. Level 2 numerical differences
-
-Usage:
-    python visualize_results.py results/jaxbench_*.json
-    python visualize_results.py --level1 results/level1.json --level2 results/level2.json
+Visualize JAXBench Level 1 and Level 2 results.
 """
 
-import os
-import sys
 import json
-import glob
-import argparse
-from typing import List, Dict, Optional
-from datetime import datetime
+import matplotlib.pyplot as plt
+import numpy as np
 
-try:
-    import matplotlib.pyplot as plt
-    import numpy as np
-except ImportError:
-    print("Please install matplotlib and numpy: pip install matplotlib numpy")
-    sys.exit(1)
+# Load data
+with open('/Users/aryatschand/Documents/GitHub/JAXBench/results/checkpoint_level1.json') as f:
+    level1_data = json.load(f)
 
+with open('/Users/aryatschand/Documents/GitHub/JAXBench/results/checkpoint_level2.json') as f:
+    level2_data = json.load(f)
 
-def load_results(filepath: str) -> Dict:
-    """Load results from JSON file."""
-    with open(filepath, 'r') as f:
-        return json.load(f)
+# Extract data for Level 1
+level1_speedups = []
+level1_jax_ms = []
+level1_pytorch_ms = []
 
+for task in level1_data['tasks']:
+    if task.get('correctness_success') and task.get('speedup') is not None:
+        level1_speedups.append(task['speedup'])
+        if task.get('jax_ms') is not None:
+            level1_jax_ms.append(task['jax_ms'])
+        if task.get('pytorch_xla_ms') is not None:
+            level1_pytorch_ms.append(task['pytorch_xla_ms'])
 
-def find_latest_results(results_dir: str = "results", level: Optional[int] = None) -> List[str]:
-    """Find the latest result files."""
-    pattern = os.path.join(results_dir, "jaxbench_*.json")
-    files = glob.glob(pattern)
-    
-    # Filter by level if specified
-    if level:
-        # We need to check inside the files to determine level
-        # For now, just return all and filter later
-        pass
-    
-    # Sort by modification time (newest first)
-    files.sort(key=os.path.getmtime, reverse=True)
-    return files
+# Extract data for Level 2
+level2_speedups = []
+level2_jax_ms = []
+level2_pytorch_ms = []
 
+for task in level2_data['tasks']:
+    if task.get('correctness_success') and task.get('speedup') is not None:
+        level2_speedups.append(task['speedup'])
+        if task.get('jax_ms') is not None:
+            level2_jax_ms.append(task['jax_ms'])
+        if task.get('pytorch_xla_ms') is not None:
+            level2_pytorch_ms.append(task['pytorch_xla_ms'])
 
-def extract_metrics(results: Dict) -> Dict:
-    """Extract speedup and max_diff metrics from results."""
-    metrics = {
-        "speedups": [],
-        "max_diffs": [],
-        "task_names": [],
-        "task_ids": [],
-        "successes": 0,
-        "failures": 0,
-    }
-    
-    for task in results.get("tasks", []):
-        task_id = task.get("task_id", "?")
-        task_name = task.get("task_name", "Unknown")
-        
-        if task.get("correctness_success"):
-            metrics["successes"] += 1
-            
-            speedup = task.get("speedup")
-            if speedup is not None:
-                metrics["speedups"].append(speedup)
-                metrics["task_names"].append(task_name[:30])
-                metrics["task_ids"].append(task_id)
-            
-            max_diff = task.get("max_diff")
-            if max_diff is not None:
-                metrics["max_diffs"].append(max_diff)
-        else:
-            metrics["failures"] += 1
-    
-    return metrics
+# Create figure with 4 subplots
+fig, axes = plt.subplots(2, 2, figsize=(14, 10))
+fig.suptitle('JAXBench: JAX vs PyTorch/XLA Performance Comparison', fontsize=14, fontweight='bold')
 
+# Color scheme
+jax_color = '#2ecc71'
+pytorch_color = '#e74c3c'
+speedup_color = '#3498db'
 
-def plot_histograms(level1_metrics: Optional[Dict], level2_metrics: Optional[Dict], 
-                    output_path: str = "jaxbench_results.png"):
-    """Generate 4-panel histogram figure."""
-    
-    fig, axes = plt.subplots(2, 2, figsize=(14, 10))
-    fig.suptitle("JAXBench Results: JAX vs PyTorch/XLA on TPU v6e", fontsize=14, fontweight='bold')
-    
-    # Color scheme
-    speedup_color = '#2ecc71'  # Green
-    diff_color = '#3498db'     # Blue
-    
-    # Panel 1: Level 1 Speedups
-    ax1 = axes[0, 0]
-    if level1_metrics and level1_metrics["speedups"]:
-        speedups = level1_metrics["speedups"]
-        ax1.hist(speedups, bins=20, color=speedup_color, edgecolor='black', alpha=0.7)
-        ax1.axvline(x=1.0, color='red', linestyle='--', linewidth=2, label='1.0x (parity)')
-        ax1.axvline(x=np.mean(speedups), color='orange', linestyle='-', linewidth=2, 
-                   label=f'Mean: {np.mean(speedups):.2f}x')
-        ax1.set_xlabel('Speedup (JAX / PyTorch/XLA)')
-        ax1.set_ylabel('Count')
-        ax1.set_title(f'Level 1 Speedups (n={len(speedups)}, {level1_metrics["successes"]}/{level1_metrics["successes"]+level1_metrics["failures"]} passed)')
-        ax1.legend()
-        ax1.grid(True, alpha=0.3)
-    else:
-        ax1.text(0.5, 0.5, 'No Level 1 data', ha='center', va='center', transform=ax1.transAxes)
-        ax1.set_title('Level 1 Speedups')
-    
-    # Panel 2: Level 1 Numerical Differences
-    ax2 = axes[0, 1]
-    if level1_metrics and level1_metrics["max_diffs"]:
-        diffs = level1_metrics["max_diffs"]
-        ax2.hist(diffs, bins=20, color=diff_color, edgecolor='black', alpha=0.7)
-        ax2.axvline(x=np.mean(diffs), color='orange', linestyle='-', linewidth=2,
-                   label=f'Mean: {np.mean(diffs):.4f}')
-        ax2.set_xlabel('Max Absolute Difference')
-        ax2.set_ylabel('Count')
-        ax2.set_title(f'Level 1 Numerical Differences (n={len(diffs)})')
-        ax2.legend()
-        ax2.grid(True, alpha=0.3)
-        # Log scale if values vary widely
-        if max(diffs) / (min(diffs) + 1e-10) > 100:
-            ax2.set_xscale('log')
-    else:
-        ax2.text(0.5, 0.5, 'No Level 1 data', ha='center', va='center', transform=ax2.transAxes)
-        ax2.set_title('Level 1 Numerical Differences')
-    
-    # Panel 3: Level 2 Speedups
-    ax3 = axes[1, 0]
-    if level2_metrics and level2_metrics["speedups"]:
-        speedups = level2_metrics["speedups"]
-        ax3.hist(speedups, bins=20, color=speedup_color, edgecolor='black', alpha=0.7)
-        ax3.axvline(x=1.0, color='red', linestyle='--', linewidth=2, label='1.0x (parity)')
-        ax3.axvline(x=np.mean(speedups), color='orange', linestyle='-', linewidth=2,
-                   label=f'Mean: {np.mean(speedups):.2f}x')
-        ax3.set_xlabel('Speedup (JAX / PyTorch/XLA)')
-        ax3.set_ylabel('Count')
-        ax3.set_title(f'Level 2 Speedups (n={len(speedups)}, {level2_metrics["successes"]}/{level2_metrics["successes"]+level2_metrics["failures"]} passed)')
-        ax3.legend()
-        ax3.grid(True, alpha=0.3)
-    else:
-        ax3.text(0.5, 0.5, 'No Level 2 data', ha='center', va='center', transform=ax3.transAxes)
-        ax3.set_title('Level 2 Speedups')
-    
-    # Panel 4: Level 2 Numerical Differences
-    ax4 = axes[1, 1]
-    if level2_metrics and level2_metrics["max_diffs"]:
-        diffs = level2_metrics["max_diffs"]
-        ax4.hist(diffs, bins=20, color=diff_color, edgecolor='black', alpha=0.7)
-        ax4.axvline(x=np.mean(diffs), color='orange', linestyle='-', linewidth=2,
-                   label=f'Mean: {np.mean(diffs):.4f}')
-        ax4.set_xlabel('Max Absolute Difference')
-        ax4.set_ylabel('Count')
-        ax4.set_title(f'Level 2 Numerical Differences (n={len(diffs)})')
-        ax4.legend()
-        ax4.grid(True, alpha=0.3)
-        if max(diffs) / (min(diffs) + 1e-10) > 100:
-            ax4.set_xscale('log')
-    else:
-        ax4.text(0.5, 0.5, 'No Level 2 data', ha='center', va='center', transform=ax4.transAxes)
-        ax4.set_title('Level 2 Numerical Differences')
-    
-    plt.tight_layout()
-    plt.savefig(output_path, dpi=150, bbox_inches='tight')
-    print(f"Saved histogram to {output_path}")
-    
-    return fig
+# Top Left: Level 1 Speedup Histogram (LOG SCALE) - 20 bins
+ax1 = axes[0, 0]
+min_speedup1 = min(level1_speedups)
+max_speedup1 = max(level1_speedups)
+bins1 = np.logspace(np.log10(max(0.1, min_speedup1 * 0.9)), np.log10(max_speedup1 * 1.1), 20)
+ax1.hist(level1_speedups, bins=bins1, color=speedup_color, edgecolor='black', alpha=0.7, linewidth=0.5)
+ax1.axvline(x=1.0, color='red', linestyle='--', linewidth=2, label='1.0x (parity)')
+ax1.axvline(x=np.mean(level1_speedups), color='orange', linestyle='-', linewidth=2, label=f'Mean: {np.mean(level1_speedups):.2f}x')
+ax1.axvline(x=np.median(level1_speedups), color='green', linestyle=':', linewidth=2, label=f'Median: {np.median(level1_speedups):.2f}x')
+ax1.set_xscale('log')
+ax1.set_xlabel('Speedup (JAX / PyTorch/XLA) - Log Scale', fontsize=11)
+ax1.set_ylabel('Number of Tasks', fontsize=11)
+ax1.set_title(f'Level 1 Speedup Distribution (n={len(level1_speedups)})', fontsize=12, fontweight='bold')
+ax1.legend(loc='upper right', fontsize=9)
+ax1.grid(axis='y', alpha=0.3)
+ax1.grid(axis='x', alpha=0.2, which='both')
 
+# Top Right: Level 2 Speedup Histogram (LOG SCALE) - 20 bins
+ax2 = axes[0, 1]
+min_speedup2 = min(level2_speedups)
+max_speedup2 = max(level2_speedups)
+bins2 = np.logspace(np.log10(max(0.1, min_speedup2 * 0.9)), np.log10(max_speedup2 * 1.1), 20)
+ax2.hist(level2_speedups, bins=bins2, color=speedup_color, edgecolor='black', alpha=0.7, linewidth=0.5)
+ax2.axvline(x=1.0, color='red', linestyle='--', linewidth=2, label='1.0x (parity)')
+ax2.axvline(x=np.mean(level2_speedups), color='orange', linestyle='-', linewidth=2, label=f'Mean: {np.mean(level2_speedups):.2f}x')
+ax2.axvline(x=np.median(level2_speedups), color='green', linestyle=':', linewidth=2, label=f'Median: {np.median(level2_speedups):.2f}x')
+ax2.set_xscale('log')
+ax2.set_xlabel('Speedup (JAX / PyTorch/XLA) - Log Scale', fontsize=11)
+ax2.set_ylabel('Number of Tasks', fontsize=11)
+ax2.set_title(f'Level 2 Speedup Distribution (n={len(level2_speedups)})', fontsize=12, fontweight='bold')
+ax2.legend(loc='upper right', fontsize=9)
+ax2.grid(axis='y', alpha=0.3)
+ax2.grid(axis='x', alpha=0.2, which='both')
 
-def print_summary(metrics: Dict, level: int):
-    """Print summary statistics."""
-    print(f"\n{'='*50}")
-    print(f"Level {level} Summary")
-    print(f"{'='*50}")
-    
-    total = metrics["successes"] + metrics["failures"]
-    print(f"Tasks: {metrics['successes']}/{total} passed ({100*metrics['successes']/total:.1f}%)")
-    
-    if metrics["speedups"]:
-        speedups = metrics["speedups"]
-        print(f"\nSpeedups (JAX vs PyTorch/XLA):")
-        print(f"  Mean:   {np.mean(speedups):.2f}x")
-        print(f"  Median: {np.median(speedups):.2f}x")
-        print(f"  Min:    {min(speedups):.2f}x")
-        print(f"  Max:    {max(speedups):.2f}x")
-        print(f"  >1.0x:  {sum(1 for s in speedups if s > 1.0)}/{len(speedups)} ({100*sum(1 for s in speedups if s > 1.0)/len(speedups):.1f}%)")
-    
-    if metrics["max_diffs"]:
-        diffs = metrics["max_diffs"]
-        print(f"\nNumerical Differences:")
-        print(f"  Mean:   {np.mean(diffs):.6f}")
-        print(f"  Median: {np.median(diffs):.6f}")
-        print(f"  Min:    {min(diffs):.6f}")
-        print(f"  Max:    {max(diffs):.6f}")
+# Bottom Left: Level 1 Raw Runtime Histogram - 25 bins
+ax3 = axes[1, 0]
+max_runtime1 = max(max(level1_jax_ms), max(level1_pytorch_ms))
+bins3 = np.logspace(np.log10(0.1), np.log10(max_runtime1 + 1), 25)
+ax3.hist(level1_jax_ms, bins=bins3, color=jax_color, edgecolor='black', alpha=0.6, linewidth=0.5, label=f'JAX (mean: {np.mean(level1_jax_ms):.2f}ms)')
+ax3.hist(level1_pytorch_ms, bins=bins3, color=pytorch_color, edgecolor='black', alpha=0.6, linewidth=0.5, label=f'PyTorch/XLA (mean: {np.mean(level1_pytorch_ms):.2f}ms)')
+ax3.set_xscale('log')
+ax3.set_xlabel('Runtime (ms) - Log Scale', fontsize=11)
+ax3.set_ylabel('Number of Tasks', fontsize=11)
+ax3.set_title('Level 1 Runtime Distribution', fontsize=12, fontweight='bold')
+ax3.legend(loc='upper right')
+ax3.grid(axis='y', alpha=0.3)
+ax3.grid(axis='x', alpha=0.2, which='both')
 
+# Bottom Right: Level 2 Raw Runtime Histogram - 25 bins
+ax4 = axes[1, 1]
+max_runtime2 = max(max(level2_jax_ms), max(level2_pytorch_ms))
+bins4 = np.logspace(np.log10(0.1), np.log10(max_runtime2 + 1), 25)
+ax4.hist(level2_jax_ms, bins=bins4, color=jax_color, edgecolor='black', alpha=0.6, linewidth=0.5, label=f'JAX (mean: {np.mean(level2_jax_ms):.2f}ms)')
+ax4.hist(level2_pytorch_ms, bins=bins4, color=pytorch_color, edgecolor='black', alpha=0.6, linewidth=0.5, label=f'PyTorch/XLA (mean: {np.mean(level2_pytorch_ms):.2f}ms)')
+ax4.set_xscale('log')
+ax4.set_xlabel('Runtime (ms) - Log Scale', fontsize=11)
+ax4.set_ylabel('Number of Tasks', fontsize=11)
+ax4.set_title('Level 2 Runtime Distribution', fontsize=12, fontweight='bold')
+ax4.legend(loc='upper right')
+ax4.grid(axis='y', alpha=0.3)
+ax4.grid(axis='x', alpha=0.2, which='both')
 
-def main():
-    parser = argparse.ArgumentParser(description="Visualize JAXBench results")
-    parser.add_argument("files", nargs="*", help="Result JSON files to visualize")
-    parser.add_argument("--level1", type=str, help="Level 1 results JSON file")
-    parser.add_argument("--level2", type=str, help="Level 2 results JSON file")
-    parser.add_argument("--output", "-o", type=str, default="jaxbench_results.png",
-                       help="Output image path")
-    parser.add_argument("--results-dir", type=str, default="results",
-                       help="Directory to search for result files")
-    args = parser.parse_args()
-    
-    level1_metrics = None
-    level2_metrics = None
-    
-    # Load specified files
-    if args.level1:
-        results = load_results(args.level1)
-        level1_metrics = extract_metrics(results)
-        print_summary(level1_metrics, 1)
-    
-    if args.level2:
-        results = load_results(args.level2)
-        level2_metrics = extract_metrics(results)
-        print_summary(level2_metrics, 2)
-    
-    # Load from positional arguments
-    for filepath in args.files:
-        results = load_results(filepath)
-        metrics = extract_metrics(results)
-        
-        # Try to determine level from filename or content
-        if "level1" in filepath.lower() or "level_1" in filepath.lower():
-            level1_metrics = metrics
-            print_summary(metrics, 1)
-        elif "level2" in filepath.lower() or "level_2" in filepath.lower():
-            level2_metrics = metrics
-            print_summary(metrics, 2)
-        else:
-            # Check number of tasks - Level 1 has simpler names
-            task_names = [t.get("task_name", "") for t in results.get("tasks", [])]
-            has_conv = any("conv" in name.lower() for name in task_names)
-            if has_conv:
-                level2_metrics = metrics
-                print_summary(metrics, 2)
-            else:
-                level1_metrics = metrics
-                print_summary(metrics, 1)
-    
-    # Auto-find latest results if nothing specified
-    if not args.files and not args.level1 and not args.level2:
-        print("No files specified, searching for latest results...")
-        files = find_latest_results(args.results_dir)
-        if files:
-            print(f"Found {len(files)} result files")
-            for f in files[:4]:  # Load up to 4 most recent
-                print(f"  Loading: {f}")
-                results = load_results(f)
-                metrics = extract_metrics(results)
-                
-                # Determine level
-                task_names = [t.get("task_name", "") for t in results.get("tasks", [])]
-                has_conv = any("conv" in name.lower() for name in task_names)
-                if has_conv:
-                    if level2_metrics is None:
-                        level2_metrics = metrics
-                        print_summary(metrics, 2)
-                else:
-                    if level1_metrics is None:
-                        level1_metrics = metrics
-                        print_summary(metrics, 1)
-        else:
-            print(f"No result files found in {args.results_dir}/")
-            return
-    
-    # Generate plots
-    if level1_metrics or level2_metrics:
-        plot_histograms(level1_metrics, level2_metrics, args.output)
-        
-        # Also save summary to JSON
-        summary = {
-            "generated_at": datetime.now().isoformat(),
-            "level1": {
-                "total": level1_metrics["successes"] + level1_metrics["failures"] if level1_metrics else 0,
-                "passed": level1_metrics["successes"] if level1_metrics else 0,
-                "mean_speedup": float(np.mean(level1_metrics["speedups"])) if level1_metrics and level1_metrics["speedups"] else None,
-                "mean_diff": float(np.mean(level1_metrics["max_diffs"])) if level1_metrics and level1_metrics["max_diffs"] else None,
-            } if level1_metrics else None,
-            "level2": {
-                "total": level2_metrics["successes"] + level2_metrics["failures"] if level2_metrics else 0,
-                "passed": level2_metrics["successes"] if level2_metrics else 0,
-                "mean_speedup": float(np.mean(level2_metrics["speedups"])) if level2_metrics and level2_metrics["speedups"] else None,
-                "mean_diff": float(np.mean(level2_metrics["max_diffs"])) if level2_metrics and level2_metrics["max_diffs"] else None,
-            } if level2_metrics else None,
-        }
-        
-        summary_path = args.output.replace('.png', '_summary.json')
-        with open(summary_path, 'w') as f:
-            json.dump(summary, f, indent=2)
-        print(f"Saved summary to {summary_path}")
-    else:
-        print("No data to visualize")
+plt.tight_layout()
+plt.subplots_adjust(top=0.92)
 
+output_path = '/Users/aryatschand/Documents/GitHub/JAXBench/results/jaxbench_visualization.png'
+plt.savefig(output_path, dpi=150, bbox_inches='tight')
+print(f"Saved: {output_path}")
 
-if __name__ == "__main__":
-    main()
-
+pdf_path = '/Users/aryatschand/Documents/GitHub/JAXBench/results/jaxbench_visualization.pdf'
+plt.savefig(pdf_path, bbox_inches='tight')
+print(f"Saved: {pdf_path}")

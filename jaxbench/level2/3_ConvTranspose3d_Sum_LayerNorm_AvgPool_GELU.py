@@ -1,6 +1,6 @@
 """
 JAXBench Level 2 - ConvTranspose3d_Sum_LayerNorm_AvgPool_GELU
-Translated from KernelBench PyTorch to JAX using bedrock/opus.
+Translated from KernelBench PyTorch to JAX using bedrock/sonnet.
 """
 
 import jax

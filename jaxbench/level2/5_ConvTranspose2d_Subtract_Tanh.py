@@ -1,6 +1,6 @@
 """
 JAXBench Level 2 - ConvTranspose2d_Subtract_Tanh
-Translated from KernelBench PyTorch to JAX using bedrock/opus.
+Translated from KernelBench PyTorch to JAX using bedrock/sonnet.
 """
 
 import jax

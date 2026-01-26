@@ -1,15 +1,14 @@
 """
-JAXBench Level 2 - Conv2d_Mish_Mish
+JAXBench Level 2 - Conv2d_HardSwish_ReLU
 Translated from KernelBench PyTorch to JAX using bedrock/sonnet.
 """
 
 import jax
 import jax.numpy as jnp
-import jax.nn as jnn
 
 class Model:
     def __init__(self, in_channels, out_channels, kernel_size):
-        # Initialize with PyTorch Conv2d weight shape (out_channels, in_channels, kH, kW)
+        # Initialize weights with same shapes as PyTorch
         self.weight = jnp.zeros((out_channels, in_channels, kernel_size, kernel_size))
         self.bias = jnp.zeros(out_channels)
 
@@ -21,12 +20,13 @@ class Model:
         # Convert NCHW -> NHWC
         x = jnp.transpose(x, (0, 2, 3, 1))
         
-        # Transpose kernel from (out,in,H,W) to (H,W,in,out)
+        # Transpose kernel for JAX conv
         kernel = jnp.transpose(self.weight, (2, 3, 1, 0))
         
-        # Convolution with VALID padding (PyTorch default is no padding)
+        # Convolution with VALID padding (no padding) to match PyTorch default
         x = jax.lax.conv_general_dilated(
-            x, kernel, 
+            x,
+            kernel,
             window_strides=(1, 1),
             padding='VALID',
             dimension_numbers=('NHWC', 'HWIO', 'NHWC')
@@ -38,16 +38,18 @@ class Model:
         # Convert back to NCHW
         x = jnp.transpose(x, (0, 3, 1, 2))
         
-        # Apply Mish twice
-        x = x * jnp.tanh(jnn.softplus(x))
-        x = x * jnp.tanh(jnn.softplus(x))
+        # HardSwish: x * relu6(x+3)/6
+        x = x * jnp.minimum(jnp.maximum(x + 3, 0), 6) / 6
+        
+        # ReLU
+        x = jnp.maximum(0, x)
         
         return x
 
-batch_size = 64
-in_channels = 64
-out_channels = 128
-height = width = 256
+batch_size = 128
+in_channels = 8  
+out_channels = 64
+height, width = 128, 128
 kernel_size = 3
 
 def get_inputs():
