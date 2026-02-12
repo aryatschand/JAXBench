@@ -1,0 +1,25 @@
+{
+  "timestamp": "2026-02-02",
+  "matrix_size": [8192, 8192],
+  "device": "TPU v5e",
+  "jax_version": "0.6.2",
+  "results": [
+    {"format": "FP32", "bits": 32, "compression": 1.0, "time_ms": 3.14, "speedup": 1.00, "accuracy": 1.0, "notes": "Baseline"},
+    {"format": "INT3", "bits": 3, "compression": 10.7, "time_ms": 0.93, "speedup": 3.39, "accuracy": 0.7850, "notes": "Max compression"},
+    {"format": "INT5", "bits": 5, "compression": 6.4, "time_ms": 0.92, "speedup": 3.40, "accuracy": 0.9892, "notes": "Best overall"},
+    {"format": "INT6", "bits": 6, "compression": 5.3, "time_ms": 0.93, "speedup": 3.40, "accuracy": 0.9975, "notes": "High accuracy"},
+    {"format": "FP_E2M1", "bits": 4, "compression": 8.0, "time_ms": 3.87, "speedup": 0.81, "accuracy": 0.9500, "notes": "4-bit custom float"},
+    {"format": "FP_E1M2", "bits": 4, "compression": 8.0, "time_ms": 4.00, "speedup": 0.79, "accuracy": 0.9524, "notes": "Precision variant"},
+    {"format": "LNS", "bits": 8, "compression": 4.0, "time_ms": 3.19, "speedup": 0.99, "accuracy": 0.7963, "notes": "Log number system"},
+    {"format": "BFP", "bits": 4.03, "compression": 7.9, "time_ms": 10.80, "speedup": 0.29, "accuracy": 0.9682, "notes": "Block floating point"},
+    {"format": "POW2", "bits": 4, "compression": 8.0, "time_ms": 3.21, "speedup": 0.98, "accuracy": 0.9805, "notes": "Power-of-2 weights"},
+    {"format": "Residual", "bits": 8, "compression": 4.0, "time_ms": 2.07, "speedup": 1.52, "accuracy": 0.9997, "notes": "Two-level quant"},
+    {"format": "Posit8", "bits": 8, "compression": 4.0, "time_ms": 3.05, "speedup": 1.03, "accuracy": 0.9999, "notes": "Tapered precision"}
+  ],
+  "summary": {
+    "fastest": "INT5 (3.40x)",
+    "best_compression": "INT3 (10.7x)",
+    "best_accuracy": "Posit8 (0.9999)",
+    "recommendation": "INT5/INT6 for best speed-accuracy tradeoff"
+  }
+}
