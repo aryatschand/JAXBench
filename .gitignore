@@ -47,9 +47,11 @@ logs/
 outputs/
 .cache/
 
-# Results - keep checkpoint files but ignore intermediate results
-results/jaxbench_*.json
-!results/checkpoint_*.json
+# Results directory
+results/
+
+# Allow real_workloads JSON files (sources.json, results.json) to be tracked
+!benchmarks/real_workloads/*.json
 
 # OS
 .DS_Store

@@ -1,1 +1,1 @@
-"""Gemma 3 model operators extracted from MaxText."""
+"""Gemma 3 workloads: Sliding window attention, Global attention."""

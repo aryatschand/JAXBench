@@ -1,1 +1,1 @@
-"""Llama 3.1 model operators extracted from MaxText."""
+"""Llama 3.1 workloads: GQA attention, SwiGLU MLP, RoPE, RMSNorm."""

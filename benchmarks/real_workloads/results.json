@@ -1,0 +1,672 @@
+{
+  "metadata": {
+    "tpu_type": "v6e-1",
+    "timestamp": "2026-02-20T02:19:37.718247+00:00",
+    "jax_version": "0.6.2",
+    "num_workloads": 30,
+    "num_succeeded": 29,
+    "num_failed": 1
+  },
+  "workloads": [
+    {
+      "name": "llama3_8b_gqa",
+      "model": "Llama-3.1-8B",
+      "operator": "gqa_attention",
+      "config": {
+        "batch": 1,
+        "seq_len": 2048,
+        "num_query_heads": 32,
+        "num_kv_heads": 8,
+        "head_dim": 128,
+        "emb_dim": 4096
+      },
+      "time_ms": 0.8725,
+      "std_ms": 0.0076,
+      "tflops": 78.76,
+      "output_shape": [
+        1,
+        2048,
+        32,
+        128
+      ],
+      "status": "success"
+    },
+    {
+      "name": "llama3_70b_gqa",
+      "model": "Llama-3.1-70B",
+      "operator": "gqa_attention",
+      "config": {
+        "batch": 1,
+        "seq_len": 2048,
+        "num_query_heads": 64,
+        "num_kv_heads": 8,
+        "head_dim": 128,
+        "emb_dim": 8192
+      },
+      "time_ms": 1.6585,
+      "std_ms": 0.0077,
+      "tflops": 82.87,
+      "output_shape": [
+        1,
+        2048,
+        64,
+        128
+      ],
+      "status": "success"
+    },
+    {
+      "name": "llama3_405b_gqa",
+      "model": "Llama-3.1-405B",
+      "operator": "gqa_attention",
+      "config": {
+        "batch": 1,
+        "seq_len": 2048,
+        "num_query_heads": 128,
+        "num_kv_heads": 8,
+        "head_dim": 128,
+        "emb_dim": 16384
+      },
+      "time_ms": 3.2397,
+      "std_ms": 0.0075,
+      "tflops": 84.85,
+      "output_shape": [
+        1,
+        2048,
+        128,
+        128
+      ],
+      "status": "success"
+    },
+    {
+      "name": "llama3_8b_swiglu",
+      "model": "Llama-3.1-8B",
+      "operator": "swiglu_mlp",
+      "config": {
+        "batch": 1,
+        "seq_len": 2048,
+        "emb_dim": 4096,
+        "mlp_dim": 14336
+      },
+      "time_ms": 1.0823,
+      "std_ms": 0.0063,
+      "tflops": 666.69,
+      "output_shape": [
+        1,
+        2048,
+        4096
+      ],
+      "status": "success"
+    },
+    {
+      "name": "llama3_70b_swiglu",
+      "model": "Llama-3.1-70B",
+      "operator": "swiglu_mlp",
+      "config": {
+        "batch": 1,
+        "seq_len": 2048,
+        "emb_dim": 8192,
+        "mlp_dim": 28672
+      },
+      "time_ms": 4.1009,
+      "std_ms": 0.014,
+      "tflops": 703.81,
+      "output_shape": [
+        1,
+        2048,
+        8192
+      ],
+      "status": "success"
+    },
+    {
+      "name": "llama3_405b_swiglu",
+      "model": "Llama-3.1-405B",
+      "operator": "swiglu_mlp",
+      "config": {
+        "batch": 1,
+        "seq_len": 2048,
+        "emb_dim": 16384,
+        "mlp_dim": 53248
+      },
+      "time_ms": 15.1559,
+      "std_ms": 0.0764,
+      "tflops": 707.33,
+      "output_shape": [
+        1,
+        2048,
+        16384
+      ],
+      "status": "success"
+    },
+    {
+      "name": "llama3_8b_rope",
+      "model": "Llama-3.1-8B",
+      "operator": "rope",
+      "config": {
+        "batch": 1,
+        "seq_len": 2048,
+        "num_heads": 32,
+        "head_dim": 128,
+        "rope_theta": 500000
+      },
+      "time_ms": 0.1653,
+      "std_ms": 0.0045,
+      "tflops": 0.203,
+      "output_shape": [
+        1,
+        2048,
+        32,
+        128
+      ],
+      "status": "success"
+    },
+    {
+      "name": "llama3_70b_rope",
+      "model": "Llama-3.1-70B",
+      "operator": "rope",
+      "config": {
+        "batch": 1,
+        "seq_len": 2048,
+        "num_heads": 64,
+        "head_dim": 128,
+        "rope_theta": 500000
+      },
+      "time_ms": 0.2125,
+      "std_ms": 0.0043,
+      "tflops": 0.3158,
+      "output_shape": [
+        1,
+        2048,
+        64,
+        128
+      ],
+      "status": "success"
+    },
+    {
+      "name": "llama3_8b_rmsnorm",
+      "model": "Llama-3.1-8B",
+      "operator": "rmsnorm",
+      "config": {
+        "batch": 1,
+        "seq_len": 2048,
+        "emb_dim": 4096,
+        "eps": 1e-06
+      },
+      "time_ms": 0.159,
+      "std_ms": 0.0064,
+      "tflops": 0.2111,
+      "output_shape": [
+        1,
+        2048,
+        4096
+      ],
+      "status": "success"
+    },
+    {
+      "name": "llama3_70b_rmsnorm",
+      "model": "Llama-3.1-70B",
+      "operator": "rmsnorm",
+      "config": {
+        "batch": 1,
+        "seq_len": 2048,
+        "emb_dim": 8192,
+        "eps": 1e-06
+      },
+      "time_ms": 0.18,
+      "std_ms": 0.0046,
+      "tflops": 0.3729,
+      "output_shape": [
+        1,
+        2048,
+        8192
+      ],
+      "status": "success"
+    },
+    {
+      "name": "llama3_8b_token_embed",
+      "model": "Llama-3.1-8B",
+      "operator": "token_embed",
+      "config": {
+        "batch": 1,
+        "seq_len": 2048,
+        "vocab_size": 128256,
+        "emb_dim": 4096
+      },
+      "time_ms": 0.2122,
+      "std_ms": 0.0098,
+      "tflops": 5.0301,
+      "output_shape": [
+        1,
+        2048,
+        4096
+      ],
+      "status": "success"
+    },
+    {
+      "name": "gemma3_4b_sliding_window_attn",
+      "model": "Gemma-3-4B",
+      "operator": "sliding_window_attention",
+      "config": {
+        "batch": 1,
+        "seq_len": 2048,
+        "num_query_heads": 8,
+        "num_kv_heads": 4,
+        "head_dim": 256,
+        "emb_dim": 2048,
+        "sliding_window": 4096,
+        "attn_logits_soft_cap": 50.0
+      },
+      "time_ms": 0.3688,
+      "std_ms": 0.0044,
+      "tflops": 93.16,
+      "output_shape": [
+        1,
+        2048,
+        8,
+        256
+      ],
+      "status": "success"
+    },
+    {
+      "name": "gemma3_12b_sliding_window_attn",
+      "model": "Gemma-3-12B",
+      "operator": "sliding_window_attention",
+      "config": {
+        "batch": 1,
+        "seq_len": 2048,
+        "num_query_heads": 16,
+        "num_kv_heads": 8,
+        "head_dim": 256,
+        "emb_dim": 3584,
+        "sliding_window": 4096,
+        "attn_logits_soft_cap": 50.0
+      },
+      "time_ms": 0.6554,
+      "std_ms": 0.0066,
+      "tflops": 104.85,
+      "output_shape": [
+        1,
+        2048,
+        16,
+        256
+      ],
+      "status": "success"
+    },
+    {
+      "name": "gemma3_27b_sliding_window_attn",
+      "model": "Gemma-3-27B",
+      "operator": "sliding_window_attention",
+      "config": {
+        "batch": 1,
+        "seq_len": 2048,
+        "num_query_heads": 32,
+        "num_kv_heads": 16,
+        "head_dim": 144,
+        "emb_dim": 4608,
+        "sliding_window": 4096,
+        "attn_logits_soft_cap": 50.0
+      },
+      "time_ms": 1.1285,
+      "std_ms": 0.0116,
+      "tflops": 68.51,
+      "output_shape": [
+        1,
+        2048,
+        32,
+        144
+      ],
+      "status": "success"
+    },
+    {
+      "name": "gemma3_4b_global_attn",
+      "model": "Gemma-3-4B",
+      "operator": "global_attention",
+      "config": {
+        "batch": 1,
+        "seq_len": 2048,
+        "num_query_heads": 8,
+        "num_kv_heads": 4,
+        "head_dim": 256,
+        "emb_dim": 2048,
+        "attn_logits_soft_cap": 50.0
+      },
+      "time_ms": 0.3646,
+      "std_ms": 0.0055,
+      "tflops": 94.24,
+      "output_shape": [
+        1,
+        2048,
+        8,
+        256
+      ],
+      "status": "success"
+    },
+    {
+      "name": "gemma3_12b_global_attn",
+      "model": "Gemma-3-12B",
+      "operator": "global_attention",
+      "config": {
+        "batch": 1,
+        "seq_len": 2048,
+        "num_query_heads": 16,
+        "num_kv_heads": 8,
+        "head_dim": 256,
+        "emb_dim": 3584,
+        "attn_logits_soft_cap": 50.0
+      },
+      "time_ms": 0.6659,
+      "std_ms": 0.0046,
+      "tflops": 103.2,
+      "output_shape": [
+        1,
+        2048,
+        16,
+        256
+      ],
+      "status": "success"
+    },
+    {
+      "name": "gemma3_27b_global_attn",
+      "model": "Gemma-3-27B",
+      "operator": "global_attention",
+      "config": {
+        "batch": 1,
+        "seq_len": 2048,
+        "num_query_heads": 32,
+        "num_kv_heads": 16,
+        "head_dim": 144,
+        "emb_dim": 4608,
+        "attn_logits_soft_cap": 50.0
+      },
+      "time_ms": 1.1363,
+      "std_ms": 0.014,
+      "tflops": 68.04,
+      "output_shape": [
+        1,
+        2048,
+        32,
+        144
+      ],
+      "status": "success"
+    },
+    {
+      "name": "mixtral_8x7b_moe",
+      "model": "Mixtral-8x7B",
+      "operator": "sparse_moe",
+      "config": {
+        "batch": 1,
+        "seq_len": 2048,
+        "emb_dim": 4096,
+        "mlp_dim": 14336,
+        "num_experts": 8,
+        "num_experts_per_tok": 2
+      },
+      "time_ms": 8.3232,
+      "std_ms": 0.026,
+      "tflops": 173.4,
+      "output_shape": [
+        1,
+        2048,
+        4096
+      ],
+      "status": "success"
+    },
+    {
+      "name": "mixtral_8x22b_moe",
+      "model": "Mixtral-8x22B",
+      "operator": "sparse_moe",
+      "config": {
+        "batch": 1,
+        "seq_len": 2048,
+        "emb_dim": 6144,
+        "mlp_dim": 16384,
+        "num_experts": 8,
+        "num_experts_per_tok": 2
+      },
+      "time_ms": 14.3347,
+      "std_ms": 0.0304,
+      "tflops": 172.6,
+      "output_shape": [
+        1,
+        2048,
+        6144
+      ],
+      "status": "success"
+    },
+    {
+      "name": "deepseek_v3_mla",
+      "model": "DeepSeek-V3-671B",
+      "operator": "mla_attention",
+      "config": {
+        "batch": 1,
+        "seq_len": 2048,
+        "emb_dim": 7168,
+        "num_heads": 128,
+        "q_lora_rank": 1536,
+        "kv_lora_rank": 512,
+        "qk_nope_head_dim": 128,
+        "qk_rope_head_dim": 64,
+        "v_head_dim": 128,
+        "rope_theta": 10000
+      },
+      "time_ms": 4.456,
+      "std_ms": 0.0871,
+      "tflops": 264.52,
+      "output_shape": [
+        1,
+        2048,
+        7168
+      ],
+      "status": "success"
+    },
+    {
+      "name": "deepseek_v3_yarn_rope",
+      "model": "DeepSeek-V3-671B",
+      "operator": "yarn_rope",
+      "config": {
+        "batch": 1,
+        "seq_len": 8192,
+        "num_heads": 128,
+        "head_dim": 64,
+        "rope_theta": 10000,
+        "max_position_embeddings": 163840,
+        "original_max_position_embeddings": 4096,
+        "rope_factor": 40,
+        "beta_fast": 32,
+        "mscale": 1.0
+      },
+      "time_ms": 1.3805,
+      "std_ms": 0.043,
+      "tflops": 0.1945,
+      "output_shape": [
+        1,
+        8192,
+        128,
+        64
+      ],
+      "status": "success"
+    },
+    {
+      "name": "deepseek_v3_moe",
+      "status": "error",
+      "error": "(8,128)(2,1)S(1)}, bf16[7168,256]{1,0:T(8,128)(2,1)}, u32[]{:S(2)})\n     Unpadded size: 32B\n     XLA label: copy-start.2 = copy-start(Arg_1.2)\n     Allocation type: HLO temp\n     ==========================\n\n  8. Size: 32B\n     Shape: (bf16[1,2048,7168]{2,1,0:T(8,128)(2,1)S(1)}, bf16[1,2048,7168]{2,1,0:T(8,128)(2,1)}, u32[]{:S(2)})\n     Unpadded size: 32B\n     XLA label: copy-start = copy-start(Arg_0.1), cross_program_prefetch_index=0\n     Allocation type: HLO temp\n     =========================="
+    },
+    {
+      "name": "qwen3_8b_gqa",
+      "model": "Qwen3-8B",
+      "operator": "gqa_attention",
+      "config": {
+        "batch": 1,
+        "seq_len": 2048,
+        "num_query_heads": 32,
+        "num_kv_heads": 8,
+        "head_dim": 128,
+        "emb_dim": 4096
+      },
+      "time_ms": 0.8728,
+      "std_ms": 0.0053,
+      "tflops": 78.73,
+      "output_shape": [
+        1,
+        2048,
+        32,
+        128
+      ],
+      "status": "success"
+    },
+    {
+      "name": "qwen3_14b_gqa",
+      "model": "Qwen3-14B",
+      "operator": "gqa_attention",
+      "config": {
+        "batch": 1,
+        "seq_len": 2048,
+        "num_query_heads": 40,
+        "num_kv_heads": 8,
+        "head_dim": 128,
+        "emb_dim": 5120
+      },
+      "time_ms": 1.101,
+      "std_ms": 0.0045,
+      "tflops": 78.02,
+      "output_shape": [
+        1,
+        2048,
+        40,
+        128
+      ],
+      "status": "success"
+    },
+    {
+      "name": "qwen3_8b_swiglu",
+      "model": "Qwen3-8B",
+      "operator": "swiglu_mlp",
+      "config": {
+        "batch": 1,
+        "seq_len": 2048,
+        "emb_dim": 4096,
+        "mlp_dim": 14336
+      },
+      "time_ms": 1.0777,
+      "std_ms": 0.0056,
+      "tflops": 669.55,
+      "output_shape": [
+        1,
+        2048,
+        4096
+      ],
+      "status": "success"
+    },
+    {
+      "name": "qwen3_moe_30b_moe",
+      "model": "Qwen3-MoE-30B-A3B",
+      "operator": "sparse_moe_shared",
+      "config": {
+        "batch": 1,
+        "seq_len": 2048,
+        "emb_dim": 2048,
+        "mlp_dim": 1024,
+        "num_experts": 128,
+        "num_experts_per_tok": 8,
+        "shared_mlp_dim": 4096
+      },
+      "time_ms": 7.5403,
+      "std_ms": 0.04,
+      "tflops": 451.13,
+      "output_shape": [
+        1,
+        2048,
+        2048
+      ],
+      "status": "success"
+    },
+    {
+      "name": "llama4_scout_gqa",
+      "model": "Llama-4-Scout-109B",
+      "operator": "gqa_attention",
+      "config": {
+        "batch": 1,
+        "seq_len": 2048,
+        "num_query_heads": 48,
+        "num_kv_heads": 8,
+        "head_dim": 128,
+        "emb_dim": 5120
+      },
+      "time_ms": 1.2731,
+      "std_ms": 0.006,
+      "tflops": 80.97,
+      "output_shape": [
+        1,
+        2048,
+        48,
+        128
+      ],
+      "status": "success"
+    },
+    {
+      "name": "llama4_scout_moe",
+      "model": "Llama-4-Scout-109B",
+      "operator": "sparse_moe_top1",
+      "config": {
+        "batch": 1,
+        "seq_len": 2048,
+        "emb_dim": 5120,
+        "mlp_dim": 8192,
+        "num_experts": 16,
+        "num_experts_per_tok": 1
+      },
+      "time_ms": 12.3117,
+      "std_ms": 0.0398,
+      "tflops": 669.8,
+      "output_shape": [
+        1,
+        2048,
+        5120
+      ],
+      "status": "success"
+    },
+    {
+      "name": "llama4_maverick_moe",
+      "model": "Llama-4-Maverick-400B",
+      "operator": "sparse_moe_top1",
+      "config": {
+        "batch": 1,
+        "seq_len": 2048,
+        "emb_dim": 5120,
+        "mlp_dim": 4096,
+        "num_experts": 128,
+        "num_experts_per_tok": 1
+      },
+      "time_ms": 51.5025,
+      "std_ms": 0.0512,
+      "tflops": 640.46,
+      "output_shape": [
+        1,
+        2048,
+        5120
+      ],
+      "status": "success"
+    },
+    {
+      "name": "llama4_scout_rope",
+      "model": "Llama-4-Scout-109B",
+      "operator": "rope",
+      "config": {
+        "batch": 1,
+        "seq_len": 2048,
+        "num_heads": 48,
+        "head_dim": 128,
+        "rope_theta": 500000
+      },
+      "time_ms": 0.1885,
+      "std_ms": 0.0048,
+      "tflops": 0.4006,
+      "output_shape": [
+        1,
+        2048,
+        48,
+        128
+      ],
+      "status": "success"
+    }
+  ]
+}
