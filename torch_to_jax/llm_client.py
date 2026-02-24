@@ -37,9 +37,9 @@ class BaseLLMClient(ABC):
 class BedrockClient(BaseLLMClient):
     """AWS Bedrock client for Claude models."""
     
-    AWS_ACCESS_KEY = "REDACTED_AWS_ACCESS_KEY"
-    AWS_SECRET_KEY = "REDACTED_AWS_SECRET_KEY"
-    AWS_REGION = "us-east-2"
+    AWS_ACCESS_KEY = os.environ.get("AWS_ACCESS_KEY_ID", "")
+    AWS_SECRET_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY", "")
+    AWS_REGION = os.environ.get("AWS_REGION", "us-east-2")
     
     MODEL_IDS = {
         "opus": "us.anthropic.claude-opus-4-5-20251101-v1:0",
@@ -83,7 +83,7 @@ class BedrockClient(BaseLLMClient):
 class GeminiClient(BaseLLMClient):
     """Google Gemini client."""
     
-    API_KEY = "REDACTED_GEMINI_API_KEY"
+    API_KEY = os.environ.get("GEMINI_API_KEY", "")
     BASE_URL = "https://generativelanguage.googleapis.com/v1beta"
     
     MODEL_IDS = {

@@ -344,7 +344,7 @@ Options:
 
 ### 1. GCP Credentials
 
-Place your GCP service account JSON at `credentials.json`. Required roles:
+Place your GCP service account JSON at `credentials.json` (or set `GCP_CREDENTIALS_FILE` env var). Required roles:
 - TPU Admin
 - Compute Admin  
 - Storage Admin

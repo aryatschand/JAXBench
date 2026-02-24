@@ -21,7 +21,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 # Set credentials
 BASE_DIR = Path(__file__).parent.parent
-CREDENTIALS_FILE = BASE_DIR / "credentials.json"
+CREDENTIALS_FILE = os.environ.get("GCP_CREDENTIALS_FILE", str(BASE_DIR / "credentials.json"))
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = str(CREDENTIALS_FILE)
 
 from google.cloud import tpu_v2

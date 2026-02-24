@@ -129,6 +129,6 @@ Currently registered: llama3 (gqa, rope, swiglu), gemma3 (sliding window).
 
 - **TPU Types**: v6e-1, v5e-8, v5e-4, v4-8, v4-16, v4-32 (preemptible)
 - **GCP**: Project `jaxbench`, zone `us-central1-b`
-- **SSH**: Key at `~/.ssh/id_rsa_tpu`, user `REDACTED_SSH_USER`
+- **SSH**: Key at `~/.ssh/id_rsa_tpu`, user set via `TPU_SSH_USER` env var
 - **TPU Packages**: jax 0.6.2, torch 2.9.0+cpu, torch_xla 2.9.0
-- **Credentials**: GCP service account JSON at `credentials.json`
+- **Credentials**: GCP service account JSON path set via `GCP_CREDENTIALS_FILE` env var (default: `credentials.json`)

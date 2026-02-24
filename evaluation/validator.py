@@ -16,11 +16,11 @@ from google.cloud import tpu_v2, storage
 from google.api_core import exceptions
 
 # Configuration
-PROJECT_ID = "jaxbench"
-ZONE = "us-central1-b"
-BUCKET_NAME = "tpu-dumps"
-CREDENTIALS_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), 
-                                 "credentials.json")
+PROJECT_ID = os.environ.get("GCP_PROJECT_ID", "jaxbench")
+ZONE = os.environ.get("GCP_ZONE", "us-central1-b")
+BUCKET_NAME = os.environ.get("GCP_BUCKET", "tpu-dumps")
+CREDENTIALS_FILE = os.environ.get("GCP_CREDENTIALS_FILE",
+                                   os.path.join(os.path.dirname(os.path.dirname(__file__)), "credentials.json"))
 
 
 def get_credentials():

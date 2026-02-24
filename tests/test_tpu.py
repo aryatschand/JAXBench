@@ -21,7 +21,7 @@ PROJECT_ID = "jaxbench"
 ZONE = "us-central1-a"  # TPU availability zone
 TPU_NAME = "jaxbench-test-tpu"
 BASE_DIR = Path(__file__).parent.parent  # Go up one level from scripts/
-CREDENTIALS_FILE = str(BASE_DIR / "credentials.json")
+CREDENTIALS_FILE = os.environ.get("GCP_CREDENTIALS_FILE", str(BASE_DIR / "credentials.json"))
 
 # TPU configurations (cheapest options)
 # v2-8 is the cheapest, followed by v3-8

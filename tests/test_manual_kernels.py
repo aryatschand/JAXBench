@@ -14,17 +14,17 @@ from pathlib import Path
 
 # Configuration
 BASE_DIR = Path(__file__).parent.parent  # Go up one level from scripts/
-CREDENTIALS_FILE = BASE_DIR / "credentials.json"
+CREDENTIALS_FILE = os.environ.get("GCP_CREDENTIALS_FILE", str(BASE_DIR / "credentials.json"))
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = str(CREDENTIALS_FILE)
 
 from google.cloud import storage, tpu_v2
 
-PROJECT_ID = "jaxbench"
-ZONE = "us-central1-b"
+PROJECT_ID = os.environ.get("GCP_PROJECT_ID", "jaxbench")
+ZONE = os.environ.get("GCP_ZONE", "us-central1-b")
 TPU_NAME = "jaxbench-runner"
-BUCKET_NAME = "tpu-dumps"
-SSH_KEY = os.path.expanduser("~/.ssh/id_rsa_tpu")
-SSH_USER = "REDACTED_SSH_USER"
+BUCKET_NAME = os.environ.get("GCP_BUCKET", "tpu-dumps")
+SSH_KEY = os.environ.get("TPU_SSH_KEY", os.path.expanduser("~/.ssh/id_rsa_tpu"))
+SSH_USER = os.environ.get("TPU_SSH_USER", "")
 
 # Tasks to test - (task_id, task_name, use_small_pytorch)
 TASKS = [

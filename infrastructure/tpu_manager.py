@@ -18,12 +18,12 @@ logger = logging.getLogger("jaxbench")
 
 # Configuration - paths relative to project root
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-CREDENTIALS_FILE = os.path.join(PROJECT_ROOT, "credentials.json")
-PROJECT_ID = "jaxbench"
-ZONE = "us-central1-b"
-BUCKET_NAME = "tpu-dumps"
-SSH_KEY = os.path.expanduser("~/.ssh/id_rsa_tpu")
-SSH_USER = "REDACTED_SSH_USER"
+CREDENTIALS_FILE = os.environ.get("GCP_CREDENTIALS_FILE", os.path.join(PROJECT_ROOT, "credentials.json"))
+PROJECT_ID = os.environ.get("GCP_PROJECT_ID", "jaxbench")
+ZONE = os.environ.get("GCP_ZONE", "us-central1-b")
+BUCKET_NAME = os.environ.get("GCP_BUCKET", "tpu-dumps")
+SSH_KEY = os.environ.get("TPU_SSH_KEY", os.path.expanduser("~/.ssh/id_rsa_tpu"))
+SSH_USER = os.environ.get("TPU_SSH_USER", "")
 
 
 def get_credentials():
