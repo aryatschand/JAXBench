@@ -1,7 +1,13 @@
-# Environment and credentials
-.env
-*.json
-!package.json
+# Local-only (kept locally, not in git)
+evaluation/
+infrastructure/
+tests/
+results/
+pallas_optimization/
+KernelBench/
+.cache/
+credentials.json
+jaxbench-*.json
 
 # Python
 __pycache__/
@@ -10,26 +16,15 @@ __pycache__/
 *.so
 .Python
 build/
-develop-eggs/
 dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
 *.egg-info/
-.installed.cfg
-*.egg
+.eggs/
+wheels/
 
 # Virtual environments
+.venv/
 venv/
 ENV/
-env/
-.venv/
 
 # IDE
 .idea/
@@ -41,19 +36,20 @@ env/
 # Jupyter
 .ipynb_checkpoints/
 
-# Logs and outputs
+# Logs
 logs/
 *.log
 outputs/
-.cache/
 
-# Results directory
-results/
-
-# Allow real_workloads JSON files (sources.json, results.json) to be tracked
-!benchmarks/real_workloads/*.json
+# JSON (ignore by default, allow benchmark results)
+*.json
+!package.json
+!real_workloads/**/*.json
+!tokamax/**/*.json
 
 # OS
 .DS_Store
 Thumbs.db
 
+# Environment
+.env

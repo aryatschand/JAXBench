@@ -4,10 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-JAXBench is an LLM-powered benchmark suite for TPU kernel optimization:
-1. **Translation**: Automatically translates PyTorch operators from KernelBench to JAX using LLMs (Claude via AWS Bedrock, or Gemini)
-2. **Evaluation**: Validates correctness and benchmarks performance on Google Cloud TPUs
-3. **Optimization**: Generates optimized Pallas TPU kernels using LLMs
+JAXBench is a benchmark suite for JAX and TPU kernel optimization. Three benchmark suites at root level, plus a translation pipeline:
+1. **jaxkernelbench/**: 200+ LLM-translated PyTorch→JAX operators (from KernelBench)
+2. **real_workloads/**: 30 hand-written ops from 6 modern LLM families (from MaxText)
+3. **tokamax/**: 12 workloads from openxla/tokamax across 6 operation categories
+4. **torch_to_jax/**: LLM-powered translation pipeline (Claude via AWS Bedrock, or Gemini)
+
+Infrastructure code (evaluation/, infrastructure/, tests/, pallas_optimization/) is kept locally but not tracked in git.
 
 ## Common Commands
 
@@ -15,6 +18,19 @@ JAXBench is an LLM-powered benchmark suite for TPU kernel optimization:
 ```bash
 pip install -r requirements.txt
 # TPU packages (jax[tpu], torch, torch_xla) are installed on TPU VMs automatically
+```
+
+### Run Individual Workloads
+```bash
+# Each workload file is self-contained, prints JSON
+python real_workloads/llama3/llama3_8b_gqa.py
+python tokamax/attention/mixtral_8x7b_attention.py
+```
+
+### Benchmark Suites on TPU
+```bash
+python -m real_workloads.run_benchmarks --tpu v6e-1 --keep-tpu
+python -m tokamax.run_benchmarks --tpu v6e-1 --keep-tpu
 ```
 
 ### Translation (PyTorch → JAX)
@@ -27,37 +43,40 @@ python -m torch_to_jax.run --level 2 --task-ids "1,5,10" --keep-tpu
 #   --model (sonnet|opus|haiku), --tpu (v6e-1|v5e-8|etc), --keep-tpu, --max-retries N, --no-cache
 ```
 
-### Pallas Optimization
+### Pallas Optimization (local only)
 ```bash
-python -m pallas_optimization.run --list              # List available workloads
+python -m pallas_optimization.run --list
 python -m pallas_optimization.run --workload llama3_8b_gqa
 ```
 
-### Tests
+### Tests (local only)
 ```bash
 python tests/run_all_tests.py             # All tests
 python tests/run_all_tests.py --quick     # Skip slow TPU benchmark
-python tests/run_all_tests.py --tpu-only  # TPU tests only
-python tests/run_all_tests.py --llm-only  # LLM client tests only
 python tests/test_tpu_connection.py       # Single test file
 python tests/test_llm_client.py           # Test LLM API access
 ```
 
-Note: Tests use direct Python execution (no pytest). Each test file has a `main()` entry point.
+## Architecture
 
-### Evaluation API
+### Workload File Format
+
+Every workload file (real_workloads and tokamax) follows the same template:
 ```python
-from evaluation.evaluate_kernel import evaluate_kernel, HardwareConfig
-
-result = evaluate_kernel(
-    generated_code=code,                         # LLM-generated Pallas code
-    benchmark_ref="real_workloads:llama3:gqa",   # Benchmark reference
-    hardware_config=HardwareConfig(tpu_type="v5e-4"),
-)
-# Returns: EvaluationResult with correct, speedup, timing, etc.
+CONFIG = {'name': '...', 'model': '...', 'operator': '...', ...}
+def create_inputs(dtype=jnp.bfloat16): ...   # Deterministic seed=42
+def workload(*inputs): ...                    # Vanilla JAX baseline
+def benchmark(num_warmup=5, num_iters=100): ... # Returns JSON dict
+if __name__ == '__main__': print(json.dumps(benchmark()))
 ```
 
-## Architecture
+### Benchmark Suites
+
+| Suite | Workloads | Source | Organization |
+|-------|-----------|--------|--------------|
+| jaxkernelbench/ | 202 | KernelBench (LLM-translated) | level1/, level2/ |
+| real_workloads/ | 30 | MaxText | by model family (llama3/, gemma3/, etc.) |
+| tokamax/ | 12 | openxla/tokamax | by operation (attention/, cross_entropy/, etc.) |
 
 ### 4-Stage Translation Pipeline
 
@@ -68,62 +87,39 @@ Stage 3: Correctness Check   → Compare outputs with identical inputs/weights (
 Stage 4: Performance Bench   → Measure JAX vs PyTorch/XLA timing on TPU
 ```
 
-Key design: TPU is allocated once and reused for all validations. Successful translations are cached in `.cache/` to avoid re-work on restart. Progress is saved incrementally to `results/checkpoints/`.
-
-### Core Modules
+### Core Modules (git-tracked)
 
 | Module | Purpose |
 |--------|---------|
-| `torch_to_jax/run.py` | Main translation pipeline CLI (orchestrates all 4 stages) |
+| `torch_to_jax/run.py` | Main translation pipeline CLI |
 | `torch_to_jax/translator.py` | LLM-based PyTorch→JAX translator |
 | `torch_to_jax/llm_client.py` | Multi-provider LLM client (BedrockClient, GeminiClient) |
-| `evaluation/evaluate_kernel.py` | Main API for kernel evaluation in optimization loops (partially skeleton) |
-| `evaluation/validator.py` | Correctness validation on TPU |
-| `evaluation/benchmarker.py` | Performance timing with proper TPU synchronization |
-| `evaluation/workload_registry.py` | Workload definitions (register_workload/get_workload pattern) |
-| `pallas_optimization/translator.py` | JAX → Pallas kernel translator |
-| `pallas_optimization/prompts.py` | Extensive Pallas-specific LLM prompts (operation detection, strategies) |
-| `infrastructure/tpu_manager.py` | TPU VM lifecycle (create/delete/SSH), handles preemption automatically |
 
-### Benchmark References
+### Local-Only Modules (not in git)
 
-Format: `type:category:identifier`
-- `kernelbench:level1:1` — Task 1 from KernelBench level 1 (original PyTorch)
-- `jaxkernelbench:level2:5` — JAX translation of task 5, level 2
-- `real_workloads:llama3:gqa` — Llama3 GQA attention
-- `real_workloads:llama3:rope` — Llama3 RoPE
-- `real_workloads:gemma3:sliding` — Gemma3 sliding window attention
-
-### Workload Registry
-
-New workloads are added by registering a `WorkloadConfig` in `evaluation/workload_registry.py`:
-```python
-register_workload(WorkloadConfig(
-    name="model_op", model="llama3", category="attention",
-    config={...}, input_generator=fn, baseline_fn=fn,
-    rtol=1e-2, atol=1e-2,
-))
-```
-
-Currently registered: llama3 (gqa, rope, swiglu), gemma3 (sliding window).
+| Module | Purpose |
+|--------|---------|
+| `evaluation/` | Kernel evaluation, correctness validation, benchmarking |
+| `infrastructure/tpu_manager.py` | TPU VM lifecycle (create/delete/SSH) |
+| `pallas_optimization/` | JAX → Pallas kernel translator + prompts |
+| `tests/` | Test suite |
 
 ## Key Patterns
-
-### Translation Rules
-- PyTorch uses **NCHW**, JAX uses **NHWC** — conversion handled automatically
-- Generated JAX models include `set_weights()` method for weight transfer from PyTorch
-- Weight tensors transposed to match JAX's expected layout
-- Correctness tolerance: `rtol=5e-2, atol=0.5` (accounts for CPU vs TPU float differences)
 
 ### TPU Synchronization (Critical for Benchmarking)
 - JAX: `output.block_until_ready()` — waits for actual TPU execution
 - PyTorch/XLA: `xm.mark_step()` + `xm.wait_device_ops()` — flushes and waits
 - Without these, you measure launch time, not execution time
 
+### Translation Rules
+- PyTorch uses **NCHW**, JAX uses **NHWC** — conversion handled automatically
+- Generated JAX models include `set_weights()` method for weight transfer
+- Correctness tolerance: `rtol=5e-2, atol=0.5`
+
 ### LLM Retry Strategy
 - Initial translation uses Sonnet (faster/cheaper)
 - Failed translations retry with Opus (stronger reasoning), up to 3 attempts
-- Error messages from compilation/validation are fed back to LLM for context
+- Error messages from compilation/validation are fed back to LLM
 
 ## Infrastructure
 
