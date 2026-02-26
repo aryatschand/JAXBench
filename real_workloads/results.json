@@ -1,7 +1,8 @@
 {
   "metadata": {
+    "suite": "real_workloads",
     "tpu_type": "v6e-1",
-    "timestamp": "2026-02-20T02:19:37.718247+00:00",
+    "timestamp": "2026-02-26T18:37:33.411403+00:00",
     "jax_version": "0.6.2",
     "num_workloads": 30,
     "num_succeeded": 29,
@@ -20,9 +21,9 @@
         "head_dim": 128,
         "emb_dim": 4096
       },
-      "time_ms": 0.8725,
-      "std_ms": 0.0076,
-      "tflops": 78.76,
+      "time_ms": 0.8869,
+      "std_ms": 0.0619,
+      "tflops": 77.49,
       "output_shape": [
         1,
         2048,
@@ -43,9 +44,9 @@
         "head_dim": 128,
         "emb_dim": 8192
       },
-      "time_ms": 1.6585,
-      "std_ms": 0.0077,
-      "tflops": 82.87,
+      "time_ms": 1.6556,
+      "std_ms": 0.0072,
+      "tflops": 83.01,
       "output_shape": [
         1,
         2048,
@@ -66,9 +67,9 @@
         "head_dim": 128,
         "emb_dim": 16384
       },
-      "time_ms": 3.2397,
+      "time_ms": 3.2531,
       "std_ms": 0.0075,
-      "tflops": 84.85,
+      "tflops": 84.5,
       "output_shape": [
         1,
         2048,
@@ -87,9 +88,9 @@
         "emb_dim": 4096,
         "mlp_dim": 14336
       },
-      "time_ms": 1.0823,
-      "std_ms": 0.0063,
-      "tflops": 666.69,
+      "time_ms": 1.113,
+      "std_ms": 0.0663,
+      "tflops": 648.27,
       "output_shape": [
         1,
         2048,
@@ -107,9 +108,9 @@
         "emb_dim": 8192,
         "mlp_dim": 28672
       },
-      "time_ms": 4.1009,
-      "std_ms": 0.014,
-      "tflops": 703.81,
+      "time_ms": 4.1015,
+      "std_ms": 0.0071,
+      "tflops": 703.7,
       "output_shape": [
         1,
         2048,
@@ -127,9 +128,9 @@
         "emb_dim": 16384,
         "mlp_dim": 53248
       },
-      "time_ms": 15.1559,
-      "std_ms": 0.0764,
-      "tflops": 707.33,
+      "time_ms": 14.5668,
+      "std_ms": 0.0083,
+      "tflops": 735.94,
       "output_shape": [
         1,
         2048,
@@ -148,9 +149,9 @@
         "head_dim": 128,
         "rope_theta": 500000
       },
-      "time_ms": 0.1653,
-      "std_ms": 0.0045,
-      "tflops": 0.203,
+      "time_ms": 0.1505,
+      "std_ms": 0.0039,
+      "tflops": 0.2229,
       "output_shape": [
         1,
         2048,
@@ -170,9 +171,9 @@
         "head_dim": 128,
         "rope_theta": 500000
       },
-      "time_ms": 0.2125,
-      "std_ms": 0.0043,
-      "tflops": 0.3158,
+      "time_ms": 0.1989,
+      "std_ms": 0.0175,
+      "tflops": 0.3373,
       "output_shape": [
         1,
         2048,
@@ -191,9 +192,9 @@
         "emb_dim": 4096,
         "eps": 1e-06
       },
-      "time_ms": 0.159,
-      "std_ms": 0.0064,
-      "tflops": 0.2111,
+      "time_ms": 0.1508,
+      "std_ms": 0.005,
+      "tflops": 0.2226,
       "output_shape": [
         1,
         2048,
@@ -211,9 +212,9 @@
         "emb_dim": 8192,
         "eps": 1e-06
       },
-      "time_ms": 0.18,
+      "time_ms": 0.182,
       "std_ms": 0.0046,
-      "tflops": 0.3729,
+      "tflops": 0.3688,
       "output_shape": [
         1,
         2048,
@@ -231,9 +232,9 @@
         "vocab_size": 128256,
         "emb_dim": 4096
       },
-      "time_ms": 0.2122,
-      "std_ms": 0.0098,
-      "tflops": 5.0301,
+      "time_ms": 0.1951,
+      "std_ms": 0.0051,
+      "tflops": 5.4702,
       "output_shape": [
         1,
         2048,
@@ -255,9 +256,9 @@
         "sliding_window": 4096,
         "attn_logits_soft_cap": 50.0
       },
-      "time_ms": 0.3688,
-      "std_ms": 0.0044,
-      "tflops": 93.16,
+      "time_ms": 0.3701,
+      "std_ms": 0.0048,
+      "tflops": 92.85,
       "output_shape": [
         1,
         2048,
@@ -280,9 +281,9 @@
         "sliding_window": 4096,
         "attn_logits_soft_cap": 50.0
       },
-      "time_ms": 0.6554,
-      "std_ms": 0.0066,
-      "tflops": 104.85,
+      "time_ms": 0.6559,
+      "std_ms": 0.0077,
+      "tflops": 104.77,
       "output_shape": [
         1,
         2048,
@@ -305,9 +306,9 @@
         "sliding_window": 4096,
         "attn_logits_soft_cap": 50.0
       },
-      "time_ms": 1.1285,
-      "std_ms": 0.0116,
-      "tflops": 68.51,
+      "time_ms": 1.1274,
+      "std_ms": 0.0123,
+      "tflops": 68.57,
       "output_shape": [
         1,
         2048,
@@ -329,9 +330,9 @@
         "emb_dim": 2048,
         "attn_logits_soft_cap": 50.0
       },
-      "time_ms": 0.3646,
+      "time_ms": 0.3654,
       "std_ms": 0.0055,
-      "tflops": 94.24,
+      "tflops": 94.04,
       "output_shape": [
         1,
         2048,
@@ -353,9 +354,9 @@
         "emb_dim": 3584,
         "attn_logits_soft_cap": 50.0
       },
-      "time_ms": 0.6659,
-      "std_ms": 0.0046,
-      "tflops": 103.2,
+      "time_ms": 0.6559,
+      "std_ms": 0.0058,
+      "tflops": 104.77,
       "output_shape": [
         1,
         2048,
@@ -377,9 +378,9 @@
         "emb_dim": 4608,
         "attn_logits_soft_cap": 50.0
       },
-      "time_ms": 1.1363,
-      "std_ms": 0.014,
-      "tflops": 68.04,
+      "time_ms": 1.1303,
+      "std_ms": 0.0594,
+      "tflops": 68.4,
       "output_shape": [
         1,
         2048,
@@ -400,9 +401,9 @@
         "num_experts": 8,
         "num_experts_per_tok": 2
       },
-      "time_ms": 8.3232,
-      "std_ms": 0.026,
-      "tflops": 173.4,
+      "time_ms": 8.3228,
+      "std_ms": 0.0087,
+      "tflops": 173.41,
       "output_shape": [
         1,
         2048,
@@ -422,9 +423,9 @@
         "num_experts": 8,
         "num_experts_per_tok": 2
       },
-      "time_ms": 14.3347,
-      "std_ms": 0.0304,
-      "tflops": 172.6,
+      "time_ms": 13.8451,
+      "std_ms": 0.0088,
+      "tflops": 178.7,
       "output_shape": [
         1,
         2048,
@@ -448,9 +449,9 @@
         "v_head_dim": 128,
         "rope_theta": 10000
       },
-      "time_ms": 4.456,
-      "std_ms": 0.0871,
-      "tflops": 264.52,
+      "time_ms": 4.4354,
+      "std_ms": 0.0559,
+      "tflops": 265.75,
       "output_shape": [
         1,
         2048,
@@ -474,9 +475,9 @@
         "beta_fast": 32,
         "mscale": 1.0
       },
-      "time_ms": 1.3805,
-      "std_ms": 0.043,
-      "tflops": 0.1945,
+      "time_ms": 1.3521,
+      "std_ms": 0.0069,
+      "tflops": 0.1985,
       "output_shape": [
         1,
         8192,
@@ -502,9 +503,9 @@
         "head_dim": 128,
         "emb_dim": 4096
       },
-      "time_ms": 0.8728,
-      "std_ms": 0.0053,
-      "tflops": 78.73,
+      "time_ms": 0.8939,
+      "std_ms": 0.0556,
+      "tflops": 76.88,
       "output_shape": [
         1,
         2048,
@@ -525,9 +526,9 @@
         "head_dim": 128,
         "emb_dim": 5120
       },
-      "time_ms": 1.101,
-      "std_ms": 0.0045,
-      "tflops": 78.02,
+      "time_ms": 1.1062,
+      "std_ms": 0.0302,
+      "tflops": 77.65,
       "output_shape": [
         1,
         2048,
@@ -546,9 +547,9 @@
         "emb_dim": 4096,
         "mlp_dim": 14336
       },
-      "time_ms": 1.0777,
-      "std_ms": 0.0056,
-      "tflops": 669.55,
+      "time_ms": 1.087,
+      "std_ms": 0.0061,
+      "tflops": 663.81,
       "output_shape": [
         1,
         2048,
@@ -569,9 +570,9 @@
         "num_experts_per_tok": 8,
         "shared_mlp_dim": 4096
       },
-      "time_ms": 7.5403,
-      "std_ms": 0.04,
-      "tflops": 451.13,
+      "time_ms": 7.5573,
+      "std_ms": 0.0147,
+      "tflops": 450.11,
       "output_shape": [
         1,
         2048,
@@ -591,9 +592,9 @@
         "head_dim": 128,
         "emb_dim": 5120
       },
-      "time_ms": 1.2731,
-      "std_ms": 0.006,
-      "tflops": 80.97,
+      "time_ms": 1.2748,
+      "std_ms": 0.0053,
+      "tflops": 80.86,
       "output_shape": [
         1,
         2048,
@@ -614,9 +615,9 @@
         "num_experts": 16,
         "num_experts_per_tok": 1
       },
-      "time_ms": 12.3117,
-      "std_ms": 0.0398,
-      "tflops": 669.8,
+      "time_ms": 12.1671,
+      "std_ms": 0.0103,
+      "tflops": 677.76,
       "output_shape": [
         1,
         2048,
@@ -636,9 +637,9 @@
         "num_experts": 128,
         "num_experts_per_tok": 1
       },
-      "time_ms": 51.5025,
-      "std_ms": 0.0512,
-      "tflops": 640.46,
+      "time_ms": 49.9089,
+      "std_ms": 0.0183,
+      "tflops": 660.91,
       "output_shape": [
         1,
         2048,
@@ -657,9 +658,9 @@
         "head_dim": 128,
         "rope_theta": 500000
       },
-      "time_ms": 0.1885,
-      "std_ms": 0.0048,
-      "tflops": 0.4006,
+      "time_ms": 0.1843,
+      "std_ms": 0.0044,
+      "tflops": 0.4096,
       "output_shape": [
         1,
         2048,
