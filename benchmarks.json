@@ -1,0 +1,1731 @@
+{
+  "metadata": {
+    "description": "JAXBench benchmark results — all suites, TPU v6e-1",
+    "hardware": "TPU v6e-1 (preemptible)",
+    "jax_version": "0.6.2",
+    "last_updated": "2026-02-26"
+  },
+  "suites": {
+    "jaxkernelbench": {
+      "description": "LLM-translated PyTorch→JAX operators from KernelBench",
+      "source": "ScalingIntelligence/KernelBench",
+      "levels": {
+        "level1": {
+          "total": 100,
+          "passed": 100,
+          "workloads": [
+            {
+              "id": "1",
+              "name": "Square_matrix_multiplication_",
+              "jax_ms": 0.2805,
+              "pytorch_xla_ms": 0.3714,
+              "speedup": 1.32
+            },
+            {
+              "id": "2",
+              "name": "Standard_matrix_multiplication_",
+              "jax_ms": 0.2849,
+              "pytorch_xla_ms": 0.3594,
+              "speedup": 1.26
+            },
+            {
+              "id": "3",
+              "name": "Batched_matrix_multiplication",
+              "jax_ms": 1.6842,
+              "pytorch_xla_ms": 1.6751,
+              "speedup": 0.99
+            },
+            {
+              "id": "4",
+              "name": "Matrix_vector_multiplication_",
+              "jax_ms": 7.7425,
+              "pytorch_xla_ms": 7.7623,
+              "speedup": 1.0
+            },
+            {
+              "id": "5",
+              "name": "Matrix_scalar_multiplication",
+              "jax_ms": 7.3298,
+              "pytorch_xla_ms": 7.3019,
+              "speedup": 1.0
+            },
+            {
+              "id": "6",
+              "name": "Matmul_with_large_K_dimension_",
+              "jax_ms": 0.9772,
+              "pytorch_xla_ms": 0.9887,
+              "speedup": 1.01
+            },
+            {
+              "id": "7",
+              "name": "Matmul_with_small_K_dimension_",
+              "jax_ms": 3.2856,
+              "pytorch_xla_ms": 3.2767,
+              "speedup": 1.0
+            },
+            {
+              "id": "8",
+              "name": "Matmul_with_irregular_shapes_",
+              "jax_ms": 0.6025,
+              "pytorch_xla_ms": 0.6795,
+              "speedup": 1.13
+            },
+            {
+              "id": "9",
+              "name": "Tall_skinny_matrix_multiplication_",
+              "jax_ms": 3.2864,
+              "pytorch_xla_ms": 3.2737,
+              "speedup": 1.0
+            },
+            {
+              "id": "10",
+              "name": "3D_tensor_matrix_multiplication",
+              "jax_ms": 0.2515,
+              "pytorch_xla_ms": 0.3834,
+              "speedup": 1.52
+            },
+            {
+              "id": "11",
+              "name": "4D_tensor_matrix_multiplication",
+              "jax_ms": 3.4901,
+              "pytorch_xla_ms": 3.4707,
+              "speedup": 0.99
+            },
+            {
+              "id": "12",
+              "name": "Matmul_with_diagonal_matrices_",
+              "jax_ms": 0.2083,
+              "pytorch_xla_ms": 0.3114,
+              "speedup": 1.49
+            },
+            {
+              "id": "13",
+              "name": "Matmul_for_symmetric_matrices",
+              "jax_ms": 0.2912,
+              "pytorch_xla_ms": 0.357,
+              "speedup": 1.23
+            },
+            {
+              "id": "14",
+              "name": "Matmul_for_upper_triangular_matrices",
+              "jax_ms": 0.2751,
+              "pytorch_xla_ms": 0.3681,
+              "speedup": 1.34
+            },
+            {
+              "id": "15",
+              "name": "Matmul_for_lower_triangular_matrices",
+              "jax_ms": 0.2839,
+              "pytorch_xla_ms": 0.3529,
+              "speedup": 1.24
+            },
+            {
+              "id": "16",
+              "name": "Matmul_with_transposed_A",
+              "jax_ms": 0.2819,
+              "pytorch_xla_ms": 0.3764,
+              "speedup": 1.34
+            },
+            {
+              "id": "17",
+              "name": "Matmul_with_transposed_B",
+              "jax_ms": 0.2943,
+              "pytorch_xla_ms": 0.3801,
+              "speedup": 1.29
+            },
+            {
+              "id": "18",
+              "name": "Matmul_with_transposed_both",
+              "jax_ms": 0.3045,
+              "pytorch_xla_ms": 0.3992,
+              "speedup": 1.31
+            },
+            {
+              "id": "19",
+              "name": "ReLU",
+              "jax_ms": 11.0167,
+              "pytorch_xla_ms": 11.0021,
+              "speedup": 1.0
+            },
+            {
+              "id": "20",
+              "name": "LeakyReLU",
+              "jax_ms": 11.0304,
+              "pytorch_xla_ms": 11.0006,
+              "speedup": 1.0
+            },
+            {
+              "id": "21",
+              "name": "Sigmoid",
+              "jax_ms": 11.0354,
+              "pytorch_xla_ms": 10.9782,
+              "speedup": 0.99
+            },
+            {
+              "id": "22",
+              "name": "Tanh",
+              "jax_ms": 10.9904,
+              "pytorch_xla_ms": 10.9536,
+              "speedup": 1.0
+            },
+            {
+              "id": "23",
+              "name": "Softmax",
+              "jax_ms": 22.75,
+              "pytorch_xla_ms": 22.6455,
+              "speedup": 1.0
+            },
+            {
+              "id": "24",
+              "name": "LogSoftmax",
+              "jax_ms": 22.7052,
+              "pytorch_xla_ms": 22.6779,
+              "speedup": 1.0
+            },
+            {
+              "id": "25",
+              "name": "Swish",
+              "jax_ms": 11.018,
+              "pytorch_xla_ms": 11.0212,
+              "speedup": 1.0
+            },
+            {
+              "id": "26",
+              "name": "GELU_",
+              "jax_ms": 11.0292,
+              "pytorch_xla_ms": 11.038,
+              "speedup": 1.0
+            },
+            {
+              "id": "27",
+              "name": "SELU_",
+              "jax_ms": 11.0239,
+              "pytorch_xla_ms": 10.9992,
+              "speedup": 1.0
+            },
+            {
+              "id": "28",
+              "name": "HardSigmoid",
+              "jax_ms": 11.0283,
+              "pytorch_xla_ms": 11.0032,
+              "speedup": 1.0
+            },
+            {
+              "id": "29",
+              "name": "Softplus",
+              "jax_ms": 11.027,
+              "pytorch_xla_ms": 10.9978,
+              "speedup": 1.0
+            },
+            {
+              "id": "30",
+              "name": "Softsign",
+              "jax_ms": 11.0262,
+              "pytorch_xla_ms": 11.0029,
+              "speedup": 1.0
+            },
+            {
+              "id": "31",
+              "name": "ELU",
+              "jax_ms": 11.0136,
+              "pytorch_xla_ms": 11.0093,
+              "speedup": 1.0
+            },
+            {
+              "id": "32",
+              "name": "HardTanh",
+              "jax_ms": 11.0249,
+              "pytorch_xla_ms": 11.009,
+              "speedup": 1.0
+            },
+            {
+              "id": "33",
+              "name": "BatchNorm",
+              "jax_ms": 7.3394,
+              "pytorch_xla_ms": 11.2276,
+              "speedup": 1.53
+            },
+            {
+              "id": "34",
+              "name": "InstanceNorm",
+              "jax_ms": 0.9384,
+              "pytorch_xla_ms": 1.2228,
+              "speedup": 1.3
+            },
+            {
+              "id": "35",
+              "name": "GroupNorm_",
+              "jax_ms": 0.9478,
+              "pytorch_xla_ms": 3.12,
+              "speedup": 3.29
+            },
+            {
+              "id": "36",
+              "name": "RMSNorm_",
+              "jax_ms": 19.9268,
+              "pytorch_xla_ms": 20.0034,
+              "speedup": 1.0
+            },
+            {
+              "id": "37",
+              "name": "FrobeniusNorm_",
+              "jax_ms": 19.6185,
+              "pytorch_xla_ms": 19.6481,
+              "speedup": 1.0
+            },
+            {
+              "id": "38",
+              "name": "L1Norm_",
+              "jax_ms": 0.3954,
+              "pytorch_xla_ms": 0.504,
+              "speedup": 1.27
+            },
+            {
+              "id": "39",
+              "name": "L2Norm_",
+              "jax_ms": 0.3984,
+              "pytorch_xla_ms": 0.4993,
+              "speedup": 1.25
+            },
+            {
+              "id": "40",
+              "name": "LayerNorm",
+              "jax_ms": 0.9493,
+              "pytorch_xla_ms": 0.8661,
+              "speedup": 0.91
+            },
+            {
+              "id": "41",
+              "name": "Max_Pooling_1D",
+              "jax_ms": 0.2908,
+              "pytorch_xla_ms": 25.2992,
+              "speedup": 87.01
+            },
+            {
+              "id": "42",
+              "name": "Max_Pooling_2D",
+              "jax_ms": 18.2057,
+              "pytorch_xla_ms": 18.3649,
+              "speedup": 1.01
+            },
+            {
+              "id": "43",
+              "name": "Max_Pooling_3D",
+              "jax_ms": 125.6133,
+              "pytorch_xla_ms": 1581.792,
+              "speedup": 12.59
+            },
+            {
+              "id": "44",
+              "name": "Average_Pooling_1D",
+              "jax_ms": 7.3402,
+              "pytorch_xla_ms": 11.4664,
+              "speedup": 1.56
+            },
+            {
+              "id": "45",
+              "name": "Average_Pooling_2D",
+              "jax_ms": 0.4629,
+              "pytorch_xla_ms": 0.5562,
+              "speedup": 1.2
+            },
+            {
+              "id": "46",
+              "name": "Average_Pooling_3D",
+              "jax_ms": 24.6161,
+              "pytorch_xla_ms": 24.7605,
+              "speedup": 1.01
+            },
+            {
+              "id": "47",
+              "name": "Sum_reduction_over_a_dimension",
+              "jax_ms": 7.7676,
+              "pytorch_xla_ms": 7.7827,
+              "speedup": 1.0
+            },
+            {
+              "id": "48",
+              "name": "Mean_reduction_over_a_dimension",
+              "jax_ms": 7.7527,
+              "pytorch_xla_ms": 7.7833,
+              "speedup": 1.0
+            },
+            {
+              "id": "49",
+              "name": "Max_reduction_over_a_dimension",
+              "jax_ms": 7.7613,
+              "pytorch_xla_ms": 7.7906,
+              "speedup": 1.0
+            },
+            {
+              "id": "50",
+              "name": "conv_standard_2D__square_input__square_kernel",
+              "jax_ms": 0.5703,
+              "pytorch_xla_ms": 0.6672,
+              "speedup": 1.17
+            },
+            {
+              "id": "51",
+              "name": "Argmax_over_a_dimension",
+              "jax_ms": 7.8139,
+              "pytorch_xla_ms": 7.8039,
+              "speedup": 1.0
+            },
+            {
+              "id": "52",
+              "name": "Argmin_over_a_dimension",
+              "jax_ms": 7.7761,
+              "pytorch_xla_ms": 7.8167,
+              "speedup": 1.01
+            },
+            {
+              "id": "53",
+              "name": "Min_reduction_over_a_dimension",
+              "jax_ms": 7.7533,
+              "pytorch_xla_ms": 7.7992,
+              "speedup": 1.01
+            },
+            {
+              "id": "54",
+              "name": "conv_standard_3D__square_input__square_kernel",
+              "jax_ms": 2.5669,
+              "pytorch_xla_ms": 2.697,
+              "speedup": 1.05
+            },
+            {
+              "id": "55",
+              "name": "conv_standard_2D__asymmetric_input__square_kernel",
+              "jax_ms": 4.5725,
+              "pytorch_xla_ms": 4.5663,
+              "speedup": 1.0
+            },
+            {
+              "id": "56",
+              "name": "conv_standard_2D__asymmetric_input__asymmetric_kernel",
+              "jax_ms": 1.8734,
+              "pytorch_xla_ms": 1.9833,
+              "speedup": 1.06
+            },
+            {
+              "id": "57",
+              "name": "conv_transposed_2D__square_input__square_kernel",
+              "jax_ms": 15.0055,
+              "pytorch_xla_ms": 15.0299,
+              "speedup": 1.0
+            },
+            {
+              "id": "58",
+              "name": "conv_transposed_3D__asymmetric_input__asymmetric_kernel",
+              "jax_ms": 3.4975,
+              "pytorch_xla_ms": 2.8936,
+              "speedup": 0.83
+            },
+            {
+              "id": "59",
+              "name": "conv_standard_3D__asymmetric_input__square_kernel",
+              "jax_ms": 12.4836,
+              "pytorch_xla_ms": 12.545,
+              "speedup": 1.0
+            },
+            {
+              "id": "60",
+              "name": "conv_standard_3D__square_input__asymmetric_kernel",
+              "jax_ms": 6.2755,
+              "pytorch_xla_ms": 6.4333,
+              "speedup": 1.03
+            },
+            {
+              "id": "61",
+              "name": "conv_transposed_3D__square_input__square_kernel",
+              "jax_ms": 5.616,
+              "pytorch_xla_ms": 5.8312,
+              "speedup": 1.04
+            },
+            {
+              "id": "62",
+              "name": "conv_standard_2D__square_input__asymmetric_kernel",
+              "jax_ms": 5.1169,
+              "pytorch_xla_ms": 5.3554,
+              "speedup": 1.05
+            },
+            {
+              "id": "63",
+              "name": "conv_standard_2D__square_input__square_kernel",
+              "jax_ms": 15.2478,
+              "pytorch_xla_ms": 15.3326,
+              "speedup": 1.01
+            },
+            {
+              "id": "64",
+              "name": "conv_transposed_1D",
+              "jax_ms": 5.4517,
+              "pytorch_xla_ms": 5.463,
+              "speedup": 1.0
+            },
+            {
+              "id": "65",
+              "name": "conv_transposed_2D__square_input__asymmetric_kernel",
+              "jax_ms": 5.6848,
+              "pytorch_xla_ms": 4.3256,
+              "speedup": 0.76
+            },
+            {
+              "id": "66",
+              "name": "conv_standard_3D__asymmetric_input__asymmetric_kernel",
+              "jax_ms": 6.6284,
+              "pytorch_xla_ms": 6.7862,
+              "speedup": 1.02
+            },
+            {
+              "id": "67",
+              "name": "conv_standard_1D",
+              "jax_ms": 4.5353,
+              "pytorch_xla_ms": 4.5724,
+              "speedup": 1.01
+            },
+            {
+              "id": "68",
+              "name": "conv_transposed_3D__square_input__asymmetric_kernel",
+              "jax_ms": 17.989,
+              "pytorch_xla_ms": 18.1598,
+              "speedup": 1.01
+            },
+            {
+              "id": "69",
+              "name": "conv_transposed_2D__asymmetric_input__asymmetric_kernel",
+              "jax_ms": 2.3814,
+              "pytorch_xla_ms": 2.3905,
+              "speedup": 1.0
+            },
+            {
+              "id": "70",
+              "name": "conv_transposed_3D__asymmetric_input__square_kernel",
+              "jax_ms": 15.9238,
+              "pytorch_xla_ms": 16.1174,
+              "speedup": 1.01
+            },
+            {
+              "id": "71",
+              "name": "conv_transposed_2D__asymmetric_input__square_kernel",
+              "jax_ms": 6.4684,
+              "pytorch_xla_ms": 6.4676,
+              "speedup": 1.0
+            },
+            {
+              "id": "72",
+              "name": "conv_transposed_3D_asymmetric_input_asymmetric_kernel___strided_padded_grouped_",
+              "jax_ms": 5.2718,
+              "pytorch_xla_ms": 5.2173,
+              "speedup": 0.99
+            },
+            {
+              "id": "73",
+              "name": "conv_transposed_3D_asymmetric_input_square_kernel__strided_padded__grouped",
+              "jax_ms": 14.1121,
+              "pytorch_xla_ms": 14.211,
+              "speedup": 1.01
+            },
+            {
+              "id": "74",
+              "name": "conv_transposed_1D_dilated",
+              "jax_ms": 7.0221,
+              "pytorch_xla_ms": 7.1376,
+              "speedup": 1.02
+            },
+            {
+              "id": "75",
+              "name": "conv_transposed_2D_asymmetric_input_asymmetric_kernel_strided__grouped____padded____dilated__",
+              "jax_ms": 14.6299,
+              "pytorch_xla_ms": 12.03,
+              "speedup": 0.82
+            },
+            {
+              "id": "76",
+              "name": "conv_standard_1D_dilated_strided__",
+              "jax_ms": 0.9044,
+              "pytorch_xla_ms": 1.0351,
+              "speedup": 1.14
+            },
+            {
+              "id": "77",
+              "name": "conv_transposed_3D_square_input_square_kernel___padded____dilated____strided__",
+              "jax_ms": 7.5943,
+              "pytorch_xla_ms": 2.8805,
+              "speedup": 0.38
+            },
+            {
+              "id": "78",
+              "name": "conv_transposed_2D_asymmetric_input_asymmetric_kernel___padded__",
+              "jax_ms": 6.8175,
+              "pytorch_xla_ms": 7.0866,
+              "speedup": 1.04
+            },
+            {
+              "id": "79",
+              "name": "conv_transposed_1D_asymmetric_input_square_kernel___padded____strided____dilated__",
+              "jax_ms": 5.6137,
+              "pytorch_xla_ms": 5.6078,
+              "speedup": 1.0
+            },
+            {
+              "id": "80",
+              "name": "conv_standard_2D_square_input_asymmetric_kernel___dilated____padded__",
+              "jax_ms": 4.8103,
+              "pytorch_xla_ms": 4.9592,
+              "speedup": 1.03
+            },
+            {
+              "id": "81",
+              "name": "conv_transposed_2D_asymmetric_input_square_kernel___dilated____padded____strided__",
+              "jax_ms": 3.4268,
+              "pytorch_xla_ms": 3.4592,
+              "speedup": 1.01
+            },
+            {
+              "id": "82",
+              "name": "conv_depthwise_2D_square_input_square_kernel",
+              "jax_ms": 7.3302,
+              "pytorch_xla_ms": 7.3217,
+              "speedup": 1.0
+            },
+            {
+              "id": "83",
+              "name": "conv_depthwise_2D_square_input_asymmetric_kernel",
+              "jax_ms": 4.1741,
+              "pytorch_xla_ms": 4.2949,
+              "speedup": 1.03
+            },
+            {
+              "id": "84",
+              "name": "conv_depthwise_2D_asymmetric_input_square_kernel",
+              "jax_ms": 12.2732,
+              "pytorch_xla_ms": 12.3949,
+              "speedup": 1.01
+            },
+            {
+              "id": "85",
+              "name": "conv_depthwise_2D_asymmetric_input_asymmetric_kernel",
+              "jax_ms": 1.8073,
+              "pytorch_xla_ms": 1.9193,
+              "speedup": 1.06
+            },
+            {
+              "id": "86",
+              "name": "conv_depthwise_separable_2D",
+              "jax_ms": 8.3726,
+              "pytorch_xla_ms": 8.4377,
+              "speedup": 1.01
+            },
+            {
+              "id": "87",
+              "name": "conv_pointwise_2D",
+              "jax_ms": 3.1747,
+              "pytorch_xla_ms": 3.2006,
+              "speedup": 1.01
+            },
+            {
+              "id": "88",
+              "name": "MinGPTNewGelu",
+              "jax_ms": 0.4944,
+              "pytorch_xla_ms": 0.647,
+              "speedup": 1.31
+            },
+            {
+              "id": "89",
+              "name": "cumsum",
+              "jax_ms": 58.2006,
+              "pytorch_xla_ms": 58.1305,
+              "speedup": 1.0
+            },
+            {
+              "id": "90",
+              "name": "cumprod",
+              "jax_ms": 59.0205,
+              "pytorch_xla_ms": 58.9138,
+              "speedup": 1.0
+            },
+            {
+              "id": "91",
+              "name": "cumsum_reverse",
+              "jax_ms": 114.6593,
+              "pytorch_xla_ms": 115.2224,
+              "speedup": 1.0
+            },
+            {
+              "id": "92",
+              "name": "cumsum_exclusive",
+              "jax_ms": 72.2707,
+              "pytorch_xla_ms": 72.2963,
+              "speedup": 1.0
+            },
+            {
+              "id": "93",
+              "name": "masked_cumsum",
+              "jax_ms": 66.0028,
+              "pytorch_xla_ms": 65.8929,
+              "speedup": 1.0
+            },
+            {
+              "id": "94",
+              "name": "MSELoss",
+              "jax_ms": 7.7524,
+              "pytorch_xla_ms": 7.8098,
+              "speedup": 1.01
+            },
+            {
+              "id": "95",
+              "name": "CrossEntropyLoss",
+              "jax_ms": 2.0485,
+              "pytorch_xla_ms": 1.4982,
+              "speedup": 0.73
+            },
+            {
+              "id": "96",
+              "name": "HuberLoss",
+              "jax_ms": 0.2008,
+              "pytorch_xla_ms": 0.3248,
+              "speedup": 1.62
+            },
+            {
+              "id": "97",
+              "name": "ScaledDotProductAttention",
+              "jax_ms": 10.4189,
+              "pytorch_xla_ms": 19.6421,
+              "speedup": 1.89
+            },
+            {
+              "id": "98",
+              "name": "KLDivLoss",
+              "jax_ms": 1.9814,
+              "pytorch_xla_ms": 1.9731,
+              "speedup": 1.0
+            },
+            {
+              "id": "99",
+              "name": "TripletMarginLoss",
+              "jax_ms": 2.9087,
+              "pytorch_xla_ms": 2.9471,
+              "speedup": 1.01
+            },
+            {
+              "id": "100",
+              "name": "HingeLoss",
+              "jax_ms": 3.918,
+              "pytorch_xla_ms": 3.8946,
+              "speedup": 0.99
+            }
+          ]
+        },
+        "level2": {
+          "total": 100,
+          "passed": 100,
+          "workloads": [
+            {
+              "id": "1",
+              "name": "Conv2D_ReLU_BiasAdd",
+              "jax_ms": 2.2135,
+              "pytorch_xla_ms": 2.3576,
+              "speedup": 1.07
+            },
+            {
+              "id": "2",
+              "name": "ConvTranspose2d_BiasAdd_Clamp_Scaling_Clamp_Divide",
+              "jax_ms": 8.1978,
+              "pytorch_xla_ms": 8.4494,
+              "speedup": 1.03
+            },
+            {
+              "id": "3",
+              "name": "ConvTranspose3d_Sum_LayerNorm_AvgPool_GELU",
+              "jax_ms": 9.1291,
+              "pytorch_xla_ms": 8.7694,
+              "speedup": 0.96
+            },
+            {
+              "id": "4",
+              "name": "Conv2d_Mish_Mish",
+              "jax_ms": 5.5342,
+              "pytorch_xla_ms": 5.3644,
+              "speedup": 0.97
+            },
+            {
+              "id": "5",
+              "name": "ConvTranspose2d_Subtract_Tanh",
+              "jax_ms": 11.014,
+              "pytorch_xla_ms": 11.0293,
+              "speedup": 1.0
+            },
+            {
+              "id": "6",
+              "name": "Conv3d_Softmax_MaxPool_MaxPool",
+              "jax_ms": 0.5379,
+              "pytorch_xla_ms": 0.9762,
+              "speedup": 1.81
+            },
+            {
+              "id": "7",
+              "name": "Conv3d_ReLU_LeakyReLU_GELU_Sigmoid_BiasAdd",
+              "jax_ms": 2.5529,
+              "pytorch_xla_ms": 2.7382,
+              "speedup": 1.07
+            },
+            {
+              "id": "8",
+              "name": "Conv3d_Divide_Max_GlobalAvgPool_BiasAdd_Sum",
+              "jax_ms": 1.3058,
+              "pytorch_xla_ms": 1.3817,
+              "speedup": 1.06
+            },
+            {
+              "id": "9",
+              "name": "Matmul_Subtract_Multiply_ReLU",
+              "jax_ms": 0.1655,
+              "pytorch_xla_ms": 0.5267,
+              "speedup": 3.18
+            },
+            {
+              "id": "10",
+              "name": "ConvTranspose2d_MaxPool_Hardtanh_Mean_Tanh",
+              "jax_ms": 9.1431,
+              "pytorch_xla_ms": 8.6256,
+              "speedup": 0.94
+            },
+            {
+              "id": "11",
+              "name": "ConvTranspose2d_BatchNorm_Tanh_MaxPool_GroupNorm",
+              "jax_ms": 1.1968,
+              "pytorch_xla_ms": 3.9815,
+              "speedup": 3.33
+            },
+            {
+              "id": "12",
+              "name": "Gemm_Multiply_LeakyReLU",
+              "jax_ms": 0.1676,
+              "pytorch_xla_ms": 0.5202,
+              "speedup": 3.1
+            },
+            {
+              "id": "13",
+              "name": "ConvTranspose3d_Mean_Add_Softmax_Tanh_Scaling",
+              "jax_ms": 13.0342,
+              "pytorch_xla_ms": 12.9855,
+              "speedup": 1.0
+            },
+            {
+              "id": "14",
+              "name": "Gemm_Divide_Sum_Scaling",
+              "jax_ms": 1.1408,
+              "pytorch_xla_ms": 0.5244,
+              "speedup": 0.46
+            },
+            {
+              "id": "15",
+              "name": "ConvTranspose3d_BatchNorm_Subtract",
+              "jax_ms": 8.6581,
+              "pytorch_xla_ms": 4.7591,
+              "speedup": 0.55
+            },
+            {
+              "id": "16",
+              "name": "ConvTranspose2d_Mish_Add_Hardtanh_Scaling",
+              "jax_ms": 8.1457,
+              "pytorch_xla_ms": 8.9336,
+              "speedup": 1.1
+            },
+            {
+              "id": "17",
+              "name": "Conv2d_InstanceNorm_Divide",
+              "jax_ms": 4.5676,
+              "pytorch_xla_ms": 3.9459,
+              "speedup": 0.86
+            },
+            {
+              "id": "18",
+              "name": "Matmul_Sum_Max_AvgPool_LogSumExp_LogSumExp",
+              "jax_ms": 0.2976,
+              "pytorch_xla_ms": 0.4645,
+              "speedup": 1.56
+            },
+            {
+              "id": "19",
+              "name": "ConvTranspose2d_GELU_GroupNorm",
+              "jax_ms": 12.3066,
+              "pytorch_xla_ms": 52.7568,
+              "speedup": 4.29
+            },
+            {
+              "id": "20",
+              "name": "ConvTranspose3d_Sum_ResidualAdd_Multiply_ResidualAdd",
+              "jax_ms": 4.438,
+              "pytorch_xla_ms": 2.7172,
+              "speedup": 0.61
+            },
+            {
+              "id": "21",
+              "name": "Conv2d_Add_Scale_Sigmoid_GroupNorm",
+              "jax_ms": 3.9655,
+              "pytorch_xla_ms": 17.3177,
+              "speedup": 4.37
+            },
+            {
+              "id": "22",
+              "name": "Matmul_Scale_ResidualAdd_Clamp_LogSumExp_Mish",
+              "jax_ms": 0.3216,
+              "pytorch_xla_ms": 0.5633,
+              "speedup": 1.75
+            },
+            {
+              "id": "23",
+              "name": "Conv3d_GroupNorm_Mean",
+              "jax_ms": 0.6849,
+              "pytorch_xla_ms": 6.9795,
+              "speedup": 10.19
+            },
+            {
+              "id": "24",
+              "name": "Conv3d_Min_Softmax",
+              "jax_ms": 0.3781,
+              "pytorch_xla_ms": 0.5111,
+              "speedup": 1.35
+            },
+            {
+              "id": "25",
+              "name": "Conv2d_Min_Tanh_Tanh",
+              "jax_ms": 2.008,
+              "pytorch_xla_ms": 2.1832,
+              "speedup": 1.09
+            },
+            {
+              "id": "26",
+              "name": "ConvTranspose3d_Add_HardSwish",
+              "jax_ms": 4.0598,
+              "pytorch_xla_ms": 4.0731,
+              "speedup": 1.0
+            },
+            {
+              "id": "27",
+              "name": "Conv3d_HardSwish_GroupNorm_Mean",
+              "jax_ms": 2.9172,
+              "pytorch_xla_ms": 22.1607,
+              "speedup": 7.6
+            },
+            {
+              "id": "28",
+              "name": "BMM_InstanceNorm_Sum_ResidualAdd_Multiply",
+              "jax_ms": 0.3597,
+              "pytorch_xla_ms": 0.6301,
+              "speedup": 1.75
+            },
+            {
+              "id": "29",
+              "name": "Matmul_Mish_Mish",
+              "jax_ms": 0.1684,
+              "pytorch_xla_ms": 0.5624,
+              "speedup": 3.34
+            },
+            {
+              "id": "30",
+              "name": "Gemm_GroupNorm_Hardtanh",
+              "jax_ms": 0.1885,
+              "pytorch_xla_ms": 0.7397,
+              "speedup": 3.92
+            },
+            {
+              "id": "31",
+              "name": "Conv2d_Min_Add_Multiply",
+              "jax_ms": 2.2123,
+              "pytorch_xla_ms": 2.4033,
+              "speedup": 1.09
+            },
+            {
+              "id": "32",
+              "name": "Conv2d_Scaling_Min",
+              "jax_ms": 3.3877,
+              "pytorch_xla_ms": 3.7672,
+              "speedup": 1.11
+            },
+            {
+              "id": "33",
+              "name": "Gemm_Scale_BatchNorm",
+              "jax_ms": 0.3333,
+              "pytorch_xla_ms": 0.5997,
+              "speedup": 1.8
+            },
+            {
+              "id": "34",
+              "name": "ConvTranspose3d_LayerNorm_GELU_Scaling",
+              "jax_ms": 21.5794,
+              "pytorch_xla_ms": 13.88,
+              "speedup": 0.64
+            },
+            {
+              "id": "35",
+              "name": "Conv2d_Subtract_HardSwish_MaxPool_Mish",
+              "jax_ms": 3.0432,
+              "pytorch_xla_ms": 3.2873,
+              "speedup": 1.08
+            },
+            {
+              "id": "36",
+              "name": "ConvTranspose2d_Min_Sum_GELU_Add",
+              "jax_ms": 0.9274,
+              "pytorch_xla_ms": 0.6131,
+              "speedup": 0.66
+            },
+            {
+              "id": "37",
+              "name": "Matmul_Swish_Sum_GroupNorm",
+              "jax_ms": 5.0932,
+              "pytorch_xla_ms": 11.8414,
+              "speedup": 2.32
+            },
+            {
+              "id": "38",
+              "name": "ConvTranspose3d_AvgPool_Clamp_Softmax_Multiply",
+              "jax_ms": 17.907,
+              "pytorch_xla_ms": 18.2072,
+              "speedup": 1.02
+            },
+            {
+              "id": "39",
+              "name": "Gemm_Scale_BatchNorm",
+              "jax_ms": 2.3528,
+              "pytorch_xla_ms": 1.5772,
+              "speedup": 0.67
+            },
+            {
+              "id": "40",
+              "name": "Matmul_Scaling_ResidualAdd",
+              "jax_ms": 1.3084,
+              "pytorch_xla_ms": 1.1216,
+              "speedup": 0.86
+            },
+            {
+              "id": "41",
+              "name": "Gemm_BatchNorm_GELU_ReLU",
+              "jax_ms": 2.3465,
+              "pytorch_xla_ms": 1.5872,
+              "speedup": 0.68
+            },
+            {
+              "id": "42",
+              "name": "ConvTranspose2d_GlobalAvgPool_BiasAdd_LogSumExp_Sum_Multiply",
+              "jax_ms": 3.5458,
+              "pytorch_xla_ms": 3.7716,
+              "speedup": 1.06
+            },
+            {
+              "id": "43",
+              "name": "Conv3d_Max_LogSumExp_ReLU",
+              "jax_ms": 5.0068,
+              "pytorch_xla_ms": 5.2046,
+              "speedup": 1.04
+            },
+            {
+              "id": "44",
+              "name": "ConvTranspose2d_Multiply_GlobalAvgPool_GlobalAvgPool_Mean",
+              "jax_ms": 0.4105,
+              "pytorch_xla_ms": 0.5783,
+              "speedup": 1.41
+            },
+            {
+              "id": "45",
+              "name": "Gemm_Sigmoid_LogSumExp",
+              "jax_ms": 0.9939,
+              "pytorch_xla_ms": 1.025,
+              "speedup": 1.03
+            },
+            {
+              "id": "46",
+              "name": "Conv2d_Subtract_Tanh_Subtract_AvgPool",
+              "jax_ms": 3.0479,
+              "pytorch_xla_ms": 3.2394,
+              "speedup": 1.06
+            },
+            {
+              "id": "47",
+              "name": "Conv3d_Mish_Tanh",
+              "jax_ms": 2.6175,
+              "pytorch_xla_ms": 3.0179,
+              "speedup": 1.15
+            },
+            {
+              "id": "48",
+              "name": "Conv3d_Scaling_Tanh_Multiply_Sigmoid",
+              "jax_ms": 0.7215,
+              "pytorch_xla_ms": 0.8583,
+              "speedup": 1.19
+            },
+            {
+              "id": "49",
+              "name": "ConvTranspose3d_Softmax_Sigmoid",
+              "jax_ms": 5.5219,
+              "pytorch_xla_ms": 8.2144,
+              "speedup": 1.49
+            },
+            {
+              "id": "50",
+              "name": "ConvTranspose3d_Scaling_AvgPool_BiasAdd_Scaling",
+              "jax_ms": 1.7614,
+              "pytorch_xla_ms": 1.777,
+              "speedup": 1.01
+            },
+            {
+              "id": "51",
+              "name": "Gemm_Subtract_GlobalAvgPool_LogSumExp_GELU_ResidualAdd",
+              "jax_ms": 0.2484,
+              "pytorch_xla_ms": 0.7665,
+              "speedup": 3.09
+            },
+            {
+              "id": "52",
+              "name": "Conv2d_Activation_BatchNorm",
+              "jax_ms": 2.4698,
+              "pytorch_xla_ms": 2.2076,
+              "speedup": 0.89
+            },
+            {
+              "id": "53",
+              "name": "Gemm_Scaling_Hardtanh_GELU",
+              "jax_ms": 0.2481,
+              "pytorch_xla_ms": 0.6781,
+              "speedup": 2.73
+            },
+            {
+              "id": "54",
+              "name": "Conv2d_Multiply_LeakyReLU_GELU",
+              "jax_ms": 9.0064,
+              "pytorch_xla_ms": 7.3253,
+              "speedup": 0.81
+            },
+            {
+              "id": "55",
+              "name": "Matmul_MaxPool_Sum_Scale",
+              "jax_ms": 1.9644,
+              "pytorch_xla_ms": 3.8818,
+              "speedup": 1.98
+            },
+            {
+              "id": "56",
+              "name": "Matmul_Sigmoid_Sum",
+              "jax_ms": 0.1265,
+              "pytorch_xla_ms": 3.8383,
+              "speedup": 30.34
+            },
+            {
+              "id": "57",
+              "name": "Conv2d_ReLU_HardSwish",
+              "jax_ms": 0.5545,
+              "pytorch_xla_ms": 0.7476,
+              "speedup": 1.35
+            },
+            {
+              "id": "58",
+              "name": "ConvTranspose3d_LogSumExp_HardSwish_Subtract_Clamp",
+              "jax_ms": 3.0806,
+              "pytorch_xla_ms": 2.8191,
+              "speedup": 0.92
+            },
+            {
+              "id": "59",
+              "name": "Matmul_Swish_Scaling",
+              "jax_ms": 0.1439,
+              "pytorch_xla_ms": 3.8933,
+              "speedup": 27.05
+            },
+            {
+              "id": "60",
+              "name": "ConvTranspose3d_Swish_GroupNorm_HardSwish",
+              "jax_ms": 4.8983,
+              "pytorch_xla_ms": 21.3674,
+              "speedup": 4.36
+            },
+            {
+              "id": "61",
+              "name": "ConvTranspose3d_ReLU_GroupNorm",
+              "jax_ms": 1.756,
+              "pytorch_xla_ms": 12.5669,
+              "speedup": 7.16
+            },
+            {
+              "id": "62",
+              "name": "Matmul_GroupNorm_LeakyReLU_Sum",
+              "jax_ms": 0.4849,
+              "pytorch_xla_ms": 2.4115,
+              "speedup": 4.97
+            },
+            {
+              "id": "63",
+              "name": "Gemm_ReLU_Divide",
+              "jax_ms": 0.1788,
+              "pytorch_xla_ms": 0.5011,
+              "speedup": 2.8
+            },
+            {
+              "id": "64",
+              "name": "Gemm_LogSumExp_LeakyReLU_LeakyReLU_GELU_GELU",
+              "jax_ms": 0.141,
+              "pytorch_xla_ms": 0.4798,
+              "speedup": 3.4
+            },
+            {
+              "id": "65",
+              "name": "Conv2d_AvgPool_Sigmoid_Sum",
+              "jax_ms": 9.5035,
+              "pytorch_xla_ms": 9.0054,
+              "speedup": 0.95
+            },
+            {
+              "id": "66",
+              "name": "Matmul_Dropout_Softmax",
+              "jax_ms": 0.5066,
+              "pytorch_xla_ms": 1.087,
+              "speedup": 2.15
+            },
+            {
+              "id": "67",
+              "name": "Conv2d_GELU_GlobalAvgPool",
+              "jax_ms": 1.4553,
+              "pytorch_xla_ms": 1.4366,
+              "speedup": 0.99
+            },
+            {
+              "id": "68",
+              "name": "Matmul_Min_Subtract",
+              "jax_ms": 0.128,
+              "pytorch_xla_ms": 1.1222,
+              "speedup": 8.77
+            },
+            {
+              "id": "69",
+              "name": "Conv2d_HardSwish_ReLU",
+              "jax_ms": 0.5551,
+              "pytorch_xla_ms": 0.687,
+              "speedup": 1.24
+            },
+            {
+              "id": "70",
+              "name": "Gemm_Sigmoid_Scaling_ResidualAdd",
+              "jax_ms": 0.1754,
+              "pytorch_xla_ms": 0.5079,
+              "speedup": 2.9
+            },
+            {
+              "id": "71",
+              "name": "Conv2d_Divide_LeakyReLU",
+              "jax_ms": 0.5522,
+              "pytorch_xla_ms": 0.7204,
+              "speedup": 1.3
+            },
+            {
+              "id": "72",
+              "name": "ConvTranspose3d_BatchNorm_AvgPool_AvgPool",
+              "jax_ms": 3.8527,
+              "pytorch_xla_ms": 3.8591,
+              "speedup": 1.0
+            },
+            {
+              "id": "73",
+              "name": "Conv2d_BatchNorm_Scaling",
+              "jax_ms": 1.8314,
+              "pytorch_xla_ms": 1.5582,
+              "speedup": 0.85
+            },
+            {
+              "id": "74",
+              "name": "ConvTranspose3d_LeakyReLU_Multiply_LeakyReLU_Max",
+              "jax_ms": 4.4769,
+              "pytorch_xla_ms": 4.4566,
+              "speedup": 1.0
+            },
+            {
+              "id": "75",
+              "name": "Gemm_GroupNorm_Min_BiasAdd",
+              "jax_ms": 0.1871,
+              "pytorch_xla_ms": 2.4121,
+              "speedup": 12.89
+            },
+            {
+              "id": "76",
+              "name": "Gemm_Add_ReLU",
+              "jax_ms": 0.1677,
+              "pytorch_xla_ms": 0.4906,
+              "speedup": 2.93
+            },
+            {
+              "id": "77",
+              "name": "ConvTranspose3d_Scale_BatchNorm_GlobalAvgPool",
+              "jax_ms": 2.4103,
+              "pytorch_xla_ms": 3.0441,
+              "speedup": 1.26
+            },
+            {
+              "id": "78",
+              "name": "ConvTranspose3d_Max_Max_Sum",
+              "jax_ms": 6.769,
+              "pytorch_xla_ms": 6.9757,
+              "speedup": 1.03
+            },
+            {
+              "id": "79",
+              "name": "Conv3d_Multiply_InstanceNorm_Clamp_Multiply_Max",
+              "jax_ms": 0.409,
+              "pytorch_xla_ms": 0.5738,
+              "speedup": 1.4
+            },
+            {
+              "id": "80",
+              "name": "Gemm_Max_Subtract_GELU",
+              "jax_ms": 0.144,
+              "pytorch_xla_ms": 0.4796,
+              "speedup": 3.33
+            },
+            {
+              "id": "81",
+              "name": "Gemm_Swish_Divide_Clamp_Tanh_Clamp",
+              "jax_ms": 0.1807,
+              "pytorch_xla_ms": 0.5373,
+              "speedup": 2.97
+            },
+            {
+              "id": "82",
+              "name": "Conv2d_Tanh_Scaling_BiasAdd_Max",
+              "jax_ms": 4.0195,
+              "pytorch_xla_ms": 4.0356,
+              "speedup": 1.0
+            },
+            {
+              "id": "83",
+              "name": "Conv3d_GroupNorm_Min_Clamp_Dropout",
+              "jax_ms": 1.6783,
+              "pytorch_xla_ms": 8.936,
+              "speedup": 5.32
+            },
+            {
+              "id": "84",
+              "name": "Gemm_BatchNorm_Scaling_Softmax",
+              "jax_ms": 0.4318,
+              "pytorch_xla_ms": 0.6204,
+              "speedup": 1.44
+            },
+            {
+              "id": "85",
+              "name": "Conv2d_GroupNorm_Scale_MaxPool_Clamp",
+              "jax_ms": 1.3853,
+              "pytorch_xla_ms": 6.9823,
+              "speedup": 5.04
+            },
+            {
+              "id": "86",
+              "name": "Matmul_Divide_GELU",
+              "jax_ms": 0.1804,
+              "pytorch_xla_ms": 0.5335,
+              "speedup": 2.96
+            },
+            {
+              "id": "87",
+              "name": "Conv2d_Subtract_Subtract_Mish",
+              "jax_ms": 2.1829,
+              "pytorch_xla_ms": 2.3994,
+              "speedup": 1.1
+            },
+            {
+              "id": "88",
+              "name": "Gemm_GroupNorm_Swish_Multiply_Swish",
+              "jax_ms": 0.4797,
+              "pytorch_xla_ms": 1.4615,
+              "speedup": 3.05
+            },
+            {
+              "id": "89",
+              "name": "ConvTranspose3d_MaxPool_Softmax_Subtract_Swish_Max",
+              "jax_ms": 2.5494,
+              "pytorch_xla_ms": 2.65,
+              "speedup": 1.04
+            },
+            {
+              "id": "90",
+              "name": "Conv3d_LeakyReLU_Sum_Clamp_GELU",
+              "jax_ms": 2.0758,
+              "pytorch_xla_ms": 2.217,
+              "speedup": 1.07
+            },
+            {
+              "id": "91",
+              "name": "ConvTranspose2d_Softmax_BiasAdd_Scaling_Sigmoid",
+              "jax_ms": 5.7769,
+              "pytorch_xla_ms": 5.7973,
+              "speedup": 1.0
+            },
+            {
+              "id": "92",
+              "name": "Conv2d_GroupNorm_Tanh_HardSwish_ResidualAdd_LogSumExp",
+              "jax_ms": 1.8411,
+              "pytorch_xla_ms": 7.7534,
+              "speedup": 4.21
+            },
+            {
+              "id": "93",
+              "name": "ConvTranspose2d_Add_Min_GELU_Multiply",
+              "jax_ms": 1.2815,
+              "pytorch_xla_ms": 1.5364,
+              "speedup": 1.2
+            },
+            {
+              "id": "94",
+              "name": "Gemm_BiasAdd_Hardtanh_Mish_GroupNorm",
+              "jax_ms": 0.2912,
+              "pytorch_xla_ms": 1.5304,
+              "speedup": 5.26
+            },
+            {
+              "id": "95",
+              "name": "Matmul_Add_Swish_Tanh_GELU_Hardtanh",
+              "jax_ms": 0.1679,
+              "pytorch_xla_ms": 0.5318,
+              "speedup": 3.17
+            },
+            {
+              "id": "96",
+              "name": "ConvTranspose3d_Multiply_Max_GlobalAvgPool_Clamp",
+              "jax_ms": 1.685,
+              "pytorch_xla_ms": 1.7205,
+              "speedup": 1.02
+            },
+            {
+              "id": "97",
+              "name": "Matmul_BatchNorm_BiasAdd_Divide_Swish",
+              "jax_ms": 0.3301,
+              "pytorch_xla_ms": 0.6347,
+              "speedup": 1.92
+            },
+            {
+              "id": "98",
+              "name": "Matmul_AvgPool_GELU_Scale_Max",
+              "jax_ms": 0.1777,
+              "pytorch_xla_ms": 0.5702,
+              "speedup": 3.21
+            },
+            {
+              "id": "99",
+              "name": "Matmul_GELU_Softmax",
+              "jax_ms": 0.1648,
+              "pytorch_xla_ms": 0.5119,
+              "speedup": 3.11
+            },
+            {
+              "id": "100",
+              "name": "ConvTranspose3d_Clamp_Min_Divide",
+              "jax_ms": 5.0504,
+              "pytorch_xla_ms": 5.0418,
+              "speedup": 1.0
+            }
+          ]
+        }
+      }
+    },
+    "real_workloads": {
+      "description": "Hand-written JAX operators from 6 modern LLM families",
+      "source": "AI-Hypercomputer/maxtext",
+      "total": 30,
+      "succeeded": 29,
+      "workloads": [
+        {
+          "name": "llama3_8b_gqa",
+          "model": "Llama-3.1-8B",
+          "operator": "gqa_attention",
+          "time_ms": 0.8869,
+          "tflops": 77.49
+        },
+        {
+          "name": "llama3_70b_gqa",
+          "model": "Llama-3.1-70B",
+          "operator": "gqa_attention",
+          "time_ms": 1.6556,
+          "tflops": 83.01
+        },
+        {
+          "name": "llama3_405b_gqa",
+          "model": "Llama-3.1-405B",
+          "operator": "gqa_attention",
+          "time_ms": 3.2531,
+          "tflops": 84.5
+        },
+        {
+          "name": "llama3_8b_swiglu",
+          "model": "Llama-3.1-8B",
+          "operator": "swiglu_mlp",
+          "time_ms": 1.113,
+          "tflops": 648.27
+        },
+        {
+          "name": "llama3_70b_swiglu",
+          "model": "Llama-3.1-70B",
+          "operator": "swiglu_mlp",
+          "time_ms": 4.1015,
+          "tflops": 703.7
+        },
+        {
+          "name": "llama3_405b_swiglu",
+          "model": "Llama-3.1-405B",
+          "operator": "swiglu_mlp",
+          "time_ms": 14.5668,
+          "tflops": 735.94
+        },
+        {
+          "name": "llama3_8b_rope",
+          "model": "Llama-3.1-8B",
+          "operator": "rope",
+          "time_ms": 0.1505,
+          "tflops": 0.22
+        },
+        {
+          "name": "llama3_70b_rope",
+          "model": "Llama-3.1-70B",
+          "operator": "rope",
+          "time_ms": 0.1989,
+          "tflops": 0.34
+        },
+        {
+          "name": "llama3_8b_rmsnorm",
+          "model": "Llama-3.1-8B",
+          "operator": "rmsnorm",
+          "time_ms": 0.1508,
+          "tflops": 0.22
+        },
+        {
+          "name": "llama3_70b_rmsnorm",
+          "model": "Llama-3.1-70B",
+          "operator": "rmsnorm",
+          "time_ms": 0.182,
+          "tflops": 0.37
+        },
+        {
+          "name": "llama3_8b_token_embed",
+          "model": "Llama-3.1-8B",
+          "operator": "token_embed",
+          "time_ms": 0.1951,
+          "tflops": 5.47
+        },
+        {
+          "name": "gemma3_4b_sliding_window_attn",
+          "model": "Gemma-3-4B",
+          "operator": "sliding_window_attention",
+          "time_ms": 0.3701,
+          "tflops": 92.85
+        },
+        {
+          "name": "gemma3_12b_sliding_window_attn",
+          "model": "Gemma-3-12B",
+          "operator": "sliding_window_attention",
+          "time_ms": 0.6559,
+          "tflops": 104.77
+        },
+        {
+          "name": "gemma3_27b_sliding_window_attn",
+          "model": "Gemma-3-27B",
+          "operator": "sliding_window_attention",
+          "time_ms": 1.1274,
+          "tflops": 68.57
+        },
+        {
+          "name": "gemma3_4b_global_attn",
+          "model": "Gemma-3-4B",
+          "operator": "global_attention",
+          "time_ms": 0.3654,
+          "tflops": 94.04
+        },
+        {
+          "name": "gemma3_12b_global_attn",
+          "model": "Gemma-3-12B",
+          "operator": "global_attention",
+          "time_ms": 0.6559,
+          "tflops": 104.77
+        },
+        {
+          "name": "gemma3_27b_global_attn",
+          "model": "Gemma-3-27B",
+          "operator": "global_attention",
+          "time_ms": 1.1303,
+          "tflops": 68.4
+        },
+        {
+          "name": "mixtral_8x7b_moe",
+          "model": "Mixtral-8x7B",
+          "operator": "sparse_moe",
+          "time_ms": 8.3228,
+          "tflops": 173.41
+        },
+        {
+          "name": "mixtral_8x22b_moe",
+          "model": "Mixtral-8x22B",
+          "operator": "sparse_moe",
+          "time_ms": 13.8451,
+          "tflops": 178.7
+        },
+        {
+          "name": "deepseek_v3_mla",
+          "model": "DeepSeek-V3-671B",
+          "operator": "mla_attention",
+          "time_ms": 4.4354,
+          "tflops": 265.75
+        },
+        {
+          "name": "deepseek_v3_yarn_rope",
+          "model": "DeepSeek-V3-671B",
+          "operator": "yarn_rope",
+          "time_ms": 1.3521,
+          "tflops": 0.2
+        },
+        {
+          "name": "qwen3_8b_gqa",
+          "model": "Qwen3-8B",
+          "operator": "gqa_attention",
+          "time_ms": 0.8939,
+          "tflops": 76.88
+        },
+        {
+          "name": "qwen3_14b_gqa",
+          "model": "Qwen3-14B",
+          "operator": "gqa_attention",
+          "time_ms": 1.1062,
+          "tflops": 77.65
+        },
+        {
+          "name": "qwen3_8b_swiglu",
+          "model": "Qwen3-8B",
+          "operator": "swiglu_mlp",
+          "time_ms": 1.087,
+          "tflops": 663.81
+        },
+        {
+          "name": "qwen3_moe_30b_moe",
+          "model": "Qwen3-MoE-30B-A3B",
+          "operator": "sparse_moe_shared",
+          "time_ms": 7.5573,
+          "tflops": 450.11
+        },
+        {
+          "name": "llama4_scout_gqa",
+          "model": "Llama-4-Scout-109B",
+          "operator": "gqa_attention",
+          "time_ms": 1.2748,
+          "tflops": 80.86
+        },
+        {
+          "name": "llama4_scout_moe",
+          "model": "Llama-4-Scout-109B",
+          "operator": "sparse_moe_top1",
+          "time_ms": 12.1671,
+          "tflops": 677.76
+        },
+        {
+          "name": "llama4_maverick_moe",
+          "model": "Llama-4-Maverick-400B",
+          "operator": "sparse_moe_top1",
+          "time_ms": 49.9089,
+          "tflops": 660.91
+        },
+        {
+          "name": "llama4_scout_rope",
+          "model": "Llama-4-Scout-109B",
+          "operator": "rope",
+          "time_ms": 0.1843,
+          "tflops": 0.41
+        }
+      ]
+    },
+    "tokamax": {
+      "description": "TPU kernel benchmarks from openxla/tokamax",
+      "source": "openxla/tokamax",
+      "total": 12,
+      "succeeded": 12,
+      "workloads": [
+        {
+          "name": "mixtral_8x7b_attention",
+          "model": "Mixtral-8x7B",
+          "operator": "gqa_causal_attention",
+          "time_ms": 0.8693,
+          "tflops": 79.05
+        },
+        {
+          "name": "deepseek2_16b_attention",
+          "model": "DeepSeek-V2-Lite-16B",
+          "operator": "causal_attention",
+          "time_ms": 0.1721,
+          "tflops": 74.85
+        },
+        {
+          "name": "mixtral_8x7b_ragged_dot",
+          "model": "Mixtral-8x7B",
+          "operator": "ragged_dot",
+          "time_ms": 1.3703,
+          "tflops": 702.08
+        },
+        {
+          "name": "llama3_8b_cross_entropy",
+          "model": "Llama-3.1-8B",
+          "operator": "fused_cross_entropy",
+          "time_ms": 7.6934,
+          "tflops": 559.59
+        },
+        {
+          "name": "qwen3_8b_cross_entropy",
+          "model": "Qwen3-8B",
+          "operator": "fused_cross_entropy",
+          "time_ms": 8.6553,
+          "tflops": 589.24
+        },
+        {
+          "name": "gemma3_4b_cross_entropy",
+          "model": "Gemma3-4B",
+          "operator": "fused_cross_entropy",
+          "time_ms": 9.7363,
+          "tflops": 564.98
+        },
+        {
+          "name": "llama3_8b_swiglu",
+          "model": "Llama-3.1-8B",
+          "operator": "swiglu",
+          "time_ms": 1.0804,
+          "tflops": 667.86
+        },
+        {
+          "name": "llama3_70b_swiglu",
+          "model": "Llama-3.1-70B",
+          "operator": "swiglu",
+          "time_ms": 4.0932,
+          "tflops": 705.12
+        },
+        {
+          "name": "llama3_8b_rmsnorm",
+          "model": "Llama-3.1-8B",
+          "operator": "rmsnorm",
+          "time_ms": 0.1497,
+          "tflops": 0.22
+        },
+        {
+          "name": "llama3_70b_rmsnorm",
+          "model": "Llama-3.1-70B",
+          "operator": "rmsnorm",
+          "time_ms": 0.1783,
+          "tflops": 0.38
+        },
+        {
+          "name": "alphafold_384_triangle_mult",
+          "model": "AlphaFold2",
+          "operator": "triangle_mult_incoming",
+          "time_ms": 0.2853,
+          "tflops": 50.81
+        },
+        {
+          "name": "alphafold_768_triangle_mult",
+          "model": "AlphaFold2",
+          "operator": "triangle_mult_outgoing",
+          "time_ms": 1.3204,
+          "tflops": 65.87
+        }
+      ]
+    }
+  }
+}

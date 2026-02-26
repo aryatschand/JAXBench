@@ -8,6 +8,7 @@ KernelBench/
 .cache/
 credentials.json
 jaxbench-*.json
+run_all_benchmarks.py
 
 # Python
 __pycache__/
@@ -41,11 +42,10 @@ logs/
 *.log
 outputs/
 
-# JSON (ignore by default, allow benchmark results)
+# JSON (ignore all except root benchmarks.json)
 *.json
 !package.json
-!real_workloads/**/*.json
-!tokamax/**/*.json
+!benchmarks.json
 
 # OS
 .DS_Store
