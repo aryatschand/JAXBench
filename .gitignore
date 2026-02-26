@@ -9,6 +9,7 @@ KernelBench/
 credentials.json
 jaxbench-*.json
 run_all_benchmarks.py
+CLAUDE.md
 
 # Python
 __pycache__/
