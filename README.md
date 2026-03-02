@@ -9,46 +9,53 @@ All benchmarks run on **TPU v6e-1** with **JAX 0.6.2**. Full results in [`benchm
 | Suite | Workloads | Source | Description |
 |-------|-----------|--------|-------------|
 | [jaxkernelbench/](jaxkernelbench/) | 200 | [KernelBench](https://github.com/ScalingIntelligence/KernelBench) | LLM-translated PyTorch→JAX operators |
-| [real_workloads/](real_workloads/) | 29 | [MaxText](https://github.com/AI-Hypercomputer/maxtext) | Hand-written ops from 6 modern LLM families |
+| [real_workloads/](real_workloads/) | 36 | [MaxText](https://github.com/AI-Hypercomputer/maxtext) | Hand-written ops from 7 LLM families + attention variants |
 | [tokamax/](tokamax/) | 12 | [openxla/tokamax](https://github.com/openxla/tokamax) | TPU kernel benchmarks across 6 operations |
 
 ---
 
-### real_workloads — 29 LLM operator benchmarks
+### real_workloads — 36 LLM operator benchmarks
 
-Production-scale operator shapes from 6 modern LLM architectures.
+Production-scale operator shapes from 7 modern LLM architectures + 7 attention variants.
 
 | Workload | Model | Operator | Time (ms) | TFLOPS |
 |----------|-------|----------|----------:|-------:|
-| llama3_8b_gqa | Llama-3.1-8B | gqa_attention | 0.89 | 77.49 |
-| llama3_70b_gqa | Llama-3.1-70B | gqa_attention | 1.66 | 83.01 |
-| llama3_405b_gqa | Llama-3.1-405B | gqa_attention | 3.25 | 84.50 |
-| llama3_8b_swiglu | Llama-3.1-8B | swiglu_mlp | 1.11 | 648.27 |
-| llama3_70b_swiglu | Llama-3.1-70B | swiglu_mlp | 4.10 | 703.70 |
-| llama3_405b_swiglu | Llama-3.1-405B | swiglu_mlp | 14.57 | 735.94 |
+| llama3_8b_gqa | Llama-3.1-8B | gqa_attention | 0.88 | 77.94 |
+| llama3_70b_gqa | Llama-3.1-70B | gqa_attention | 1.65 | 83.05 |
+| llama3_405b_gqa | Llama-3.1-405B | gqa_attention | 3.24 | 84.94 |
+| llama3_8b_swiglu | Llama-3.1-8B | swiglu_mlp | 1.08 | 665.21 |
+| llama3_70b_swiglu | Llama-3.1-70B | swiglu_mlp | 4.05 | 711.79 |
+| llama3_405b_swiglu | Llama-3.1-405B | swiglu_mlp | 14.54 | 737.30 |
 | llama3_8b_rope | Llama-3.1-8B | rope | 0.15 | 0.22 |
-| llama3_70b_rope | Llama-3.1-70B | rope | 0.20 | 0.34 |
+| llama3_70b_rope | Llama-3.1-70B | rope | 0.19 | 0.35 |
 | llama3_8b_rmsnorm | Llama-3.1-8B | rmsnorm | 0.15 | 0.22 |
-| llama3_70b_rmsnorm | Llama-3.1-70B | rmsnorm | 0.18 | 0.37 |
-| llama3_8b_token_embed | Llama-3.1-8B | token_embed | 0.20 | 5.47 |
-| gemma3_4b_sliding_window | Gemma-3-4B | sliding_window_attention | 0.37 | 92.85 |
-| gemma3_12b_sliding_window | Gemma-3-12B | sliding_window_attention | 0.66 | 104.77 |
-| gemma3_27b_sliding_window | Gemma-3-27B | sliding_window_attention | 1.13 | 68.57 |
-| gemma3_4b_global_attn | Gemma-3-4B | global_attention | 0.37 | 94.04 |
-| gemma3_12b_global_attn | Gemma-3-12B | global_attention | 0.66 | 104.77 |
-| gemma3_27b_global_attn | Gemma-3-27B | global_attention | 1.13 | 68.40 |
-| mixtral_8x7b_moe | Mixtral-8x7B | sparse_moe | 8.32 | 173.41 |
-| mixtral_8x22b_moe | Mixtral-8x22B | sparse_moe | 13.85 | 178.70 |
-| deepseek_v3_mla | DeepSeek-V3-671B | mla_attention | 4.44 | 265.75 |
-| deepseek_v3_yarn_rope | DeepSeek-V3-671B | yarn_rope | 1.35 | 0.20 |
-| qwen3_8b_gqa | Qwen3-8B | gqa_attention | 0.89 | 76.88 |
-| qwen3_14b_gqa | Qwen3-14B | gqa_attention | 1.11 | 77.65 |
-| qwen3_8b_swiglu | Qwen3-8B | swiglu_mlp | 1.09 | 663.81 |
-| qwen3_moe_30b_moe | Qwen3-MoE-30B-A3B | sparse_moe_shared | 7.56 | 450.11 |
-| llama4_scout_gqa | Llama-4-Scout-109B | gqa_attention | 1.27 | 80.86 |
-| llama4_scout_moe | Llama-4-Scout-109B | sparse_moe_top1 | 12.17 | 677.76 |
-| llama4_maverick_moe | Llama-4-Maverick-400B | sparse_moe_top1 | 49.91 | 660.91 |
-| llama4_scout_rope | Llama-4-Scout-109B | rope | 0.18 | 0.41 |
+| llama3_70b_rmsnorm | Llama-3.1-70B | rmsnorm | 0.18 | 0.38 |
+| llama3_8b_token_embed | Llama-3.1-8B | token_embed | 0.19 | 5.64 |
+| gemma3_4b_sliding_window | Gemma-3-4B | sliding_window_attention | 0.37 | 93.17 |
+| gemma3_12b_sliding_window | Gemma-3-12B | sliding_window_attention | 0.65 | 105.24 |
+| gemma3_27b_sliding_window | Gemma-3-27B | sliding_window_attention | 1.12 | 68.82 |
+| gemma3_4b_global_attn | Gemma-3-4B | global_attention | 0.36 | 94.58 |
+| gemma3_12b_global_attn | Gemma-3-12B | global_attention | 0.65 | 105.80 |
+| gemma3_27b_global_attn | Gemma-3-27B | global_attention | 1.13 | 68.41 |
+| mixtral_8x7b_moe | Mixtral-8x7B | sparse_moe | 8.25 | 174.87 |
+| mixtral_8x22b_moe | Mixtral-8x22B | sparse_moe | 13.80 | 179.35 |
+| deepseek_v3_mla | DeepSeek-V3-671B | mla_attention | 4.47 | 263.82 |
+| deepseek_v3_yarn_rope | DeepSeek-V3-671B | yarn_rope | 1.37 | 0.20 |
+| qwen3_8b_gqa | Qwen3-8B | gqa_attention | 0.88 | 78.38 |
+| qwen3_14b_gqa | Qwen3-14B | gqa_attention | 1.10 | 77.89 |
+| qwen3_8b_swiglu | Qwen3-8B | swiglu_mlp | 1.08 | 667.81 |
+| qwen3_moe_30b_moe | Qwen3-MoE-30B-A3B | sparse_moe_shared | 7.54 | 451.14 |
+| llama4_scout_gqa | Llama-4-Scout-109B | gqa_attention | 1.27 | 80.90 |
+| llama4_scout_moe | Llama-4-Scout-109B | sparse_moe_top1 | 12.07 | 683.39 |
+| llama4_maverick_moe | Llama-4-Maverick-400B | sparse_moe_top1 | 49.52 | 666.08 |
+| llama4_scout_rope | Llama-4-Scout-109B | rope | 0.17 | 0.44 |
+| **performer_favor** | **Performer** | **favor_plus_linear_attention** | **0.26** | **32.42** |
+| **bloom_7b_alibi** | **BLOOM-7B1** | **alibi_causal_attention** | **1.16** | **59.01** |
+| **t5_relative_attention** | **T5-Base** | **relative_position_attention** | **12.36** | **1.04** |
+| **t5_cross_attention** | **T5-Base** | **cross_attention** | **0.18** | **18.17** |
+| **bigbird_block_sparse** | **BigBird-RoBERTa** | **block_sparse_attention** | **0.97** | **8.01** |
+| **diff_transformer_6.8b** | **DIFF-Transformer-6.8B** | **differential_attention** | **1.69** | **40.59** |
+| **falcon_7b_mqa** | **Falcon-7B** | **multi_query_attention** | **1.54** | **49.47** |
 
 ### tokamax — 12 TPU kernel benchmarks
 
@@ -56,18 +63,18 @@ Production model configurations from [openxla/tokamax](https://github.com/openxl
 
 | Workload | Model | Operator | Time (ms) | TFLOPS |
 |----------|-------|----------|----------:|-------:|
-| mixtral_8x7b_attention | Mixtral-8x7B | gqa_causal_attention | 0.87 | 79.05 |
-| deepseek2_16b_attention | DeepSeek-V2-Lite-16B | causal_attention | 0.17 | 74.85 |
-| mixtral_8x7b_ragged_dot | Mixtral-8x7B | ragged_dot | 1.37 | 702.08 |
-| llama3_8b_cross_entropy | Llama-3.1-8B | fused_cross_entropy | 7.69 | 559.59 |
-| qwen3_8b_cross_entropy | Qwen3-8B | fused_cross_entropy | 8.66 | 589.24 |
-| gemma3_4b_cross_entropy | Gemma3-4B | fused_cross_entropy | 9.74 | 564.98 |
-| llama3_8b_swiglu | Llama-3.1-8B | swiglu | 1.08 | 667.86 |
-| llama3_70b_swiglu | Llama-3.1-70B | swiglu | 4.09 | 705.12 |
+| mixtral_8x7b_attention | Mixtral-8x7B | gqa_causal_attention | 0.87 | 78.79 |
+| deepseek2_16b_attention | DeepSeek-V2-Lite-16B | causal_attention | 0.18 | 72.86 |
+| mixtral_8x7b_ragged_dot | Mixtral-8x7B | ragged_dot | 1.37 | 700.00 |
+| llama3_8b_cross_entropy | Llama-3.1-8B | fused_cross_entropy | 7.66 | 562.36 |
+| qwen3_8b_cross_entropy | Qwen3-8B | fused_cross_entropy | 8.63 | 591.07 |
+| gemma3_4b_cross_entropy | Gemma3-4B | fused_cross_entropy | 9.68 | 568.39 |
+| llama3_8b_swiglu | Llama-3.1-8B | swiglu | 1.08 | 668.02 |
+| llama3_70b_swiglu | Llama-3.1-70B | swiglu | 4.07 | 708.81 |
 | llama3_8b_rmsnorm | Llama-3.1-8B | rmsnorm | 0.15 | 0.22 |
-| llama3_70b_rmsnorm | Llama-3.1-70B | rmsnorm | 0.18 | 0.38 |
-| alphafold_384_triangle_mult | AlphaFold2 | triangle_mult_incoming | 0.29 | 50.81 |
-| alphafold_768_triangle_mult | AlphaFold2 | triangle_mult_outgoing | 1.32 | 65.87 |
+| llama3_70b_rmsnorm | Llama-3.1-70B | rmsnorm | 0.18 | 0.37 |
+| alphafold_384_triangle_mult | AlphaFold2 | triangle_mult_incoming | 0.29 | 50.05 |
+| alphafold_768_triangle_mult | AlphaFold2 | triangle_mult_outgoing | 1.31 | 66.58 |
 
 ### jaxkernelbench — 200 LLM-translated operators
 
@@ -141,13 +148,14 @@ JAXBench/
 ├── jaxkernelbench/       # 200 LLM-translated PyTorch→JAX operators
 │   ├── level1/           # 100 single operators
 │   └── level2/           # 100 fused operators
-├── real_workloads/       # 29 hand-written ops from 6 LLM architectures
+├── real_workloads/       # 36 hand-written ops from 7 LLM families + attention variants
 │   ├── llama3/           # 11 workloads
 │   ├── llama4/           # 4 workloads
 │   ├── gemma3/           # 6 workloads
 │   ├── qwen3/            # 4 workloads
 │   ├── mixtral/          # 2 workloads
 │   ├── deepseek_v3/      # 3 workloads (deepseek_v3_moe OOM on single TPU)
+│   ├── attention_variants/ # 7 workloads (FAVOR+, ALiBi, T5, BigBird, Diff, MQA)
 │   └── run_benchmarks.py
 ├── tokamax/              # 12 workloads from openxla/tokamax
 │   ├── attention/        # 2 workloads

@@ -3,7 +3,7 @@
     "description": "JAXBench benchmark results — all suites, TPU v6e-1",
     "hardware": "TPU v6e-1 (preemptible)",
     "jax_version": "0.6.2",
-    "last_updated": "2026-02-26"
+    "last_updated": "2026-03-02"
   },
   "suites": {
     "jaxkernelbench": {
@@ -1425,10 +1425,10 @@
       }
     },
     "real_workloads": {
-      "description": "Hand-written JAX operators from 6 modern LLM families",
+      "description": "Hand-written JAX operators from 7 modern LLM families + 7 attention variants",
       "source": "AI-Hypercomputer/maxtext",
-      "total": 30,
-      "succeeded": 29,
+      "total": 37,
+      "succeeded": 36,
       "workloads": [
         {
           "name": "llama3_8b_gqa",
@@ -1630,8 +1630,57 @@
           "name": "llama4_scout_rope",
           "model": "Llama-4-Scout-109B",
           "operator": "rope",
-          "time_ms": 0.1843,
-          "tflops": 0.41
+          "time_ms": 0.1725,
+          "tflops": 0.44
+        },
+        {
+          "name": "performer_favor_attention",
+          "model": "Performer",
+          "operator": "favor_plus_linear_attention",
+          "time_ms": 0.2649,
+          "tflops": 32.42
+        },
+        {
+          "name": "bloom_7b_alibi_attention",
+          "model": "BLOOM-7B1",
+          "operator": "alibi_causal_attention",
+          "time_ms": 1.1646,
+          "tflops": 59.01
+        },
+        {
+          "name": "t5_base_relative_attention",
+          "model": "T5-Base",
+          "operator": "relative_position_attention",
+          "time_ms": 12.3578,
+          "tflops": 1.04
+        },
+        {
+          "name": "t5_base_cross_attention",
+          "model": "T5-Base",
+          "operator": "cross_attention",
+          "time_ms": 0.1773,
+          "tflops": 18.17
+        },
+        {
+          "name": "bigbird_block_sparse_attention",
+          "model": "BigBird-RoBERTa-Base",
+          "operator": "block_sparse_attention",
+          "time_ms": 0.9674,
+          "tflops": 8.01
+        },
+        {
+          "name": "diff_transformer_6_8b_attention",
+          "model": "DIFF-Transformer-6.8B",
+          "operator": "differential_attention",
+          "time_ms": 1.6928,
+          "tflops": 40.59
+        },
+        {
+          "name": "falcon_7b_mqa_attention",
+          "model": "Falcon-7B",
+          "operator": "multi_query_attention",
+          "time_ms": 1.541,
+          "tflops": 49.47
         }
       ]
     },
