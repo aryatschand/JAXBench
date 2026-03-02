@@ -1,13 +1,13 @@
 {
   "metadata": {
-    "description": "JAXBench benchmark results — all suites, TPU v6e-1",
+    "description": "JAXBench benchmark results \u2014 all suites, TPU v6e-1",
     "hardware": "TPU v6e-1 (preemptible)",
     "jax_version": "0.6.2",
     "last_updated": "2026-03-02"
   },
   "suites": {
     "jaxkernelbench": {
-      "description": "LLM-translated PyTorch→JAX operators from KernelBench",
+      "description": "LLM-translated PyTorch\u2192JAX operators from KernelBench",
       "source": "ScalingIntelligence/KernelBench",
       "levels": {
         "level1": {
@@ -1425,10 +1425,10 @@
       }
     },
     "real_workloads": {
-      "description": "Hand-written JAX operators from 7 modern LLM families + 7 attention variants",
+      "description": "Hand-written JAX operators from 7 modern LLM families + 5 attention variants",
       "source": "AI-Hypercomputer/maxtext",
-      "total": 37,
-      "succeeded": 36,
+      "total": 34,
+      "succeeded": 34,
       "workloads": [
         {
           "name": "llama3_8b_gqa",
@@ -1634,53 +1634,115 @@
           "tflops": 0.44
         },
         {
-          "name": "performer_favor_attention",
-          "model": "Performer",
-          "operator": "favor_plus_linear_attention",
-          "time_ms": 0.2649,
-          "tflops": 32.42
+          "name": "causal_linear_attention",
+          "model": "LinearAttn-1.3B",
+          "operator": "causal_linear_attention",
+          "config": {
+            "batch": 1,
+            "seq_len": 2048,
+            "num_heads": 16,
+            "head_dim": 64
+          },
+          "time_ms": 33.1366,
+          "std_ms": 0.0131,
+          "tflops": 0.02,
+          "output_shape": [
+            1,
+            16,
+            2048,
+            64
+          ],
+          "status": "success"
         },
         {
-          "name": "bloom_7b_alibi_attention",
-          "model": "BLOOM-7B1",
-          "operator": "alibi_causal_attention",
-          "time_ms": 1.1646,
-          "tflops": 59.01
+          "name": "retnet_6_7b_retention",
+          "model": "RetNet-6.7B",
+          "operator": "multi_scale_retention",
+          "config": {
+            "batch": 1,
+            "seq_len": 2048,
+            "num_heads": 16,
+            "head_dim": 256,
+            "d_model": 4096
+          },
+          "time_ms": 0.5172,
+          "std_ms": 0.004,
+          "tflops": 132.86,
+          "output_shape": [
+            1,
+            16,
+            2048,
+            256
+          ],
+          "status": "success"
         },
         {
-          "name": "t5_base_relative_attention",
-          "model": "T5-Base",
-          "operator": "relative_position_attention",
-          "time_ms": 12.3578,
-          "tflops": 1.04
+          "name": "mamba2_2_7b_ssd",
+          "model": "Mamba-2-2.7B",
+          "operator": "state_space_duality",
+          "config": {
+            "batch": 1,
+            "seq_len": 2048,
+            "num_heads": 64,
+            "head_dim": 64,
+            "d_state": 128,
+            "d_model": 2560
+          },
+          "time_ms": 1.81,
+          "std_ms": 0.4575,
+          "tflops": 37.97,
+          "output_shape": [
+            1,
+            64,
+            2048,
+            64
+          ],
+          "status": "success"
         },
         {
-          "name": "t5_base_cross_attention",
-          "model": "T5-Base",
-          "operator": "cross_attention",
-          "time_ms": 0.1773,
-          "tflops": 18.17
-        },
-        {
-          "name": "bigbird_block_sparse_attention",
-          "model": "BigBird-RoBERTa-Base",
-          "operator": "block_sparse_attention",
-          "time_ms": 0.9674,
-          "tflops": 8.01
+          "name": "gla_1_3b_attention",
+          "model": "GLA-1.3B",
+          "operator": "gated_linear_attention",
+          "config": {
+            "batch": 1,
+            "seq_len": 2048,
+            "num_heads": 16,
+            "head_dim": 128,
+            "gate_dim": 16,
+            "d_model": 2048
+          },
+          "time_ms": 0.4877,
+          "std_ms": 0.0045,
+          "tflops": 70.46,
+          "output_shape": [
+            1,
+            16,
+            2048,
+            128
+          ],
+          "status": "success"
         },
         {
           "name": "diff_transformer_6_8b_attention",
           "model": "DIFF-Transformer-6.8B",
           "operator": "differential_attention",
-          "time_ms": 1.6928,
-          "tflops": 40.59
-        },
-        {
-          "name": "falcon_7b_mqa_attention",
-          "model": "Falcon-7B",
-          "operator": "multi_query_attention",
-          "time_ms": 1.541,
-          "tflops": 49.47
+          "config": {
+            "batch": 1,
+            "seq_len": 2048,
+            "num_heads": 32,
+            "head_dim": 128,
+            "d_model": 4096
+          },
+          "time_ms": 1.6847,
+          "std_ms": 0.0814,
+          "tflops": 40.79,
+          "output_shape": [
+            1,
+            2048,
+            32,
+            128
+          ],
+          "status": "success"
         }
       ]
     },

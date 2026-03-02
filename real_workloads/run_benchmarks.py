@@ -70,6 +70,13 @@ WORKLOAD_MAP = {
         "llama4_maverick_moe.py",
         "llama4_scout_rope.py",
     ],
+    "attention_variants": [
+        "linear_attention.py",
+        "retnet_retention.py",
+        "mamba2_ssd.py",
+        "gated_linear_attention.py",
+        "differential_attention.py",
+    ],
 }
 
 WORKLOADS_DIR = Path(__file__).resolve().parent
