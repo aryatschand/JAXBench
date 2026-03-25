@@ -59,11 +59,10 @@ def workload(query, key, value, A_log):
     log_a = jnp.log(a + 1e-8)  # (B, H, S)
     log_a_cumsum = jnp.cumsum(log_a, axis=-1)  # (B, H, S)
 
-    # L[i,j] = exp(cumsum[i] - cumsum[j]) for i >= j
-    L = jnp.exp(log_a_cumsum[:, :, :, None] - log_a_cumsum[:, :, None, :])  # (B, H, S, S)
-    # Apply causal mask
-    causal = jnp.tril(jnp.ones((S, S), dtype=jnp.float32))
-    L = L * causal[None, None, :, :]
+    # L[i,j] = exp(cumsum[i] - cumsum[j]) for i >= j, 0 for i < j
+    diff = log_a_cumsum[:, :, :, None] - log_a_cumsum[:, :, None, :]
+    causal = jnp.tril(jnp.ones((S, S), dtype=jnp.bool_))
+    L = jnp.exp(jnp.where(causal[None, None, :, :], diff, -1e30))
 
     # SSD attention: (L ⊙ CB^T) x
     # CB^T: (B, H, S, S) — "attention scores"
