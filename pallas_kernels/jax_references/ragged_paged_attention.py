@@ -1,4 +1,4 @@
-"""JAX reference for Pallas ragged paged attention — Llama-3.1-8B mixed prefill+decode.
+"""JAX reference for Pallas ragged paged attention — Llama-3.1-70B mixed prefill+decode.
 
 Adapted from ref_ragged_paged_attention in
 jax/experimental/pallas/ops/tpu/ragged_paged_attention/kernel.py.
@@ -14,12 +14,12 @@ import jax.numpy as jnp
 DEFAULT_MASK_VALUE = -0.7 * float(jnp.finfo(jnp.dtype("float32")).max)
 
 CONFIG = {
-    'name': 'pallas_ragged_paged_attention_llama8b',
-    'model': 'Llama-3.1-8B',
+    'name': 'pallas_ragged_paged_attention_llama70b',
+    'model': 'Llama-3.1-70B',
     'operator': 'pallas_ragged_paged_attention',
     'max_num_batched_tokens': 2048,
     'max_num_seqs': 32,
-    'num_q_heads': 32,
+    'num_q_heads': 64,
     'num_kv_heads': 8,
     'head_dim': 128,
     'page_size': 16,

@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Pallas Ragged Paged Attention kernel — Llama-3.1-8B mixed prefill+decode.
+"""Pallas Ragged Paged Attention kernel — Llama-3.1-70B mixed prefill+decode.
 
 Upstream kernel from jax.experimental.pallas.ops.tpu.ragged_paged_attention,
 wrapped as a JAXBench workload with CONFIG / create_inputs / workload.
@@ -908,12 +908,12 @@ import math
 
 
 CONFIG = {
-    'name': 'pallas_ragged_paged_attention_llama8b',
-    'model': 'Llama-3.1-8B',
+    'name': 'pallas_ragged_paged_attention_llama70b',
+    'model': 'Llama-3.1-70B',
     'operator': 'pallas_ragged_paged_attention',
     'max_num_batched_tokens': 2048,
     'max_num_seqs': 32,
-    'num_q_heads': 32,
+    'num_q_heads': 64,
     'num_kv_heads': 8,
     'head_dim': 128,
     'page_size': 16,
