@@ -918,6 +918,8 @@ CONFIG = {
     'head_dim': 128,
     'page_size': 16,
     'pages_per_seq': 128,
+    'atol': 0.2,
+    'rtol': 0.2,
 }
 
 

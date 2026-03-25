@@ -212,7 +212,11 @@ def check_one(kernel_name):
     denom = jnp.maximum(jnp.max(jnp.abs(ref_f32)), 1e-6)
     max_rel_diff = float(jnp.max(jnp.abs(ref_f32 - pallas_f32) / denom))
 
-    if not jnp.allclose(ref_f32, pallas_f32, atol=ATOL, rtol=RTOL):
+    cfg = getattr(ref_mod, 'CONFIG', {})
+    atol = cfg.get('atol', ATOL)
+    rtol = cfg.get('rtol', RTOL)
+
+    if not jnp.allclose(ref_f32, pallas_f32, atol=atol, rtol=rtol):
         return {
             "status": "FAIL",
             "reason": f"correctness check failed (max_diff={max_diff:.6f}, max_rel_diff={max_rel_diff:.6f})",

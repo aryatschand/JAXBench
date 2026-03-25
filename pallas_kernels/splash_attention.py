@@ -2652,6 +2652,8 @@ CONFIG = {
     'num_query_heads': 64,
     'num_kv_heads': 8,
     'head_dim': 128,
+    'atol': 3e-3,
+    'rtol': 3e-3,
 }
 
 

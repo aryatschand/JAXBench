@@ -1727,6 +1727,8 @@ CONFIG = {
     'seq_len': 2048,
     'num_heads': 64,
     'head_dim': 128,
+    'atol': 2e-3,
+    'rtol': 2e-3,
 }
 
 

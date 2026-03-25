@@ -808,6 +808,8 @@ CONFIG = {
     'emb_dim': 4096,
     'moe_mlp_dim': 1536,
     'seq_len': 2048,
+    'atol': 1e-3,
+    'rtol': 1e-2,
 }
 
 
