@@ -40,22 +40,22 @@ def workload(x, Wq, Wk, Wv, Wo):
     H_q, H_kv, D_h = CONFIG['num_query_heads'], CONFIG['num_kv_heads'], CONFIG['head_dim']
     num_q_per_kv = H_q // H_kv
 
-    q = jnp.dot(x, Wq).reshape(B, S, H_q, D_h).transpose(0, 2, 1, 3)       # (B, H_q, S, D)
-    k = jnp.dot(x, Wk).reshape(B, S, H_kv, D_h).transpose(0, 2, 1, 3)      # (B, H_kv, S, D)
-    v = jnp.dot(x, Wv).reshape(B, S, H_kv, D_h).transpose(0, 2, 1, 3)      # (B, H_kv, S, D)
+    # dot_product_attention expects (B, S, H, D) layout
+    q = jnp.dot(x, Wq).reshape(B, S, H_q, D_h)        # (B, S, H_q, D)
+    k = jnp.dot(x, Wk).reshape(B, S, H_kv, D_h)       # (B, S, H_kv, D)
+    v = jnp.dot(x, Wv).reshape(B, S, H_kv, D_h)       # (B, S, H_kv, D)
 
-    # Expand KV heads to match query heads for dot_product_attention
-    k = jnp.repeat(k, num_q_per_kv, axis=1)  # (B, H_q, S, D)
-    v = jnp.repeat(v, num_q_per_kv, axis=1)
+    # Expand KV heads to match query heads
+    k = jnp.repeat(k, num_q_per_kv, axis=2)  # (B, S, H_q, D)
+    v = jnp.repeat(v, num_q_per_kv, axis=2)
 
     # Use optimized attention
     attn_out = jax.nn.dot_product_attention(
         q, k, v,
         is_causal=True,
-        scale=D_h ** -0.5,
-    )  # (B, H_q, S, D)
+    )  # (B, S, H_q, D)
 
-    attn_out = attn_out.transpose(0, 2, 1, 3).reshape(B, S, H_q * D_h)
+    attn_out = attn_out.reshape(B, S, H_q * D_h)
     return jnp.dot(attn_out, Wo)
 
 

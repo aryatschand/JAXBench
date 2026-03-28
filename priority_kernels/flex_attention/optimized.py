@@ -42,11 +42,19 @@ def workload(q, k, v, rel_pos_bias):
     bias = rel_pos_bias + causal_bias  # (H, S, S)
     bias = bias[None, :, :, :]  # (1, H, S, S)
 
-    return jax.nn.dot_product_attention(
-        q, k, v,
+    # dot_product_attention expects (B, S, H, D)
+    q_t = q.transpose(0, 2, 1, 3)  # (B, S, H, D)
+    k_t = k.transpose(0, 2, 1, 3)
+    v_t = v.transpose(0, 2, 1, 3)
+    # bias shape: (1, H, S, S) -> (1, S, H, S) won't work;
+    # bias must be broadcastable to (B, S, H, S) or (B, H, S, S)
+    # Actually for dot_product_attention bias is (B, num_heads, q_len, kv_len)
+    # so we keep (1, H, S, S) and pass it directly
+    out = jax.nn.dot_product_attention(
+        q_t, k_t, v_t,
         bias=bias,
-        scale=CONFIG['head_dim'] ** -0.5,
     )
+    return out.transpose(0, 2, 1, 3)  # (B, H, S, D)
 
 
 def benchmark(num_warmup=5, num_iters=100):

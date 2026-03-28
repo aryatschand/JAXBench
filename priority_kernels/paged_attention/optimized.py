@@ -60,16 +60,15 @@ def workload(queries, k_pages, v_pages, kv_lens, page_indices, cu_q_lens):
         # Expand for GQA
         k = jnp.repeat(k, num_q_per_kv, axis=1)
         v = jnp.repeat(v, num_q_per_kv, axis=1)
-        # Reshape to (1, H, S, D) for dot_product_attention
-        q_4d = q[:, None, :, :].transpose(0, 2, 1, 3)       # (1, H_q, 1, D)
-        k_4d = k[None].transpose(0, 2, 1, 3)                 # (1, H_q, S, D)
-        v_4d = v[None].transpose(0, 2, 1, 3)                 # (1, H_q, S, D)
+        # dot_product_attention expects (B, S, H, D)
+        q_4d = q[None]                  # (1, 1, H_q, D) — 1 query token
+        k_4d = k[None]                  # (1, S, H_q, D)
+        v_4d = v[None]                  # (1, S, H_q, D)
         # No causal mask needed for decode (single query token attends to all KV)
         out = jax.nn.dot_product_attention(
             q_4d, k_4d, v_4d,
-            scale=head_dim ** -0.5,
-        )  # (1, H_q, 1, D)
-        return out[0, :, 0, :]  # (H_q, D)
+        )  # (1, 1, H_q, D)
+        return out[0, 0, :, :]  # (H_q, D)
 
     outputs = jax.vmap(attend_one_seq)(jnp.arange(num_seqs))
     return outputs

@@ -24,7 +24,7 @@ def create_inputs(dtype=jnp.bfloat16):
     G, M, K, N = CONFIG['num_groups'], CONFIG['M'], CONFIG['K'], CONFIG['N']
     tokens_per_group = M // G
     # Pre-shaped as (G, tokens_per_group, K) for batched matmul
-    lhs = jax.random.normal(k1, (G, tokens_per_group, K), dtype=dtype) * 0.02
+    lhs = jax.random.normal(k1, (G, tokens_per_group, K), dtype=dtype)
     rhs = jax.random.normal(k2, (G, K, N), dtype=dtype) * 0.02
     return lhs, rhs
 

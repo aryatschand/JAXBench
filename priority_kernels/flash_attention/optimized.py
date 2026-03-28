@@ -23,18 +23,24 @@ def create_inputs(dtype=jnp.bfloat16):
     k1, k2, k3 = jax.random.split(key, 3)
     B, S, H, D = CONFIG['batch'], CONFIG['seq_len'], CONFIG['num_heads'], CONFIG['head_dim']
     q = jax.random.normal(k1, (B, H, S, D), dtype=dtype)
-    k = jax.random.normal(k2, (B, H, S, D), dtype=dtype) * 0.02
-    v = jax.random.normal(k3, (B, H, S, D), dtype=dtype) * 0.02
+    k = jax.random.normal(k2, (B, H, S, D), dtype=dtype)
+    v = jax.random.normal(k3, (B, H, S, D), dtype=dtype)
     return q, k, v
 
 
 def workload(query, key, value):
-    """Optimized causal MHA using jax.nn.dot_product_attention."""
-    return jax.nn.dot_product_attention(
-        query, key, value,
-        is_causal=True,
-        scale=CONFIG['head_dim'] ** -0.5,
-    )
+    """Optimized causal MHA using jax.nn.dot_product_attention.
+
+    dot_product_attention expects (B, S, H, D) layout, so we transpose
+    from the standard (B, H, S, D) used by the baseline.
+    """
+    # (B, H, S, D) -> (B, S, H, D)
+    q = query.transpose(0, 2, 1, 3)
+    k = key.transpose(0, 2, 1, 3)
+    v = value.transpose(0, 2, 1, 3)
+    out = jax.nn.dot_product_attention(q, k, v, is_causal=True)
+    # (B, S, H, D) -> (B, H, S, D)
+    return out.transpose(0, 2, 1, 3)
 
 
 def benchmark(num_warmup=5, num_iters=100):

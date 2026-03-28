@@ -38,19 +38,21 @@ def workload(q, k, v):
     H_kv = CONFIG['num_kv_heads']
     num_q_per_kv = H_q // H_kv
 
-    # Expand KV heads and add batch dim for dot_product_attention: (1, H, S, D)
-    k = jnp.repeat(k, num_q_per_kv, axis=0)
+    # Expand KV heads
+    k = jnp.repeat(k, num_q_per_kv, axis=0)  # (H_q, S, D)
     v = jnp.repeat(v, num_q_per_kv, axis=0)
 
-    q = q[None]  # (1, H_q, S, D)
-    k = k[None]
-    v = v[None]
+    # dot_product_attention expects (B, S, H, D)
+    # Input is (H, S, D) -> transpose to (S, H, D) -> add batch -> (1, S, H, D)
+    q_bshd = q.transpose(1, 0, 2)[None]  # (1, S, H_q, D)
+    k_bshd = k.transpose(1, 0, 2)[None]
+    v_bshd = v.transpose(1, 0, 2)[None]
 
     out = jax.nn.dot_product_attention(
-        q, k, v,
+        q_bshd, k_bshd, v_bshd,
         is_causal=True,
-    )
-    return out[0]  # (H_q, S, D)
+    )  # (1, S, H_q, D)
+    return out[0].transpose(1, 0, 2)  # (H_q, S, D)
 
 
 def benchmark(num_warmup=5, num_iters=100):

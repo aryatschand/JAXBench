@@ -79,19 +79,18 @@ def workload(x, W_dq, W_uq, W_dkv, W_uk, W_uv, W_o, rope_cos, rope_sin):
         rope_cos[None, :, None, :], rope_sin[None, :, None, :]
     )
 
-    # Concatenate q and k components
-    q = jnp.concatenate([q_nope, q_rope], axis=-1).transpose(0, 2, 1, 3)  # (B, H, S, d_nope+d_rope)
-    k = jnp.concatenate([k_nope, k_rope], axis=-1).transpose(0, 2, 1, 3)  # (B, H, S, d_nope+d_rope)
-    v = v.transpose(0, 2, 1, 3)  # (B, H, S, d_v)
+    # Concatenate q and k components — keep (B, S, H, D) layout for dot_product_attention
+    q = jnp.concatenate([q_nope, q_rope], axis=-1)  # (B, S, H, d_nope+d_rope)
+    k = jnp.concatenate([k_nope, k_rope], axis=-1)  # (B, S, H, d_nope+d_rope)
+    # v already (B, S, H, d_v)
 
     # Optimized attention
     attn_out = jax.nn.dot_product_attention(
         q, k, v,
         is_causal=True,
-        scale=(d_nope + d_rope) ** -0.5,
-    )  # (B, H, S, d_v)
+    )  # (B, S, H, d_v)
 
-    attn_out = attn_out.transpose(0, 2, 1, 3).reshape(B, S, H * d_v)
+    attn_out = attn_out.reshape(B, S, H * d_v)
     return jnp.dot(attn_out, W_o)
 
 
