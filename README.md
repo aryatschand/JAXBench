@@ -6,34 +6,44 @@ All benchmarks run on **TPU v6e-1** with **JAX 0.6.2**. Full results in [`benchm
 
 ## Benchmark Suites
 
-| Suite | Workloads | Source | Description |
-|-------|-----------|--------|-------------|
-| [priority_kernels/](priority_kernels/) | 10 | Hand-written | Core LLM operator baselines (attention, MLP, MoE, SSM) |
-| [pallas_kernels/](pallas_kernels/) | 6 | [JAX 0.6.2 Pallas](https://github.com/jax-ml/jax) | Upstream Pallas TPU kernels for optimization |
-| [jaxkernelbench/](jaxkernelbench/) | 200 | [KernelBench](https://github.com/ScalingIntelligence/KernelBench) | LLM-translated PyTorch→JAX operators |
+| Suite | Workloads | Variants | Description |
+|-------|-----------|----------|-------------|
+| [priority_kernels/](priority_kernels/) | 17 | baseline + optimized + pallas | Core LLM operators with multi-tier optimization benchmarks |
+| [pallas_kernels/](pallas_kernels/) | 6 | — | Upstream Pallas TPU kernels from JAX 0.6.2 (reference source) |
+| [jaxkernelbench/](jaxkernelbench/) | 200 | — | LLM-translated PyTorch→JAX operators |
 
 ---
 
-### priority_kernels — 10 core LLM operator benchmarks
+### priority_kernels — 17 core LLM operator benchmarks
 
-Production-scale operator shapes from modern LLM architectures covering attention variants, MLPs, MoE, cross-entropy, and state-space models.
+Each workload has up to 3 implementation variants for optimization comparison:
+- **baseline** — vanilla JAX (the unoptimized reference)
+- **optimized** — JAX with library imports (e.g., `jax.nn.dot_product_attention`) and tuned parameters
+- **pallas** — upstream Pallas TPU kernel from JAX 0.6.2
 
-| Workload | Model | Operator | Time (ms) | TFLOPS |
+| Workload | Model | Variants | Baseline (ms) | TFLOPS |
 |----------|-------|----------|----------:|-------:|
-| gemm_llama70b | Llama-3.1-70B | dense_matmul | 5.44 | 707.81 |
-| flash_attention_baseline | Baseline-MHA | causal_mha | 2.83 | 97.16 |
-| llama3_405b_gqa | Llama-3.1-405B | gqa_attention | 3.26 | 84.42 |
-| llama3_70b_swiglu | Llama-3.1-70B | swiglu_mlp | 4.07 | 708.40 |
-| mixtral_8x7b_moe | Mixtral-8x7B | sparse_moe | 8.31 | 173.74 |
-| llama3_8b_cross_entropy | Llama-3.1-8B | fused_cross_entropy | 7.65 | 562.51 |
-| deepseek_v3_mla | DeepSeek-V3-671B | mla_attention | 4.46 | 264.00 |
-| mixtral_8x7b_ragged_dot | Mixtral-8x7B | ragged_dot | 1.36 | 705.26 |
-| retnet_6_7b_retention | RetNet-6.7B | multi_scale_retention | 0.52 | 132.51 |
-| mamba2_2_7b_ssd | Mamba-2-2.7B | state_space_duality | 1.80 | 38.13 |
+| [gemm](priority_kernels/gemm/) | Llama-3.1-70B | baseline, pallas | 5.44 | 707.81 |
+| [flash_attention](priority_kernels/flash_attention/) | Baseline-MHA | baseline, optimized, pallas | 2.83 | 97.16 |
+| [gqa_attention](priority_kernels/gqa_attention/) | Llama-3.1-405B | baseline, optimized | 3.26 | 84.42 |
+| [swiglu_mlp](priority_kernels/swiglu_mlp/) | Llama-3.1-70B | baseline | 4.07 | 708.40 |
+| [sparse_moe](priority_kernels/sparse_moe/) | Mixtral-8x7B | baseline, optimized, pallas | 8.31 | 173.74 |
+| [cross_entropy](priority_kernels/cross_entropy/) | Llama-3.1-8B | baseline | 7.65 | 562.51 |
+| [mla_attention](priority_kernels/mla_attention/) | DeepSeek-V3-671B | baseline, optimized | 4.46 | 264.00 |
+| [ragged_dot](priority_kernels/ragged_dot/) | Mixtral-8x7B | baseline, optimized | 1.36 | 705.26 |
+| [retnet_retention](priority_kernels/retnet_retention/) | RetNet-6.7B | baseline | 0.52 | 132.51 |
+| [mamba2_ssd](priority_kernels/mamba2_ssd/) | Mamba-2-2.7B | baseline | 1.80 | 38.13 |
+| [rms_norm](priority_kernels/rms_norm/) | Llama-3.1-70B | baseline | — | — |
+| [paged_attention](priority_kernels/paged_attention/) | Llama-3.1-70B | baseline, optimized, pallas | — | — |
+| [sparse_attention](priority_kernels/sparse_attention/) | Llama-3.1-70B | baseline, optimized, pallas | — | — |
+| [flex_attention](priority_kernels/flex_attention/) | Llama-3.1-70B | baseline, optimized | — | — |
+| [triangle_multiplication](priority_kernels/triangle_multiplication/) | AlphaFold2 | baseline | — | — |
+| [ragged_paged_attention](priority_kernels/ragged_paged_attention/) | Llama-3.1-70B | baseline, pallas | — | — |
+| [megablox_gmm](priority_kernels/megablox_gmm/) | Qwen3-235B | baseline, pallas | — | — |
 
 ### pallas_kernels — 6 upstream Pallas TPU kernels
 
-Kernels copied verbatim from JAX 0.6.2 with pure-JAX references for correctness verification.
+Kernels copied verbatim from JAX 0.6.2 with pure-JAX references for correctness verification. These serve as the source for `pallas.py` variants in priority_kernels.
 
 | Kernel | Model | Time (ms) |
 |--------|-------|----------:|
@@ -113,15 +123,25 @@ if __name__ == '__main__':
 
 ```
 JAXBench/
-├── priority_kernels/     # 10 core LLM operator baselines
-├── pallas_kernels/       # 6 upstream Pallas TPU kernels from JAX 0.6.2
-│   ├── jax_references/   # Pure-JAX references for correctness checks
+├── priority_kernels/           # 17 core LLM operators with multi-tier benchmarks
+│   ├── gemm/                   # Each workload folder contains:
+│   │   ├── baseline.py         #   Vanilla JAX implementation
+│   │   ├── optimized.py        #   JAX + library imports (where applicable)
+│   │   ├── pallas.py           #   Upstream Pallas kernel (where available)
+│   │   └── README.md           #   Kernel overview + benchmark results
+│   ├── flash_attention/
+│   ├── gqa_attention/
+│   ├── ... (17 workload folders)
+│   ├── run_benchmarks.py       # TPU benchmark orchestrator
+│   └── results.json
+├── pallas_kernels/             # 6 upstream Pallas TPU kernels from JAX 0.6.2
+│   ├── jax_references/         # Pure-JAX references for correctness checks
 │   └── check_references.py
-├── jaxkernelbench/       # 200 LLM-translated PyTorch→JAX operators
-│   ├── level1/           # 100 single operators
-│   └── level2/           # 100 fused operators
-├── torch_to_jax/         # Translation pipeline (PyTorch → JAX)
-├── benchmarks.json       # Benchmark results (TPU v6e-1)
+├── jaxkernelbench/             # 200 LLM-translated PyTorch→JAX operators
+│   ├── level1/                 # 100 single operators
+│   └── level2/                 # 100 fused operators
+├── torch_to_jax/               # Translation pipeline (PyTorch → JAX)
+├── benchmarks.json             # jaxkernelbench results (TPU v6e-1)
 ├── README.md
 ├── requirements.txt
 └── .gitignore

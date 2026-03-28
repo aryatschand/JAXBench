@@ -1,11 +1,13 @@
 """
 Benchmark runner for priority_kernels workloads on TPU.
 
-Discovers all 10 priority workload files, copies them to a TPU VM,
-runs each one, collects JSON results, and saves to priority_kernels/results.json.
+Discovers workload folders, each containing baseline.py (and optionally
+optimized.py, pallas.py), copies them to a TPU VM, runs each variant,
+collects JSON results, and saves to priority_kernels/results.json.
 
 Usage:
     python -m priority_kernels.run_benchmarks --tpu v6e-1 --keep-tpu
+    python -m priority_kernels.run_benchmarks --tpu v6e-1 --workload flash_attention --variant optimized
 """
 
 import argparse
@@ -26,20 +28,7 @@ from infrastructure.tpu_manager import TPUManager, SSH_KEY, SSH_USER
 
 logger = logging.getLogger("jaxbench.priority_kernels")
 
-# All 10 priority workload files (flat directory)
-WORKLOAD_FILES = [
-    "gemm.py",
-    "flash_attention.py",
-    "gqa_attention.py",
-    "swiglu_mlp.py",
-    "sparse_moe.py",
-    "cross_entropy.py",
-    "mla_attention.py",
-    "ragged_dot.py",
-    "retnet_retention.py",
-    "mamba2_ssd.py",
-]
-
+VARIANTS = ["baseline", "optimized", "pallas"]
 WORKLOADS_DIR = Path(__file__).resolve().parent
 REMOTE_DIR = "/tmp/jaxbench_priority_kernels"
 
@@ -59,12 +48,13 @@ def scp_file(local_path: str, remote_ip: str, remote_path: str, timeout: int = 3
         raise RuntimeError(f"SCP failed: {result.stderr}")
 
 
-def run_workload_on_tpu(tpu: TPUManager, filename: str, timeout: int = 300) -> dict:
-    """Run a single workload file on the TPU and parse JSON output."""
-    remote_file = f"{REMOTE_DIR}/{filename}"
+def run_workload_on_tpu(tpu: TPUManager, workload: str, variant: str,
+                        timeout: int = 300) -> dict:
+    """Run a single workload variant on the TPU and parse JSON output."""
+    remote_file = f"{REMOTE_DIR}/{workload}/{variant}.py"
     cmd = f"PJRT_DEVICE=TPU python3 {remote_file}"
 
-    logger.info(f"  Running {filename}...")
+    logger.info(f"  Running {workload}/{variant}...")
     start = time.time()
     output = tpu.run_ssh(cmd, timeout=timeout)
     elapsed = time.time() - start
@@ -74,6 +64,7 @@ def run_workload_on_tpu(tpu: TPUManager, filename: str, timeout: int = 300) -> d
     for line in reversed(lines):
         try:
             result = json.loads(line)
+            result['variant'] = variant
             logger.info(f"    OK ({elapsed:.1f}s) — {result.get('time_ms', '?')}ms")
             return result
         except json.JSONDecodeError:
@@ -82,26 +73,32 @@ def run_workload_on_tpu(tpu: TPUManager, filename: str, timeout: int = 300) -> d
     # Failed to parse
     error_msg = output.strip()[-500:] if output.strip() else "No output"
     logger.warning(f"    FAILED ({elapsed:.1f}s): {error_msg[:100]}")
-    name = filename.replace('.py', '')
     return {
-        'name': name,
+        'name': f"{workload}_{variant}",
+        'variant': variant,
         'status': 'error',
         'error': error_msg,
     }
 
 
-def discover_workloads(workload_filter=None) -> list:
-    """Return list of filenames for workloads on disk."""
-    available = []
-    for f in WORKLOAD_FILES:
-        local_path = WORKLOADS_DIR / f
-        if local_path.exists():
-            if workload_filter and f != f"{workload_filter}.py":
-                continue
-            available.append(f)
-        else:
-            logger.warning(f"Workload file not found: {f}")
-    return available
+def discover_workloads(workload_filter=None, variant_filter=None) -> list:
+    """Discover workload folders and their variants.
+
+    Returns list of (workload_name, variant_name, local_path) tuples.
+    """
+    discovered = []
+    for entry in sorted(WORKLOADS_DIR.iterdir()):
+        if not entry.is_dir() or entry.name.startswith(('_', '.')):
+            continue
+        if workload_filter and entry.name != workload_filter:
+            continue
+        for variant in VARIANTS:
+            variant_file = entry / f"{variant}.py"
+            if variant_file.exists():
+                if variant_filter and variant != variant_filter:
+                    continue
+                discovered.append((entry.name, variant, str(variant_file)))
+    return discovered
 
 
 def main():
@@ -111,7 +108,9 @@ def main():
     parser.add_argument("--keep-tpu", action="store_true", help="Keep TPU after benchmarks")
     parser.add_argument("--timeout", type=int, default=300, help="Per-workload timeout (s)")
     parser.add_argument("--output", default=None, help="Output JSON path")
-    parser.add_argument("--workload", default=None, help="Run only this workload (filename without .py)")
+    parser.add_argument("--workload", default=None, help="Run only this workload folder")
+    parser.add_argument("--variant", default=None, choices=VARIANTS,
+                        help="Run only this variant (baseline/optimized/pallas)")
     args = parser.parse_args()
 
     logging.basicConfig(
@@ -121,13 +120,17 @@ def main():
     )
 
     # Discover workloads
-    workloads = discover_workloads(workload_filter=args.workload)
+    tasks = discover_workloads(
+        workload_filter=args.workload,
+        variant_filter=args.variant,
+    )
 
-    if args.workload and not workloads:
-        logger.error(f"Workload {args.workload}.py not found.")
+    if not tasks:
+        logger.error("No workloads found matching filters.")
         sys.exit(1)
 
-    logger.info(f"Found {len(workloads)} workloads to benchmark")
+    workload_names = sorted(set(w for w, _, _ in tasks))
+    logger.info(f"Found {len(tasks)} tasks across {len(workload_names)} workloads")
 
     # Allocate TPU
     tpu = TPUManager(tpu_name=args.tpu_name, tpu_type=args.tpu)
@@ -136,16 +139,18 @@ def main():
         tpu.get_or_create_tpu()
         tpu.setup_environment()
 
-        # Create remote directory and install numpy
+        # Create remote directories and install numpy
         tpu.run_ssh(f"mkdir -p {REMOTE_DIR}")
+        for wname in workload_names:
+            tpu.run_ssh(f"mkdir -p {REMOTE_DIR}/{wname}")
         tpu.run_ssh("pip install -q numpy", timeout=60)
 
         # Copy all workload files to TPU
         logger.info("Copying workload files to TPU...")
-        for f in workloads:
-            local_path = str(WORKLOADS_DIR / f)
-            scp_file(local_path, tpu.tpu_ip, f"{REMOTE_DIR}/{f}")
-        logger.info(f"  Copied {len(workloads)} files")
+        for wname, variant, local_path in tasks:
+            remote_path = f"{REMOTE_DIR}/{wname}/{variant}.py"
+            scp_file(local_path, tpu.tpu_ip, remote_path)
+        logger.info(f"  Copied {len(tasks)} files")
 
         # Clear TPU state before benchmarking
         tpu.clear_tpu_state()
@@ -160,20 +165,23 @@ def main():
                 jax_version = line
                 break
 
-        # Run each workload
+        # Run each workload variant
         logger.info("=" * 60)
         logger.info("RUNNING PRIORITY KERNEL BENCHMARKS")
         logger.info("=" * 60)
-        results = []
+        results = {}  # workload -> {variant -> result}
         num_success = 0
         num_failed = 0
 
-        for f in workloads:
+        for wname, variant, _ in tasks:
             tpu.clear_tpu_state()
             time.sleep(1)
 
-            result = run_workload_on_tpu(tpu, f, timeout=args.timeout)
-            results.append(result)
+            result = run_workload_on_tpu(tpu, wname, variant, timeout=args.timeout)
+
+            if wname not in results:
+                results[wname] = {}
+            results[wname][variant] = result
 
             if result.get('status') == 'success':
                 num_success += 1
@@ -184,11 +192,12 @@ def main():
         output = {
             'metadata': {
                 'suite': 'priority_kernels',
-                'description': '10 core evaluation workloads for JAXBench',
+                'description': f'{len(workload_names)} workloads with {len(tasks)} total variants',
                 'tpu_type': args.tpu,
                 'timestamp': datetime.now(timezone.utc).isoformat(),
                 'jax_version': jax_version,
-                'num_workloads': len(workloads),
+                'num_workloads': len(workload_names),
+                'num_variants': len(tasks),
                 'num_succeeded': num_success,
                 'num_failed': num_failed,
             },
@@ -197,26 +206,37 @@ def main():
 
         # Save results
         output_path = args.output or str(WORKLOADS_DIR / "results.json")
-        os.makedirs(os.path.dirname(output_path), exist_ok=True)
+        os.makedirs(os.path.dirname(output_path) or '.', exist_ok=True)
         with open(output_path, 'w') as f:
             json.dump(output, f, indent=2)
 
         logger.info("=" * 60)
-        logger.info(f"RESULTS: {num_success}/{len(workloads)} succeeded, {num_failed} failed")
+        logger.info(f"RESULTS: {num_success}/{len(tasks)} succeeded, {num_failed} failed")
         logger.info(f"Saved to: {output_path}")
         logger.info("=" * 60)
 
         # Print summary table
-        print(f"\n{'Name':<40} {'Status':<8} {'Time (ms)':>10} {'TFLOPS':>8}")
-        print("-" * 70)
-        for r in results:
-            status = r.get('status', 'error')
-            name = r.get('name', '?')
-            if status == 'success':
-                print(f"{name:<40} {'OK':<8} {r['time_ms']:>10.2f} {r.get('tflops', 0):>8.2f}")
-            else:
-                err = r.get('error', '')[:30]
-                print(f"{name:<40} {'FAIL':<8} {'':>10} {err}")
+        print(f"\n{'Workload':<35} {'Variant':<12} {'Status':<8} {'Time (ms)':>10} {'TFLOPS':>8}")
+        print("-" * 78)
+        for wname in sorted(results.keys()):
+            baseline_time = None
+            for variant in VARIANTS:
+                if variant not in results[wname]:
+                    continue
+                r = results[wname][variant]
+                status = r.get('status', 'error')
+                if status == 'success':
+                    t = r['time_ms']
+                    tflops = r.get('tflops', 0)
+                    if variant == 'baseline':
+                        baseline_time = t
+                    speedup = ""
+                    if baseline_time and variant != 'baseline' and t > 0:
+                        speedup = f" ({baseline_time / t:.2f}x)"
+                    print(f"{wname:<35} {variant:<12} {'OK':<8} {t:>10.2f} {tflops:>8.2f}{speedup}")
+                else:
+                    err = r.get('error', '')[:25]
+                    print(f"{wname:<35} {variant:<12} {'FAIL':<8} {'':>10} {err}")
 
     finally:
         if not args.keep_tpu:
