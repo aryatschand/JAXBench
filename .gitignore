@@ -4,6 +4,9 @@ infrastructure/
 tests/
 results/
 pallas_optimization/
+inference_speedup/
+real_workloads/
+tokamax/
 KernelBench/
 .cache/
 credentials.json
