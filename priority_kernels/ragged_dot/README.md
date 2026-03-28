@@ -1,19 +1,23 @@
 # Ragged Dot (Grouped Matmul)
 
-Mixtral-8x7B grouped matrix multiplication for MoE expert routing (8 groups, 8192x4096x14336).
+**Model:** Mixtral-8x7B
+
+Grouped matrix multiplication for MoE expert routing.
+
+**Dimensions:** 8 groups, M=8192, K=4096, N=14336
 
 ## Variants
 
 | Variant | Description |
 |---------|-------------|
 | baseline | Vanilla JAX implementation |
-| optimized | Batched jnp.matmul via vmap over groups |
+| optimized | Batched `jnp.matmul` via `jax.vmap` over groups |
 
-## Benchmark Results (TPU v6e-1, JAX 0.6.2, bf16)
+## Benchmark Results
 
-| Variant | Time (ms) | Std (ms) | TFLOPS | Speedup vs Baseline |
-|---------|----------:|----------:|-------:|--------------------:|
+*TPU v6e-1, JAX 0.6.2, bfloat16, 100 iterations with 5 warmup*
+
+| Variant | Time (ms) | Std (ms) | TFLOPS | vs Baseline |
+|---------|----------:|----------:|-------:|------------:|
 | baseline | 1.3641 | 0.0055 | 705.26 | 1.00x |
-| optimized | — | — | — | *pending TPU run* |
-
-*Results collected on Google Cloud TPU v6e-1 (single chip), JAX 0.6.2, bfloat16, median of 100 iterations with 5 warmup.*
+| optimized | *pending* | — | — | — |

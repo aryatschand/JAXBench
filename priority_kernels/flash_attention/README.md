@@ -1,21 +1,27 @@
-# Flash Attention
+# Flash Attention (Causal MHA)
 
-Causal multi-head attention (32 heads, seq_len=4096, head_dim=128). Standard dot-product attention baseline.
+**Model:** Baseline-MHA
+
+Standard causal multi-head attention.
+
+**Dimensions:** batch=1, seq_len=4096, num_heads=32, head_dim=128
 
 ## Variants
 
 | Variant | Description |
 |---------|-------------|
 | baseline | Vanilla JAX implementation |
-| optimized | jax.nn.dot_product_attention (dispatches to flash attention on TPU) |
-| pallas | Upstream Pallas kernel (`jax.experimental.pallas.ops.tpu.flash_attention`) |
+| optimized | `jax.nn.dot_product_attention` (dispatches to flash attention on TPU) |
+| pallas | `jax.experimental.pallas.ops.tpu.flash_attention` |
 
-## Benchmark Results (TPU v6e-1, JAX 0.6.2, bf16)
+## Benchmark Results
 
-| Variant | Time (ms) | Std (ms) | TFLOPS | Speedup vs Baseline |
-|---------|----------:|----------:|-------:|--------------------:|
+*TPU v6e-1, JAX 0.6.2, bfloat16, 100 iterations with 5 warmup*
+
+| Variant | Time (ms) | Std (ms) | TFLOPS | vs Baseline |
+|---------|----------:|----------:|-------:|------------:|
 | baseline | 2.8291 | 0.5127 | 97.16 | 1.00x |
-| optimized | — | — | — | *pending TPU run* |
-| pallas | — | — | — | *pending TPU run* |
+| optimized | *pending* | — | — | — |
+| pallas | 6.2 | — | — | 0.46x |
 
-*Results collected on Google Cloud TPU v6e-1 (single chip), JAX 0.6.2, bfloat16, median of 100 iterations with 5 warmup.*
+> **Note:** Pallas result uses a different configuration (64 heads, seq=2048 vs baseline 32 heads, seq=4096). Direct speedup comparison requires running with matched configs.

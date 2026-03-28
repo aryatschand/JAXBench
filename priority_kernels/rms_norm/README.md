@@ -1,6 +1,10 @@
 # RMSNorm
 
-Llama-3.1-70B Root Mean Square Layer Normalization (batch=1, seq_len=2048, emb_dim=8192).
+**Model:** Llama-3.1-70B
+
+Root Mean Square Layer Normalization from MaxText.
+
+**Dimensions:** batch=1, seq_len=2048, emb_dim=8192, epsilon=1e-5
 
 ## Variants
 
@@ -8,10 +12,10 @@ Llama-3.1-70B Root Mean Square Layer Normalization (batch=1, seq_len=2048, emb_d
 |---------|-------------|
 | baseline | Vanilla JAX implementation |
 
-## Benchmark Results (TPU v6e-1, JAX 0.6.2, bf16)
+## Benchmark Results
 
-| Variant | Time (ms) | Std (ms) | TFLOPS | Speedup vs Baseline |
-|---------|----------:|----------:|-------:|--------------------:|
-| baseline | — | — | — | *pending TPU run* |
+*TPU v6e-1, JAX 0.6.2, bfloat16, 100 iterations with 5 warmup*
 
-*Results collected on Google Cloud TPU v6e-1 (single chip), JAX 0.6.2, bfloat16, median of 100 iterations with 5 warmup.*
+| Variant | Time (ms) | Std (ms) | TFLOPS | vs Baseline |
+|---------|----------:|----------:|-------:|------------:|
+| baseline | *pending* | — | — | — |

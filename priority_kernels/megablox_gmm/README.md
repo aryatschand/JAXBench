@@ -1,19 +1,23 @@
 # Megablox Grouped Matrix Multiply
 
-Qwen3-235B-A22B grouped matmul for MoE (128 experts, 8 experts/token, 4096x1536).
+**Model:** Qwen3-235B-A22B
+
+Grouped matmul for MoE: each expert group gets its own weight matrix.
+
+**Dimensions:** 128 experts, 8 experts/token, emb_dim=4096, mlp_dim=1536, seq_len=2048
 
 ## Variants
 
 | Variant | Description |
 |---------|-------------|
 | baseline | Vanilla JAX implementation |
-| pallas | Upstream Pallas kernel (`jax.experimental.pallas.ops.tpu.megablox.gmm`) |
+| pallas | `jax.experimental.pallas.ops.tpu.megablox.gmm` |
 
-## Benchmark Results (TPU v6e-1, JAX 0.6.2, bf16)
+## Benchmark Results
 
-| Variant | Time (ms) | Std (ms) | TFLOPS | Speedup vs Baseline |
-|---------|----------:|----------:|-------:|--------------------:|
-| baseline | — | — | — | *pending TPU run* |
-| pallas | — | — | — | *pending TPU run* |
+*TPU v6e-1, JAX 0.6.2, bfloat16, 100 iterations with 5 warmup*
 
-*Results collected on Google Cloud TPU v6e-1 (single chip), JAX 0.6.2, bfloat16, median of 100 iterations with 5 warmup.*
+| Variant | Time (ms) | Std (ms) | TFLOPS | vs Baseline |
+|---------|----------:|----------:|-------:|------------:|
+| baseline | *pending* | — | — | — |
+| pallas | 21.3 | — | — | — |
