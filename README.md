@@ -11,6 +11,7 @@ All benchmarks run on **TPU v6e-1** with **JAX 0.6.2**. Full results in [`benchm
 | [jaxkernelbench/](jaxkernelbench/) | 200 | [KernelBench](https://github.com/ScalingIntelligence/KernelBench) | LLM-translated PyTorch→JAX operators |
 | [real_workloads/](real_workloads/) | 36 | [MaxText](https://github.com/AI-Hypercomputer/maxtext) | Hand-written ops from 7 LLM families + attention variants |
 | [tokamax/](tokamax/) | 12 | [openxla/tokamax](https://github.com/openxla/tokamax) | TPU kernel benchmarks across 6 operations |
+| [pallas_kernels/](pallas_kernels/) | 6 | [JAX 0.6.2 Pallas](https://github.com/jax-ml/jax) | Upstream Pallas TPU kernels for optimization |
 
 ---
 
@@ -165,6 +166,9 @@ JAXBench/
 │   ├── layer_norm/       # 2 workloads
 │   ├── triangle_mult/    # 2 workloads
 │   └── run_benchmarks.py
+├── pallas_kernels/       # 6 upstream Pallas TPU kernels from JAX 0.6.2
+│   ├── jax_references/   # Pure-JAX references for correctness checks
+│   └── check_references.py
 ├── torch_to_jax/         # Translation pipeline (PyTorch → JAX)
 ├── benchmarks.json       # All benchmark results (TPU v6e-1)
 ├── README.md
