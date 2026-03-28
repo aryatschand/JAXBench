@@ -1,7 +1,8 @@
-"""MLA Attention (Optimized) — DeepSeek-V3-671B with jax.nn.dot_product_attention.
+"""MLA Attention (Optimized) — DeepSeek-V3-671B with optimized projections.
 
-Multi-head Latent Attention keeps the LoRA projection structure but replaces
-the manual attention computation with jax.nn.dot_product_attention.
+Multi-head Latent Attention with pre-computed RoPE frequencies and optimized
+LoRA projection structure. Note: d_qk != d_v so dot_product_attention cannot
+be used directly; attention is computed manually with jax.nn.softmax.
 """
 import jax
 import jax.numpy as jnp
@@ -79,18 +80,25 @@ def workload(x, W_dq, W_uq, W_dkv, W_uk, W_uv, W_o, rope_cos, rope_sin):
         rope_cos[None, :, None, :], rope_sin[None, :, None, :]
     )
 
-    # Concatenate q and k components — keep (B, S, H, D) layout for dot_product_attention
+    # Concatenate q and k components
     q = jnp.concatenate([q_nope, q_rope], axis=-1)  # (B, S, H, d_nope+d_rope)
     k = jnp.concatenate([k_nope, k_rope], axis=-1)  # (B, S, H, d_nope+d_rope)
-    # v already (B, S, H, d_v)
+    # v: (B, S, H, d_v) — note d_v != d_qk, so can't use dot_product_attention
 
-    # Optimized attention
-    attn_out = jax.nn.dot_product_attention(
-        q, k, v,
-        is_causal=True,
-    )  # (B, S, H, d_v)
+    # Transpose to (B, H, S, D) for attention
+    q = q.transpose(0, 2, 1, 3)  # (B, H, S, d_qk)
+    k = k.transpose(0, 2, 1, 3)  # (B, H, S, d_qk)
+    v = v.transpose(0, 2, 1, 3)  # (B, H, S, d_v)
 
-    attn_out = attn_out.reshape(B, S, H * d_v)
+    # Optimized attention with separate QK and AV (d_qk != d_v)
+    scale = (d_nope + d_rope) ** -0.5
+    attn = jnp.einsum('bhqd,bhkd->bhqk', q, k) * scale
+    causal = jnp.tril(jnp.ones((S, S), dtype=jnp.bool_))
+    attn = jnp.where(causal[None, None], attn, -1e30)
+    attn = jax.nn.softmax(attn, axis=-1)
+    attn_out = jnp.einsum('bhqk,bhkd->bhqd', attn, v)  # (B, H, S, d_v)
+
+    attn_out = attn_out.transpose(0, 2, 1, 3).reshape(B, S, H * d_v)
     return jnp.dot(attn_out, W_o)
 
 
