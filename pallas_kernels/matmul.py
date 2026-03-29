@@ -38,6 +38,9 @@ CONFIG = {
     'rtol': 1e-2,
 }
 
+# Tuned by autotune_block_sizes.py. Re-run to update.
+TUNED_PARAMS = {'block_shape': [1024, 2048], 'block_k': 1024}
+
 
 def matmul_kernel(x_tile_ref, y_tile_ref, o_tile_ref, acc_ref):
   @pl.when(pl.program_id(2) == 0)
@@ -108,4 +111,4 @@ def create_inputs(dtype=jnp.bfloat16):
 
 
 def workload(x, y):
-    return matmul(x, y, block_shape=(512, 512))
+    return matmul(x, y, block_shape=tuple(TUNED_PARAMS['block_shape']), block_k=TUNED_PARAMS['block_k'])

@@ -690,6 +690,9 @@ CONFIG = {
     'rtol': 2e-2,
 }
 
+# Tuned by autotune_block_sizes.py. Re-run to update.
+TUNED_PARAMS = {'pages_per_compute_block': 64}
+
 
 def create_inputs(dtype=jnp.bfloat16):
     key = jax.random.PRNGKey(42)
@@ -713,5 +716,5 @@ def create_inputs(dtype=jnp.bfloat16):
 def workload(q, k_pages, v_pages, lengths, page_indices):
     return paged_attention(
         q, k_pages, v_pages, lengths, page_indices,
-        pages_per_compute_block=16,
+        pages_per_compute_block=TUNED_PARAMS['pages_per_compute_block'],
     )

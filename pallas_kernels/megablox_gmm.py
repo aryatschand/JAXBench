@@ -812,6 +812,9 @@ CONFIG = {
     'rtol': 1e-2,
 }
 
+# Tuned by autotune_block_sizes.py. Re-run to update.
+TUNED_PARAMS = {'tiling': [128, 512, 512]}
+
 
 def create_inputs(dtype=jnp.bfloat16):
     key = jax.random.PRNGKey(42)
@@ -830,4 +833,4 @@ def create_inputs(dtype=jnp.bfloat16):
 
 
 def workload(lhs, rhs, group_sizes):
-    return gmm(lhs, rhs, group_sizes)
+    return gmm(lhs, rhs, group_sizes, tiling=tuple(TUNED_PARAMS['tiling']))

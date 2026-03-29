@@ -167,6 +167,7 @@ JAXBench/
 │   ├── triangle_mult/    # 2 workloads
 │   └── run_benchmarks.py
 ├── pallas_kernels/       # 6 upstream Pallas TPU kernels from JAX 0.6.2
+│   ├── autotune_block_sizes.py  # Block size autotuner (run on TPU VM)
 │   ├── jax_references/   # Pure-JAX references for correctness checks
 │   └── check_references.py
 ├── torch_to_jax/         # Translation pipeline (PyTorch → JAX)

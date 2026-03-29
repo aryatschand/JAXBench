@@ -923,6 +923,13 @@ CONFIG = {
     'rtol': 0.2,
 }
 
+# Tuned by autotune_block_sizes.py. Re-run to update.
+TUNED_PARAMS = {
+    'num_kv_pages_per_block': 32,  # autotuned
+    'num_queries_per_block': 64,  # autotuned
+    'vmem_limit_bytes': 33554432,  # not autotuned (hardware constraint)
+}
+
 
 def create_inputs(dtype=jnp.bfloat16):
     key = jax.random.PRNGKey(42)
@@ -956,7 +963,7 @@ def workload(q, kv_pages, kv_lens, page_indices, cu_q_lens, num_seqs):
     return ragged_paged_attention(
         q, kv_pages, kv_lens, page_indices, cu_q_lens, num_seqs,
         sm_scale=sm_scale,
-        num_kv_pages_per_block=8,
-        num_queries_per_block=64,
-        vmem_limit_bytes=32 * 1024 * 1024,
+        num_kv_pages_per_block=TUNED_PARAMS['num_kv_pages_per_block'],
+        num_queries_per_block=TUNED_PARAMS['num_queries_per_block'],
+        vmem_limit_bytes=TUNED_PARAMS['vmem_limit_bytes'],
     )
