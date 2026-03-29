@@ -1,6 +1,6 @@
 # Pallas Kernels
 
-Upstream JAX Pallas TPU kernels wrapped as JAXBench workloads for optimization by autocomp.
+Upstream JAX Pallas TPU kernels wrapped as JAXBench workloads.
 
 ## Source
 
@@ -9,24 +9,24 @@ TPU VM runs JAX 0.6.2, so the kernel code must match that version exactly. Each 
 contains the unmodified upstream kernel followed by a thin JAXBench wrapper (`CONFIG`,
 `create_inputs`, `workload`).
 
-| Workload | Upstream module | Model shape | Default | Autotuned |
-|----------|----------------|-------------|--------:|----------:|
-| `matmul.py` | `pallas.ops.tpu.matmul` | Llama-3.1-70B | 406.5 ms | 5.6 ms |
-| `flash_attention.py` | `pallas.ops.tpu.flash_attention` | Llama-3.1-70B | 6.3 ms | 0.6 ms |
-| `splash_attention.py` | `pallas.ops.tpu.splash_attention` | Llama-3.1-70B | 5.9 ms | 0.7 ms |
-| `paged_attention.py` | `pallas.ops.tpu.paged_attention` | Llama-3.1-70B | 4.9 ms | 1.0 ms |
-| `ragged_paged_attention.py` | `pallas.ops.tpu.ragged_paged_attention` | Llama-3.1-70B | 1.6 ms | 0.9 ms |
-| `megablox_gmm.py` | `pallas.ops.tpu.megablox.gmm` | Qwen3-235B-A22B | 21.3 ms | 2.8 ms |
+| Workload | Upstream module | Model shape | Latency |
+|----------|----------------|-------------|--------:|
+| `matmul.py` | `pallas.ops.tpu.matmul` | Llama-3.1-70B | 5.561 ms |
+| `flash_attention.py` | `pallas.ops.tpu.flash_attention` | Llama-3.1-70B | 0.633 ms |
+| `splash_attention.py` | `pallas.ops.tpu.splash_attention` | Llama-3.1-70B | 0.679 ms |
+| `paged_attention.py` | `pallas.ops.tpu.paged_attention` | Llama-3.1-70B | 1.008 ms |
+| `ragged_paged_attention.py` | `pallas.ops.tpu.ragged_paged_attention` | Llama-3.1-70B | 0.874 ms |
+| `megablox_gmm.py` | `pallas.ops.tpu.megablox.gmm` | Qwen3-235B-A22B | 2.807 ms |
 
-Times measured on TPU v6e-1 with bf16, median of 100 trials. "Default" uses upstream block
-sizes (128 for all). "Autotuned" uses block sizes from `autotune_block_sizes.py`.
+Times measured on TPU v6e-1 with bf16, median of 100 trials. Block sizes tuned by
+`autotune_block_sizes.py`.
 
 ## File structure
 
 Each workload file has two parts:
 
 1. **Kernel code** (top of file) — copied from the installed JAX 0.6.2 package on the TPU VM.
-   This is the code that autocomp agents will try to optimize. Do not modify it by hand.
+   This is the code to optimize. Do not modify it by hand.
 
 2. **JAXBench wrapper** (bottom of file) — `CONFIG` dict with model shape parameters and
    tolerances, `TUNED_PARAMS` dict with autotuned block sizes, `create_inputs()` to generate
@@ -68,8 +68,12 @@ Each workload file has a `TUNED_PARAMS` dict that controls block sizes and other
 parameters. These are read by `workload()` and passed to the kernel. The checked-in values
 are tuned for TPU v6e-1.
 
-To re-tune for a different TPU or after changing workload shapes, upload the kernel files and
-autotuner to the TPU VM and run:
+> **Important:** The checked-in block sizes are tuned for **TPU v6e-1**. If you are targeting a
+> different TPU type, re-run `autotune_block_sizes.py --apply` on your TPU VM before
+> benchmarking or trying to further optimize the kernels. Optimal block sizes vary significantly across TPU
+> generations — tuning alone can yield 5-70x speedups over naive defaults.
+
+Upload the kernel files and autotuner to the TPU VM and run:
 
 ```bash
 cd /tmp
@@ -104,8 +108,7 @@ ragged_paged_attention         PASS (local)
 ## Tolerances
 
 Each workload's `CONFIG` includes `atol` and `rtol` matching the upstream JAX test tolerances.
-These are used by both `check_references.py` and `jaxbench_runner.py` (autocomp's evaluation
-harness).
+These are used by both `check_references.py` and `jaxbench_runner.py`.
 
 ## Updating kernels
 
