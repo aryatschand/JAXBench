@@ -2534,6 +2534,25 @@ CONFIG = {
     'rtol': 3e-3,
 }
 
+# Tuned by autotune_block_sizes.py. Re-run to update.
+TUNED_PARAMS = {
+    # Autotuned (forward pass).
+    'block_q': 2048,
+    'block_kv': 2048,
+    'block_kv_compute': 1024,
+    'q_layout': 1,  # QKVLayout.HEAD_DIM_MINOR=1, SEQ_MINOR=2
+    'k_layout': 1,
+    'v_layout': 1,
+    'head_shards': 1,
+    'q_seq_shards': 1,
+    # Not autotuned (backward-only).
+    'block_q_dkv': None,
+    'block_kv_dkv': None,
+    'block_kv_dkv_compute': None,
+    'block_q_dq': None,
+    'block_kv_dq': None,
+}
+
 
 def create_inputs(dtype=jnp.bfloat16):
     key = jax.random.PRNGKey(42)
@@ -2555,8 +2574,24 @@ def workload(q, k, v):
     heads_per_group = H_q // H_kv
     mask = mask_lib.CausalMask(shape=(S, S))
     multi_head_mask = mask_lib.MultiHeadMask([mask] * H_q)
-    splash_kernel = make_splash_mha_single_device(
-        multi_head_mask, head_shards=1, q_seq_shards=1,
+    block_sizes = BlockSizes(
+        block_q=TUNED_PARAMS['block_q'],
+        block_kv=TUNED_PARAMS['block_kv'],
+        block_kv_compute=TUNED_PARAMS['block_kv_compute'],
+        q_layout=QKVLayout(TUNED_PARAMS['q_layout']),
+        k_layout=QKVLayout(TUNED_PARAMS['k_layout']),
+        v_layout=QKVLayout(TUNED_PARAMS['v_layout']),
+        block_q_dkv=TUNED_PARAMS['block_q_dkv'],
+        block_kv_dkv=TUNED_PARAMS['block_kv_dkv'],
+        block_kv_dkv_compute=TUNED_PARAMS['block_kv_dkv_compute'],
+        block_q_dq=TUNED_PARAMS['block_q_dq'],
+        block_kv_dq=TUNED_PARAMS['block_kv_dq'],
+    )
+    splash_kernel = _make_splash_attention(
+        multi_head_mask, block_sizes=block_sizes,
+        is_mqa=False,
+        head_shards=TUNED_PARAMS['head_shards'],
+        q_seq_shards=TUNED_PARAMS['q_seq_shards'],
     )
     @jax.vmap
     def _attend(q_batch, k_batch, v_batch):
