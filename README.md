@@ -135,9 +135,9 @@ JAXBench/
 │   ├── run_benchmarks.py       # TPU benchmark orchestrator
 │   └── results.json
 ├── pallas_kernels/       # 6 upstream Pallas TPU kernels from JAX 0.6.2
+│   ├── autotune_block_sizes.py  # Pallas kernel block size autotuner
 │   ├── jax_references/   # Pure-JAX implementations matching Pallas kernels
-│   ├── check_references.py # Pallas vs JAX references correctness check
-│   └── autotune_block_sizes.py  # Pallas kernel block size autotuner
+│   └── check_references.py # Pallas vs JAX references correctness check
 ├── jaxkernelbench/             # 200 LLM-translated PyTorch→JAX operators
 │   ├── level1/                 # 100 single operators
 │   └── level2/                 # 100 fused operators

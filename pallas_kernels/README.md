@@ -26,7 +26,7 @@ Times measured on TPU v6e-1 with bf16, median of 100 trials. Block sizes tuned b
 Each workload file has two parts:
 
 1. **Kernel code** (top of file) — copied from the installed JAX 0.6.2 package on the TPU VM.
-   This is the code to optimize. Do not modify it by hand.
+   This is the baseline code to optimize.
 
 2. **JAXBench wrapper** (bottom of file) — `CONFIG` dict with model shape parameters and
    tolerances, `TUNED_PARAMS` dict with autotuned block sizes, `create_inputs()` to generate
