@@ -18,4 +18,4 @@ Fused linear projection + log-softmax + NLL loss.
 
 | Variant | Time (ms) | Std (ms) | TFLOPS | vs Baseline |
 |---------|----------:|----------:|-------:|------------:|
-| baseline | 7.6535 | 0.0088 | 562.51 | 1.00x |
+| baseline | 7.7018 | 0.0118 | 558.97 | 1.00x |

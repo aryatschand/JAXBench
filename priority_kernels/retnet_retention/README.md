@@ -2,9 +2,9 @@
 
 **Model:** RetNet-6.7B
 
-Multi-scale retention with per-head exponential decay (alternative to softmax attention).
+Multi-scale retention with per-head exponential decay.
 
-**Dimensions:** batch=1, seq_len=2048, num_heads=16, head_dim=256, d_model=4096
+**Dimensions:** batch=1, seq_len=2048, num_heads=16, head_dim=256
 
 ## Variants
 
@@ -18,4 +18,4 @@ Multi-scale retention with per-head exponential decay (alternative to softmax at
 
 | Variant | Time (ms) | Std (ms) | TFLOPS | vs Baseline |
 |---------|----------:|----------:|-------:|------------:|
-| baseline | 0.5186 | 0.0047 | 132.51 | 1.00x |
+| baseline | 0.5091 | 0.0036 | 134.99 | 1.00x |

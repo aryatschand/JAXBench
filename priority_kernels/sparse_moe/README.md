@@ -11,8 +11,8 @@ Sparse MoE with top-2 expert routing, 8 SwiGLU expert MLPs.
 | Variant | Description |
 |---------|-------------|
 | baseline | Vanilla JAX implementation |
-| optimized | Batched vmap over all experts (avoids sequential per-expert computation) |
-| pallas | `jax.experimental.pallas.ops.tpu.megablox.gmm` for expert matmuls |
+| optimized | Batched vmap over all experts simultaneously |
+| pallas | `jax.experimental.pallas.ops.tpu.megablox.gmm` |
 
 ## Benchmark Results
 
@@ -20,6 +20,6 @@ Sparse MoE with top-2 expert routing, 8 SwiGLU expert MLPs.
 
 | Variant | Time (ms) | Std (ms) | TFLOPS | vs Baseline |
 |---------|----------:|----------:|-------:|------------:|
-| baseline | 8.3069 | 0.0086 | 173.74 | 1.00x |
-| optimized | *pending* | — | — | — |
-| pallas | *pending* | — | — | — |
+| baseline | 8.2964 | 0.0104 | 173.96 | 1.00x |
+| optimized | 14.8174 | 0.0107 | 389.58 | 0.56x |
+| pallas | 180.3568 | 0.0306 | 8.00 | 0.05x |

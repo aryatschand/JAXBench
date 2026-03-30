@@ -4,14 +4,14 @@
 
 MLA with LoRA-compressed KV projections and RoPE.
 
-**Dimensions:** batch=1, seq_len=2048, emb_dim=7168, 128 heads, q_lora=1536, kv_lora=512
+**Dimensions:** batch=1, seq_len=2048, emb_dim=7168, 128 heads
 
 ## Variants
 
 | Variant | Description |
 |---------|-------------|
 | baseline | Vanilla JAX implementation |
-| optimized | `jax.nn.dot_product_attention` for core attention (keeps LoRA projections) |
+| optimized | Optimized LoRA projections with pre-computed RoPE |
 
 ## Benchmark Results
 
@@ -19,5 +19,5 @@ MLA with LoRA-compressed KV projections and RoPE.
 
 | Variant | Time (ms) | Std (ms) | TFLOPS | vs Baseline |
 |---------|----------:|----------:|-------:|------------:|
-| baseline | 4.4647 | 0.0894 | 264.00 | 1.00x |
-| optimized | *pending* | — | — | — |
+| baseline | 4.4813 | 0.0726 | 263.02 | 1.00x |
+| optimized | 4.4173 | 0.0555 | 250.85 | 1.01x |

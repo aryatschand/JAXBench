@@ -2,9 +2,9 @@
 
 **Model:** Llama-3.1-70B
 
-Root Mean Square Layer Normalization from MaxText.
+Root Mean Square Layer Normalization.
 
-**Dimensions:** batch=1, seq_len=2048, emb_dim=8192, epsilon=1e-5
+**Dimensions:** batch=1, seq_len=2048, emb_dim=8192
 
 ## Variants
 
@@ -18,4 +18,4 @@ Root Mean Square Layer Normalization from MaxText.
 
 | Variant | Time (ms) | Std (ms) | TFLOPS | vs Baseline |
 |---------|----------:|----------:|-------:|------------:|
-| baseline | *pending* | — | — | — |
+| baseline | 0.1776 | 0.0039 | 0.47 | 1.00x |

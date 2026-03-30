@@ -4,7 +4,7 @@
 
 Selective state space model via the SSD linear attention dual form.
 
-**Dimensions:** batch=1, seq_len=2048, num_heads=64, head_dim=64, d_state=128
+**Dimensions:** batch=1, seq_len=2048, num_heads=64, head_dim=64
 
 ## Variants
 
@@ -18,4 +18,4 @@ Selective state space model via the SSD linear attention dual form.
 
 | Variant | Time (ms) | Std (ms) | TFLOPS | vs Baseline |
 |---------|----------:|----------:|-------:|------------:|
-| baseline | 1.8024 | 0.4420 | 38.13 | 1.00x |
+| baseline | 1.8208 | 0.4602 | 37.74 | 1.00x |

@@ -11,7 +11,7 @@ Grouped matrix multiplication for MoE expert routing.
 | Variant | Description |
 |---------|-------------|
 | baseline | Vanilla JAX implementation |
-| optimized | Batched `jnp.matmul` via `jax.vmap` over groups |
+| optimized | Batched `jax.vmap(jnp.matmul)` over groups |
 
 ## Benchmark Results
 
@@ -19,5 +19,5 @@ Grouped matrix multiplication for MoE expert routing.
 
 | Variant | Time (ms) | Std (ms) | TFLOPS | vs Baseline |
 |---------|----------:|----------:|-------:|------------:|
-| baseline | 1.3641 | 0.0055 | 705.26 | 1.00x |
-| optimized | *pending* | — | — | — |
+| baseline | 1.3689 | 0.0059 | 702.79 | 1.00x |
+| optimized | 1.3704 | 0.0055 | 702.04 | 1.00x |

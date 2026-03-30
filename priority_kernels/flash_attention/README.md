@@ -20,8 +20,6 @@ Standard causal multi-head attention.
 
 | Variant | Time (ms) | Std (ms) | TFLOPS | vs Baseline |
 |---------|----------:|----------:|-------:|------------:|
-| baseline | 2.8291 | 0.5127 | 97.16 | 1.00x |
-| optimized | *pending* | — | — | — |
-| pallas | 6.2 | — | — | 0.46x |
-
-> **Note:** Pallas result uses a different configuration (64 heads, seq=2048 vs baseline 32 heads, seq=4096). Direct speedup comparison requires running with matched configs.
+| baseline | 2.8794 | 0.5926 | 95.46 | 1.00x |
+| optimized | 21.4722 | 0.1341 | 12.80 | 0.13x |
+| pallas | 11.6198 | 0.0146 | 23.66 | 0.25x |

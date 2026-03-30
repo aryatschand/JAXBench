@@ -19,5 +19,5 @@ Attention with arbitrary score modification (relative position bias).
 
 | Variant | Time (ms) | Std (ms) | TFLOPS | vs Baseline |
 |---------|----------:|----------:|-------:|------------:|
-| baseline | *pending* | — | — | — |
-| optimized | *pending* | — | — | — |
+| baseline | 2.9163 | 0.4804 | 47.22 | 1.00x |
+| optimized | 3.3323 | 0.4207 | 41.33 | 0.88x |

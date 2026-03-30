@@ -4,7 +4,7 @@
 
 Grouped matmul for MoE: each expert group gets its own weight matrix.
 
-**Dimensions:** 128 experts, 8 experts/token, emb_dim=4096, mlp_dim=1536, seq_len=2048
+**Dimensions:** 128 experts, 8 experts/token, emb_dim=4096, mlp_dim=1536
 
 ## Variants
 
@@ -19,5 +19,5 @@ Grouped matmul for MoE: each expert group gets its own weight matrix.
 
 | Variant | Time (ms) | Std (ms) | TFLOPS | vs Baseline |
 |---------|----------:|----------:|-------:|------------:|
-| baseline | *pending* | — | — | — |
-| pallas | 21.3 | — | — | — |
+| baseline | 183.1552 | 0.8913 | 1.13 | 1.00x |
+| pallas | 21.2623 | 0.0140 | 9.70 | 8.61x |

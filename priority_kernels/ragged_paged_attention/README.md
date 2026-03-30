@@ -2,9 +2,9 @@
 
 **Model:** Llama-3.1-70B
 
-Variable-length paged attention for mixed prefill+decode serving.
+Variable-length paged attention for mixed prefill+decode.
 
-**Dimensions:** max_tokens=2048, max_seqs=32, 64 query heads, 8 KV heads, page_size=16
+**Dimensions:** max_tokens=2048, max_seqs=32, 64 query heads, 8 KV heads
 
 ## Variants
 
@@ -19,5 +19,5 @@ Variable-length paged attention for mixed prefill+decode serving.
 
 | Variant | Time (ms) | Std (ms) | TFLOPS | vs Baseline |
 |---------|----------:|----------:|-------:|------------:|
-| baseline | *pending* | — | — | — |
-| pallas | 1.6 | — | — | — |
+| baseline | 200.5945 | 11.8335 | 0.69 | 1.00x |
+| pallas | 1.5510 | 0.0055 | 88.62 | 129.33x |

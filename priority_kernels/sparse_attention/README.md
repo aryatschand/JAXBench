@@ -4,14 +4,14 @@
 
 Causal GQA attention baseline for splash attention optimization.
 
-**Dimensions:** batch=1, seq_len=2048, 64 query heads, 8 KV heads, head_dim=128
+**Dimensions:** batch=1, seq_len=2048, 64 query heads, 8 KV heads
 
 ## Variants
 
 | Variant | Description |
 |---------|-------------|
 | baseline | Vanilla JAX implementation |
-| optimized | `jax.nn.dot_product_attention` |
+| optimized | `jax.nn.dot_product_attention` with GQA |
 | pallas | `jax.experimental.pallas.ops.tpu.splash_attention` |
 
 ## Benchmark Results
@@ -20,6 +20,6 @@ Causal GQA attention baseline for splash attention optimization.
 
 | Variant | Time (ms) | Std (ms) | TFLOPS | vs Baseline |
 |---------|----------:|----------:|-------:|------------:|
-| baseline | *pending* | — | — | — |
-| optimized | *pending* | — | — | — |
-| pallas | 5.9 | — | — | — |
+| baseline | 1.5021 | 0.2742 | 91.50 | 1.00x |
+| optimized | 1.8448 | 0.3909 | 74.50 | 0.81x |
+| pallas | 5.8533 | 0.0110 | 23.48 | 0.26x |

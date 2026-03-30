@@ -2,7 +2,7 @@
 
 **Model:** Llama-3.1-70B
 
-SwiGLU feed-forward: gate + up projection with SiLU activation, then down projection.
+SwiGLU feed-forward: gate + up projection with SiLU, then down projection.
 
 **Dimensions:** batch=1, seq_len=2048, emb_dim=8192, mlp_dim=28672
 
@@ -18,4 +18,4 @@ SwiGLU feed-forward: gate + up projection with SiLU activation, then down projec
 
 | Variant | Time (ms) | Std (ms) | TFLOPS | vs Baseline |
 |---------|----------:|----------:|-------:|------------:|
-| baseline | 4.0743 | 0.0081 | 708.40 | 1.00x |
+| baseline | 4.0781 | 0.0082 | 707.74 | 1.00x |
