@@ -43,7 +43,7 @@ Each workload has up to 3 implementation variants for optimization comparison:
 
 ### pallas_kernels — 6 upstream Pallas TPU kernels
 
-Kernels copied verbatim from JAX 0.6.2 with pure-JAX references for correctness verification. These serve as the source for `pallas.py` variants in priority_kernels.
+Kernels copied verbatim from JAX 0.6.2 with pure-JAX references also provided.
 
 | Kernel | Model | Time (ms) |
 |--------|-------|----------:|

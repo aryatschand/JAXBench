@@ -50,8 +50,8 @@ def get_dirs_for_level(level: int):
     out_dir = os.path.join(BASE_DIR, "jaxbench", f"level{level}")
     return kb_dir, out_dir
 CREDENTIALS_FILE = os.environ.get("GCP_CREDENTIALS_FILE", os.path.join(BASE_DIR, "credentials.json"))
-PROJECT_ID = os.environ.get("GCP_PROJECT_ID", "jaxbench")
-ZONE = os.environ.get("GCP_ZONE", "us-central1-b")
+PROJECT_ID = os.environ.get("GCP_PROJECT_ID", "ch-llm")
+ZONE = os.environ.get("GCP_ZONE", "us-east5-a")
 BUCKET_NAME = os.environ.get("GCP_BUCKET", "tpu-dumps")
 
 # SSH Configuration
@@ -150,15 +150,18 @@ def save_progress(tasks: List[Dict], level: int, provider: str, model: str, suff
 
 
 def get_credentials():
-    return service_account.Credentials.from_service_account_file(
-        CREDENTIALS_FILE, scopes=["https://www.googleapis.com/auth/cloud-platform"]
-    )
+    """Get credentials from service account file if it exists, else use ADC (gcloud login)."""
+    if os.path.exists(CREDENTIALS_FILE):
+        return service_account.Credentials.from_service_account_file(
+            CREDENTIALS_FILE, scopes=["https://www.googleapis.com/auth/cloud-platform"]
+        )
+    return None
 
 
 class TPUManager:
     """Manages TPU VM lifecycle and SSH execution."""
     
-    def __init__(self, tpu_name: str = "jaxbench-runner", tpu_type: str = "v6e-1"):
+    def __init__(self, tpu_name: str = "tpu-node", tpu_type: str = "v6e-1"):
         self.tpu_name = tpu_name
         self.tpu_type = tpu_type
         self.tpu_ip = None
