@@ -1740,7 +1740,7 @@ _PAD_HEAD_DIM = 256
 TUNED_PARAMS = {
     'block_q': 2048,
     'block_k_major': 2048,
-    'block_k': 512,
+    'block_k': 1024,
     'block_b': 1,
     'block_q_major_dkv': 128,
     'block_k_major_dkv': 128,
