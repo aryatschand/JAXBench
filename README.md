@@ -47,12 +47,12 @@ Kernels copied verbatim from JAX 0.6.2 with pure-JAX references also provided.
 
 | Kernel | Model | Time (ms) |
 |--------|-------|----------:|
-| matmul | Llama-3.1-70B | 22.7 |
-| flash_attention | Llama-3.1-70B | 6.2 |
-| splash_attention | Llama-3.1-70B | 5.9 |
-| paged_attention | Llama-3.1-70B | 1.6 |
-| ragged_paged_attention | Llama-3.1-70B | 1.6 |
-| megablox_gmm | Qwen3-235B | 21.3 |
+| matmul | Llama-3.1-70B | 5.561 |
+| flash_attention | Llama-3.1-70B | 0.633 |
+| splash_attention | Llama-3.1-70B | 0.679 |
+| paged_attention | Llama-3.1-70B | 1.008 |
+| ragged_paged_attention | Llama-3.1-70B | 0.874 |
+| megablox_gmm | Qwen3-235B | 2.807 |
 
 ### jaxkernelbench — 200 LLM-translated operators
 
