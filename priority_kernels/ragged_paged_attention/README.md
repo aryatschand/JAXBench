@@ -2,22 +2,22 @@
 
 **Model:** Llama-3.1-70B
 
-Variable-length paged attention for mixed prefill+decode.
+Variable-length paged attention.
 
-**Dimensions:** max_tokens=2048, max_seqs=32, 64 query heads, 8 KV heads
+**Dimensions:** max_tokens=2048, max_seqs=32, 64 query heads
 
 ## Variants
 
 | Variant | Description |
 |---------|-------------|
 | baseline | Vanilla JAX implementation |
-| pallas | `jax.experimental.pallas.ops.tpu.ragged_paged_attention` |
+| pallas | Pallas ragged paged attention with async DMA |
 
 ## Benchmark Results
 
-*TPU v6e-1, JAX 0.6.2, bfloat16, 100 iterations with 5 warmup*
+*TPU v6e-1 (us-east5-a), JAX 0.6.2, bfloat16, 100 iterations, 5 warmup*
 
-| Variant | Time (ms) | Std (ms) | TFLOPS | vs Baseline |
-|---------|----------:|----------:|-------:|------------:|
-| baseline | 200.5945 | 11.8335 | 0.69 | 1.00x |
-| pallas | 1.5510 | 0.0055 | 88.62 | 129.33x |
+| Variant | Time (ms) | Std (ms) | vs Baseline |
+|---------|----------:|----------:|------------:|
+| baseline | 191.9868 | 1.3604 | 1.00x |
+| pallas | 0.8649 | 0.0058 | **222.0x** |

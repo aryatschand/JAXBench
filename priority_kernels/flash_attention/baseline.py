@@ -1,8 +1,8 @@
-"""Vanilla Multi-Head Causal Attention — Baseline (32 heads, seq=4096).
+"""Vanilla Multi-Head Causal Attention — Baseline (64 heads, seq=2048).
 
 Standard scaled dot-product attention with causal mask.
 No GQA, no softcap, no sliding window — pure MHA baseline.
-Longer sequence (4096) to stress the O(S^2) bottleneck.
+Matches Pallas flash_attention kernel config.
 """
 import jax
 import jax.numpy as jnp
@@ -12,8 +12,8 @@ CONFIG = {
     'model': 'Baseline-MHA',
     'operator': 'causal_mha',
     'batch': 1,
-    'seq_len': 4096,
-    'num_heads': 32,
+    'seq_len': 2048,
+    'num_heads': 64,
     'head_dim': 128,
 }
 

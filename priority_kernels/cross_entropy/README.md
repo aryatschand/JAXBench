@@ -2,9 +2,9 @@
 
 **Model:** Llama-3.1-8B
 
-Fused linear projection + log-softmax + NLL loss.
+Fused linear + softmax cross-entropy.
 
-**Dimensions:** batch_tokens=4096, hidden_dim=4096, vocab_size=128256
+**Dimensions:** tokens=4096, hidden=4096, vocab=128256
 
 ## Variants
 
@@ -14,8 +14,8 @@ Fused linear projection + log-softmax + NLL loss.
 
 ## Benchmark Results
 
-*TPU v6e-1, JAX 0.6.2, bfloat16, 100 iterations with 5 warmup*
+*TPU v6e-1 (us-east5-a), JAX 0.6.2, bfloat16, 100 iterations, 5 warmup*
 
-| Variant | Time (ms) | Std (ms) | TFLOPS | vs Baseline |
-|---------|----------:|----------:|-------:|------------:|
-| baseline | 7.7018 | 0.0118 | 558.97 | 1.00x |
+| Variant | Time (ms) | Std (ms) | vs Baseline |
+|---------|----------:|----------:|------------:|
+| baseline | 7.6978 | 0.0092 | 1.00x |

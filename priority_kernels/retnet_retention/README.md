@@ -1,10 +1,10 @@
-# RetNet Multi-Scale Retention
+# RetNet Retention
 
 **Model:** RetNet-6.7B
 
-Multi-scale retention with per-head exponential decay.
+Multi-scale retention with exponential decay.
 
-**Dimensions:** batch=1, seq_len=2048, num_heads=16, head_dim=256
+**Dimensions:** batch=1, seq_len=2048, 16 heads, head_dim=256
 
 ## Variants
 
@@ -14,8 +14,8 @@ Multi-scale retention with per-head exponential decay.
 
 ## Benchmark Results
 
-*TPU v6e-1, JAX 0.6.2, bfloat16, 100 iterations with 5 warmup*
+*TPU v6e-1 (us-east5-a), JAX 0.6.2, bfloat16, 100 iterations, 5 warmup*
 
-| Variant | Time (ms) | Std (ms) | TFLOPS | vs Baseline |
-|---------|----------:|----------:|-------:|------------:|
-| baseline | 0.5091 | 0.0036 | 134.99 | 1.00x |
+| Variant | Time (ms) | Std (ms) | vs Baseline |
+|---------|----------:|----------:|------------:|
+| baseline | 0.5200 | 0.0146 | 1.00x |

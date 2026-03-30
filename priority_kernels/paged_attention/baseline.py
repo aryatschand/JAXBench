@@ -11,12 +11,13 @@ CONFIG = {
     'name': 'llama3_70b_paged_attention',
     'model': 'Llama-3.1-70B',
     'operator': 'paged_attention',
-    'num_seqs': 16,
+    'num_seqs': 32,
     'max_seq_len': 2048,
     'num_query_heads': 64,
     'num_kv_heads': 8,
     'head_dim': 128,
     'page_size': 16,
+    'pages_per_seq': 128,
 }
 
 
@@ -30,7 +31,7 @@ def create_inputs(dtype=jnp.bfloat16):
     num_kv_heads = CONFIG['num_kv_heads']
     head_dim = CONFIG['head_dim']
     page_size = CONFIG['page_size']
-    pages_per_seq = max_seq_len // page_size
+    pages_per_seq = CONFIG['pages_per_seq']
     total_pages = num_seqs * pages_per_seq
 
     # Each sequence has 1 query token (decode mode)
@@ -56,8 +57,8 @@ def workload(queries, k_pages, v_pages, kv_lens, page_indices, cu_q_lens):
     num_kv_heads = CONFIG['num_kv_heads']
     head_dim = CONFIG['head_dim']
     page_size = CONFIG['page_size']
-    max_seq_len = CONFIG['max_seq_len']
-    pages_per_seq = max_seq_len // page_size
+    max_seq_len = CONFIG['pages_per_seq'] * page_size
+    pages_per_seq = CONFIG['pages_per_seq']
     num_q_per_kv = num_q_heads // num_kv_heads
     sm_scale = head_dim ** -0.5
 

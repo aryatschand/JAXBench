@@ -2,7 +2,7 @@
 
 **Model:** Llama-3.1-70B
 
-SwiGLU feed-forward: gate + up projection with SiLU, then down projection.
+SwiGLU feed-forward layer.
 
 **Dimensions:** batch=1, seq_len=2048, emb_dim=8192, mlp_dim=28672
 
@@ -14,8 +14,8 @@ SwiGLU feed-forward: gate + up projection with SiLU, then down projection.
 
 ## Benchmark Results
 
-*TPU v6e-1, JAX 0.6.2, bfloat16, 100 iterations with 5 warmup*
+*TPU v6e-1 (us-east5-a), JAX 0.6.2, bfloat16, 100 iterations, 5 warmup*
 
-| Variant | Time (ms) | Std (ms) | TFLOPS | vs Baseline |
-|---------|----------:|----------:|-------:|------------:|
-| baseline | 4.0781 | 0.0082 | 707.74 | 1.00x |
+| Variant | Time (ms) | Std (ms) | vs Baseline |
+|---------|----------:|----------:|------------:|
+| baseline | 4.0748 | 0.0086 | 1.00x |

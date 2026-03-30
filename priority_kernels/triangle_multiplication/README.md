@@ -2,7 +2,7 @@
 
 **Model:** AlphaFold2
 
-Triangle multiplication (outgoing) with gated projections.
+Triangle multiplication (outgoing).
 
 **Dimensions:** N=768, C=64
 
@@ -14,8 +14,8 @@ Triangle multiplication (outgoing) with gated projections.
 
 ## Benchmark Results
 
-*TPU v6e-1, JAX 0.6.2, bfloat16, 100 iterations with 5 warmup*
+*TPU v6e-1 (us-east5-a), JAX 0.6.2, bfloat16, 100 iterations, 5 warmup*
 
-| Variant | Time (ms) | Std (ms) | TFLOPS | vs Baseline |
-|---------|----------:|----------:|-------:|------------:|
-| baseline | 1.3181 | 0.0313 | 65.98 | 1.00x |
+| Variant | Time (ms) | Std (ms) | vs Baseline |
+|---------|----------:|----------:|------------:|
+| baseline | 1.3130 | 0.0170 | 1.00x |

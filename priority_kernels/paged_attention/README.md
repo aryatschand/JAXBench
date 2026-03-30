@@ -2,24 +2,22 @@
 
 **Model:** Llama-3.1-70B
 
-Paged KV-cache attention for inference decode with GQA.
+Paged KV-cache decode attention.
 
-**Dimensions:** num_seqs=16, max_seq_len=2048, 64 query heads, 8 KV heads
+**Dimensions:** batch=32, 64 query heads, 8 KV heads, 128 pages/seq
 
 ## Variants
 
 | Variant | Description |
 |---------|-------------|
 | baseline | Vanilla JAX implementation |
-| optimized | `jax.nn.dot_product_attention` for decode attention step |
-| pallas | `jax.experimental.pallas.ops.tpu.paged_attention` |
+| pallas | Pallas paged attention with async DMA |
 
 ## Benchmark Results
 
-*TPU v6e-1, JAX 0.6.2, bfloat16, 100 iterations with 5 warmup*
+*TPU v6e-1 (us-east5-a), JAX 0.6.2, bfloat16, 100 iterations, 5 warmup*
 
-| Variant | Time (ms) | Std (ms) | TFLOPS | vs Baseline |
-|---------|----------:|----------:|-------:|------------:|
-| baseline | 1.0423 | 0.0512 | 1.03 | 1.00x |
-| optimized | 1.5580 | 0.0079 | 0.69 | 0.67x |
-| pallas | 0.9242 | 0.0052 | 2.32 | 1.13x |
+| Variant | Time (ms) | Std (ms) | vs Baseline |
+|---------|----------:|----------:|------------:|
+| baseline | 1.9649 | 0.0050 | 1.00x |
+| pallas | 1.0212 | 0.0055 | **1.9x** |

@@ -2,7 +2,7 @@
 
 **Model:** Llama-3.1-70B
 
-Dense bfloat16 matrix multiplication at Llama-3.1-70B hidden-to-FFN scale.
+Dense bfloat16 matrix multiplication.
 
 **Dimensions:** M=8192, K=8192, N=28672
 
@@ -11,13 +11,13 @@ Dense bfloat16 matrix multiplication at Llama-3.1-70B hidden-to-FFN scale.
 | Variant | Description |
 |---------|-------------|
 | baseline | Vanilla JAX implementation |
-| pallas | `jax.experimental.pallas.ops.tpu.matmul` |
+| pallas | Pallas tiled matmul with autotuned block sizes |
 
 ## Benchmark Results
 
-*TPU v6e-1, JAX 0.6.2, bfloat16, 100 iterations with 5 warmup*
+*TPU v6e-1 (us-east5-a), JAX 0.6.2, bfloat16, 100 iterations, 5 warmup*
 
-| Variant | Time (ms) | Std (ms) | TFLOPS | vs Baseline |
-|---------|----------:|----------:|-------:|------------:|
-| baseline | 5.4879 | 0.0092 | 701.23 | 1.00x |
-| pallas | 22.6375 | 0.0189 | 170.00 | 0.24x |
+| Variant | Time (ms) | Std (ms) | vs Baseline |
+|---------|----------:|----------:|------------:|
+| baseline | 5.4830 | 0.0125 | 1.00x |
+| pallas | 5.6237 | 0.2648 | 0.97x |
