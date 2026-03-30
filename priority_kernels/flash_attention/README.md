@@ -11,13 +11,13 @@ Causal multi-head attention.
 | Variant | Description |
 |---------|-------------|
 | baseline | Vanilla JAX implementation |
-| pallas | Pallas flash attention with autotuned block sizes |
+| pallas | Pallas flash attention with autotuned block sizes (bq=2048, bk=512) |
 
 ## Benchmark Results
 
-*TPU v6e-1 (us-east5-a), JAX 0.6.2, bfloat16, 100 iterations, 5 warmup*
+*TPU v6e-1, JAX 0.6.2, bfloat16, 100 iterations, 5 warmup*
 
-| Variant | Time (ms) | Std (ms) | vs Baseline |
-|---------|----------:|----------:|------------:|
+| Variant | Time (ms) | Std (ms) | Speedup |
+|---------|----------:|----------:|--------:|
 | baseline | 1.4919 | 0.2812 | 1.00x |
 | pallas | 0.6212 | 0.0045 | **2.4x** |

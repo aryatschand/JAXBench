@@ -14,8 +14,8 @@ Sparse MoE with top-2 routing, 8 experts.
 
 ## Benchmark Results
 
-*TPU v6e-1 (us-east5-a), JAX 0.6.2, bfloat16, 100 iterations, 5 warmup*
+*TPU v6e-1, JAX 0.6.2, bfloat16, 100 iterations, 5 warmup*
 
-| Variant | Time (ms) | Std (ms) | vs Baseline |
-|---------|----------:|----------:|------------:|
+| Variant | Time (ms) | Std (ms) | Speedup |
+|---------|----------:|----------:|--------:|
 | baseline | 8.2921 | 0.0103 | 1.00x |

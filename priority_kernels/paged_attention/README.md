@@ -11,13 +11,13 @@ Paged KV-cache decode attention.
 | Variant | Description |
 |---------|-------------|
 | baseline | Vanilla JAX implementation |
-| pallas | Pallas paged attention with async DMA |
+| pallas | Pallas paged attention with async DMA (64 pages/block) |
 
 ## Benchmark Results
 
-*TPU v6e-1 (us-east5-a), JAX 0.6.2, bfloat16, 100 iterations, 5 warmup*
+*TPU v6e-1, JAX 0.6.2, bfloat16, 100 iterations, 5 warmup*
 
-| Variant | Time (ms) | Std (ms) | vs Baseline |
-|---------|----------:|----------:|------------:|
+| Variant | Time (ms) | Std (ms) | Speedup |
+|---------|----------:|----------:|--------:|
 | baseline | 1.9649 | 0.0050 | 1.00x |
 | pallas | 1.0212 | 0.0055 | **1.9x** |

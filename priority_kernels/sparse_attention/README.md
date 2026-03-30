@@ -11,13 +11,13 @@ Causal GQA attention (splash baseline).
 | Variant | Description |
 |---------|-------------|
 | baseline | Vanilla JAX implementation |
-| pallas | Pallas splash attention with autotuned block sizes |
+| pallas | Pallas splash attention with autotuned block sizes (bq=2048, bkv=2048) |
 
 ## Benchmark Results
 
-*TPU v6e-1 (us-east5-a), JAX 0.6.2, bfloat16, 100 iterations, 5 warmup*
+*TPU v6e-1, JAX 0.6.2, bfloat16, 100 iterations, 5 warmup*
 
-| Variant | Time (ms) | Std (ms) | vs Baseline |
-|---------|----------:|----------:|------------:|
+| Variant | Time (ms) | Std (ms) | Speedup |
+|---------|----------:|----------:|--------:|
 | baseline | 1.4998 | 0.2690 | 1.00x |
 | pallas | 0.6649 | 0.0046 | **2.3x** |

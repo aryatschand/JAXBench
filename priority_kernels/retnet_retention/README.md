@@ -14,8 +14,8 @@ Multi-scale retention with exponential decay.
 
 ## Benchmark Results
 
-*TPU v6e-1 (us-east5-a), JAX 0.6.2, bfloat16, 100 iterations, 5 warmup*
+*TPU v6e-1, JAX 0.6.2, bfloat16, 100 iterations, 5 warmup*
 
-| Variant | Time (ms) | Std (ms) | vs Baseline |
-|---------|----------:|----------:|------------:|
+| Variant | Time (ms) | Std (ms) | Speedup |
+|---------|----------:|----------:|--------:|
 | baseline | 0.5200 | 0.0146 | 1.00x |

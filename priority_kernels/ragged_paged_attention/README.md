@@ -11,13 +11,13 @@ Variable-length paged attention.
 | Variant | Description |
 |---------|-------------|
 | baseline | Vanilla JAX implementation |
-| pallas | Pallas ragged paged attention with async DMA |
+| pallas | Pallas ragged paged attention with async DMA (32 pages/block) |
 
 ## Benchmark Results
 
-*TPU v6e-1 (us-east5-a), JAX 0.6.2, bfloat16, 100 iterations, 5 warmup*
+*TPU v6e-1, JAX 0.6.2, bfloat16, 100 iterations, 5 warmup*
 
-| Variant | Time (ms) | Std (ms) | vs Baseline |
-|---------|----------:|----------:|------------:|
+| Variant | Time (ms) | Std (ms) | Speedup |
+|---------|----------:|----------:|--------:|
 | baseline | 191.9868 | 1.3604 | 1.00x |
 | pallas | 0.8649 | 0.0058 | **222.0x** |

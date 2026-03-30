@@ -11,13 +11,13 @@ Dense bfloat16 matrix multiplication.
 | Variant | Description |
 |---------|-------------|
 | baseline | Vanilla JAX implementation |
-| pallas | Pallas tiled matmul with autotuned block sizes |
+| pallas | Pallas tiled matmul with autotuned block sizes (1024x2048, bk=1024) |
 
 ## Benchmark Results
 
-*TPU v6e-1 (us-east5-a), JAX 0.6.2, bfloat16, 100 iterations, 5 warmup*
+*TPU v6e-1, JAX 0.6.2, bfloat16, 100 iterations, 5 warmup*
 
-| Variant | Time (ms) | Std (ms) | vs Baseline |
-|---------|----------:|----------:|------------:|
+| Variant | Time (ms) | Std (ms) | Speedup |
+|---------|----------:|----------:|--------:|
 | baseline | 5.4830 | 0.0125 | 1.00x |
 | pallas | 5.6237 | 0.2648 | 0.97x |
