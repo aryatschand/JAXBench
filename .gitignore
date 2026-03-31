@@ -57,3 +57,10 @@ Thumbs.db
 
 # Environment
 .env
+
+# full-archive branch: slim-main paths — keep local copies, not tracked here
+/pallas_kernels/
+/torch_to_jax/
+/benchmarks.json
+/run_priority_benchmarks.py
+/validate_kernels_modal.py
