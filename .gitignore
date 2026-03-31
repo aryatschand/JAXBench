@@ -46,10 +46,9 @@ logs/
 *.log
 outputs/
 
-# JSON (ignore all except root benchmarks.json)
+# JSON (generated results / dumps)
 *.json
 !package.json
-!benchmarks.json
 
 # OS
 .DS_Store
