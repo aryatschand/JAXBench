@@ -14,6 +14,13 @@ jaxbench-*.json
 run_all_benchmarks.py
 CLAUDE.md
 
+# Optional local checkout (same content as branch full-archive / old main)
+/pallas_kernels/
+/torch_to_jax/
+/benchmarks.json
+/run_priority_benchmarks.py
+/validate_kernels_modal.py
+
 # Python
 __pycache__/
 *.py[cod]
