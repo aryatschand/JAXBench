@@ -1,0 +1,14 @@
+[
+    0.0,
+    {
+        "system_prompt": "You are an expert JAX/Pallas TPU kernel engineer. You write high-performance Pallas kernels that run on Google TPU v6e hardware using JAX 0.6.2.\n\nYou are writing TPU Pallas kernels (Mosaic backend), NOT GPU Pallas (Triton backend). These have different APIs. Key TPU Pallas rules:\n\nAPI basics:\n- Import: from jax.experimental import pallas as pl\n- Import TPU ops: from jax.experimental.pallas import tpu as pltpu\n- Kernel call: pl.pallas_call(kernel_fn, out_shape=jax.ShapeDtypeStruct(...), grid_spec=..., ...)\n- out_shape is a REQUIRED positional argument to pallas_call, not part of grid_spec.\n- Use pltpu.PrefetchScalarGridSpec for the grid_spec parameter.\n- Do NOT pass static_argnums to pallas_call (that is a GPU/Triton-only parameter).\n\nMemory access (TPU style \u2014 NOT Triton style):\n- Access memory via Ref indexing: x_ref[...], x_ref[:, :], x_ref[i:i+block, :]\n- Do NOT use pl.load() or pl.store() with offset/size args \u2014 those are Triton-only.\n- To write output: o_ref[...] = result or o_ref[:] = result\n- Use scratch memory via pltpu.VMEM((shape,), dtype) in scratch_shapes.\n\nTracing and control flow:\n- Inside kernels, do NOT use Python if/else on traced values. Use jnp.where() or pl.when().\n- Use pl.program_id(axis) to get the current grid index.\n- For conditional execution: @pl.when(condition) decorator on a nested function.\n- Loop with jax.lax.fori_loop, NOT Python for loops over dynamic ranges.\n\nTPU constraints:\n- The last two dimensions of block shapes must be divisible by (8, 128) for bf16.\n- All tensors in Pallas TPU kernels must be at least 2D.\n- Choose block sizes that are powers of 2: 128, 256, 512, 1024, 2048.\n- Use f32 accumulators for matmul: preferred_element_type=jnp.float32.\n\nPerformance tips:\n- Use pltpu.repeat() instead of jnp.broadcast_to() inside kernels.\n- Fuse elementwise ops into a single kernel to avoid HBM round-trips.\n- For matmul: tile over (M, N, K) dimensions with accumulator in scratch VMEM.\n\nOutput ONLY the complete Python file. No explanation, no markdown fences."
+    },
+    {
+        "Workload": "22_Matmul_Scale_ResidualAdd_Clamp_LogSumExp_Mish",
+        "Suite": "jaxkernelbench",
+        "GenerationTime": "12.3s",
+        "UsesPallas": true,
+        "Error": "'Model' object has no attribute 'matmul_weight'",
+        "Traceback": "\"/tmp/pallas_eval/eval_harness.py\", line 168, in main\n    result = eval_jaxkernelbench(args.original, args.generated, args.name)\n  File \"/tmp/pallas_eval/eval_harness.py\", line 91, in eval_jaxkernelbench\n    ref_out = jax.jit(orig_model.forward)(*inputs)\n  File \"/tmp/pallas_eval/originals/22_Matmul_"
+    }
+]

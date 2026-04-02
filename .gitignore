@@ -2,7 +2,7 @@
 evaluation/
 infrastructure/
 tests/
-results/
+/results/
 pallas_optimization/
 inference_speedup/
 real_workloads/
@@ -49,6 +49,9 @@ outputs/
 # JSON (generated results / dumps)
 *.json
 !package.json
+!pallas_eval/results/*.json
+!pallas_eval/generated/generation_log.json
+!pallas_eval/gepa_runs/**/*.json
 
 # OS
 .DS_Store

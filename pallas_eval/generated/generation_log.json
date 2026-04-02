@@ -1,0 +1,1304 @@
+[
+  {
+    "name": "100_HingeLoss",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 152.8
+  },
+  {
+    "name": "10_3D_tensor_matrix_multiplication",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 150.2
+  },
+  {
+    "name": "11_4D_tensor_matrix_multiplication",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 183.7
+  },
+  {
+    "name": "12_Matmul_with_diagonal_matrices_",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 62.8
+  },
+  {
+    "name": "13_Matmul_for_symmetric_matrices",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 136.4
+  },
+  {
+    "name": "14_Matmul_for_upper_triangular_matrices",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 157.6
+  },
+  {
+    "name": "15_Matmul_for_lower_triangular_matrices",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 151.9
+  },
+  {
+    "name": "16_Matmul_with_transposed_A",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 154.8
+  },
+  {
+    "name": "17_Matmul_with_transposed_B",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 206.8
+  },
+  {
+    "name": "18_Matmul_with_transposed_both",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 152.7
+  },
+  {
+    "name": "19_ReLU",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 49.9
+  },
+  {
+    "name": "1_Square_matrix_multiplication_",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 123.7
+  },
+  {
+    "name": "20_LeakyReLU",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 100.4
+  },
+  {
+    "name": "21_Sigmoid",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 58.4
+  },
+  {
+    "name": "22_Tanh",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 34.9
+  },
+  {
+    "name": "23_Softmax",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 150.2
+  },
+  {
+    "name": "24_LogSoftmax",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 150.6
+  },
+  {
+    "name": "25_Swish",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 87.4
+  },
+  {
+    "name": "26_GELU_",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 92.1
+  },
+  {
+    "name": "27_SELU_",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 78.6
+  },
+  {
+    "name": "28_HardSigmoid",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 60.1
+  },
+  {
+    "name": "29_Softplus",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 89.4
+  },
+  {
+    "name": "2_Standard_matrix_multiplication_",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 131.7
+  },
+  {
+    "name": "30_Softsign",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 65.4
+  },
+  {
+    "name": "31_ELU",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 90.1
+  },
+  {
+    "name": "32_HardTanh",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 43.1
+  },
+  {
+    "name": "33_BatchNorm",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 161.9
+  },
+  {
+    "name": "34_InstanceNorm",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 124.7
+  },
+  {
+    "name": "35_GroupNorm_",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 124.4
+  },
+  {
+    "name": "36_RMSNorm_",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 192.6
+  },
+  {
+    "name": "37_FrobeniusNorm_",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 148.0
+  },
+  {
+    "name": "38_L1Norm_",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 84.1
+  },
+  {
+    "name": "39_L2Norm_",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 63.2
+  },
+  {
+    "name": "3_Batched_matrix_multiplication",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 148.4
+  },
+  {
+    "name": "40_LayerNorm",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 148.8
+  },
+  {
+    "name": "41_Max_Pooling_1D",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 156.5
+  },
+  {
+    "name": "42_Max_Pooling_2D",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 278.5
+  },
+  {
+    "name": "43_Max_Pooling_3D",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 145.8
+  },
+  {
+    "name": "44_Average_Pooling_1D",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 144.9
+  },
+  {
+    "name": "45_Average_Pooling_2D",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 166.4
+  },
+  {
+    "name": "46_Average_Pooling_3D",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 156.0
+  },
+  {
+    "name": "47_Sum_reduction_over_a_dimension",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 135.0
+  },
+  {
+    "name": "48_Mean_reduction_over_a_dimension",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 126.7
+  },
+  {
+    "name": "49_Max_reduction_over_a_dimension",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 148.0
+  },
+  {
+    "name": "4_Matrix_vector_multiplication_",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 150.9
+  },
+  {
+    "name": "50_conv_standard_2D__square_input__square_kernel",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 150.1
+  },
+  {
+    "name": "51_Argmax_over_a_dimension",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 145.9
+  },
+  {
+    "name": "52_Argmin_over_a_dimension",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 143.2
+  },
+  {
+    "name": "53_Min_reduction_over_a_dimension",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 154.3
+  },
+  {
+    "name": "54_conv_standard_3D__square_input__square_kernel",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 188.8
+  },
+  {
+    "name": "55_conv_standard_2D__asymmetric_input__square_kernel",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 153.8
+  },
+  {
+    "name": "56_conv_standard_2D__asymmetric_input__asymmetric_kernel",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 148.7
+  },
+  {
+    "name": "57_conv_transposed_2D__square_input__square_kernel",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 116.9
+  },
+  {
+    "name": "58_conv_transposed_3D__asymmetric_input__asymmetric_kernel",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 147.5
+  },
+  {
+    "name": "59_conv_standard_3D__asymmetric_input__square_kernel",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 163.9
+  },
+  {
+    "name": "5_Matrix_scalar_multiplication",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 78.1
+  },
+  {
+    "name": "60_conv_standard_3D__square_input__asymmetric_kernel",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 153.0
+  },
+  {
+    "name": "61_conv_transposed_3D__square_input__square_kernel",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 143.7
+  },
+  {
+    "name": "62_conv_standard_2D__square_input__asymmetric_kernel",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 149.5
+  },
+  {
+    "name": "63_conv_standard_2D__square_input__square_kernel",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 262.8
+  },
+  {
+    "name": "64_conv_transposed_1D",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 149.2
+  },
+  {
+    "name": "65_conv_transposed_2D__square_input__asymmetric_kernel",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 146.7
+  },
+  {
+    "name": "66_conv_standard_3D__asymmetric_input__asymmetric_kernel",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 150.4
+  },
+  {
+    "name": "67_conv_standard_1D",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 159.4
+  },
+  {
+    "name": "68_conv_transposed_3D__square_input__asymmetric_kernel",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 147.8
+  },
+  {
+    "name": "69_conv_transposed_2D__asymmetric_input__asymmetric_kernel",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 140.7
+  },
+  {
+    "name": "6_Matmul_with_large_K_dimension_",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 155.1
+  },
+  {
+    "name": "70_conv_transposed_3D__asymmetric_input__square_kernel",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 149.1
+  },
+  {
+    "name": "71_conv_transposed_2D__asymmetric_input__square_kernel",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 145.1
+  },
+  {
+    "name": "72_conv_transposed_3D_asymmetric_input_asymmetric_kernel___strided_padded_grouped_",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 139.2
+  },
+  {
+    "name": "73_conv_transposed_3D_asymmetric_input_square_kernel__strided_padded__grouped",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 139.9
+  },
+  {
+    "name": "74_conv_transposed_1D_dilated",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 142.9
+  },
+  {
+    "name": "75_conv_transposed_2D_asymmetric_input_asymmetric_kernel_strided__grouped____padded____dilated__",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 141.7
+  },
+  {
+    "name": "76_conv_standard_1D_dilated_strided__",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 265.1
+  },
+  {
+    "name": "77_conv_transposed_3D_square_input_square_kernel___padded____dilated____strided__",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 137.9
+  },
+  {
+    "name": "78_conv_transposed_2D_asymmetric_input_asymmetric_kernel___padded__",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 142.6
+  },
+  {
+    "name": "79_conv_transposed_1D_asymmetric_input_square_kernel___padded____strided____dilated__",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 149.5
+  },
+  {
+    "name": "7_Matmul_with_small_K_dimension_",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 64.8
+  },
+  {
+    "name": "80_conv_standard_2D_square_input_asymmetric_kernel___dilated____padded__",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 143.0
+  },
+  {
+    "name": "81_conv_transposed_2D_asymmetric_input_square_kernel___dilated____padded____strided__",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 212.8
+  },
+  {
+    "name": "82_conv_depthwise_2D_square_input_square_kernel",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 295.4
+  },
+  {
+    "name": "83_conv_depthwise_2D_square_input_asymmetric_kernel",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 142.0
+  },
+  {
+    "name": "84_conv_depthwise_2D_asymmetric_input_square_kernel",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 238.8
+  },
+  {
+    "name": "85_conv_depthwise_2D_asymmetric_input_asymmetric_kernel",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 148.2
+  },
+  {
+    "name": "86_conv_depthwise_separable_2D",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 148.9
+  },
+  {
+    "name": "87_conv_pointwise_2D",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 139.1
+  },
+  {
+    "name": "88_MinGPTNewGelu",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 30.4
+  },
+  {
+    "name": "89_cumsum",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 138.0
+  },
+  {
+    "name": "8_Matmul_with_irregular_shapes_",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 107.6
+  },
+  {
+    "name": "90_cumprod",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 143.2
+  },
+  {
+    "name": "91_cumsum_reverse",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 106.1
+  },
+  {
+    "name": "92_cumsum_exclusive",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 154.2
+  },
+  {
+    "name": "93_masked_cumsum",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 129.9
+  },
+  {
+    "name": "94_MSELoss",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 131.5
+  },
+  {
+    "name": "95_CrossEntropyLoss",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 113.5
+  },
+  {
+    "name": "96_HuberLoss",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 121.3
+  },
+  {
+    "name": "97_ScaledDotProductAttention",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 107.2
+  },
+  {
+    "name": "98_KLDivLoss",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 101.0
+  },
+  {
+    "name": "99_TripletMarginLoss",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 144.3
+  },
+  {
+    "name": "9_Tall_skinny_matrix_multiplication_",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 137.1
+  },
+  {
+    "name": "100_ConvTranspose3d_Clamp_Min_Divide",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 146.2
+  },
+  {
+    "name": "10_ConvTranspose2d_MaxPool_Hardtanh_Mean_Tanh",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 146.5
+  },
+  {
+    "name": "11_ConvTranspose2d_BatchNorm_Tanh_MaxPool_GroupNorm",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 144.7
+  },
+  {
+    "name": "12_Gemm_Multiply_LeakyReLU",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 136.3
+  },
+  {
+    "name": "13_ConvTranspose3d_Mean_Add_Softmax_Tanh_Scaling",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 139.7
+  },
+  {
+    "name": "14_Gemm_Divide_Sum_Scaling",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 150.3
+  },
+  {
+    "name": "15_ConvTranspose3d_BatchNorm_Subtract",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 150.0
+  },
+  {
+    "name": "16_ConvTranspose2d_Mish_Add_Hardtanh_Scaling",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 119.9
+  },
+  {
+    "name": "17_Conv2d_InstanceNorm_Divide",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 143.8
+  },
+  {
+    "name": "18_Matmul_Sum_Max_AvgPool_LogSumExp_LogSumExp",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 142.0
+  },
+  {
+    "name": "19_ConvTranspose2d_GELU_GroupNorm",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 149.4
+  },
+  {
+    "name": "1_Conv2D_ReLU_BiasAdd",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 321.3
+  },
+  {
+    "name": "20_ConvTranspose3d_Sum_ResidualAdd_Multiply_ResidualAdd",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 139.4
+  },
+  {
+    "name": "21_Conv2d_Add_Scale_Sigmoid_GroupNorm",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 171.2
+  },
+  {
+    "name": "22_Matmul_Scale_ResidualAdd_Clamp_LogSumExp_Mish",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 250.6
+  },
+  {
+    "name": "23_Conv3d_GroupNorm_Mean",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 147.3
+  },
+  {
+    "name": "24_Conv3d_Min_Softmax",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 138.7
+  },
+  {
+    "name": "25_Conv2d_Min_Tanh_Tanh",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 145.3
+  },
+  {
+    "name": "26_ConvTranspose3d_Add_HardSwish",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 108.0
+  },
+  {
+    "name": "27_Conv3d_HardSwish_GroupNorm_Mean",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 141.1
+  },
+  {
+    "name": "28_BMM_InstanceNorm_Sum_ResidualAdd_Multiply",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 97.9
+  },
+  {
+    "name": "29_Matmul_Mish_Mish",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 146.7
+  },
+  {
+    "name": "2_ConvTranspose2d_BiasAdd_Clamp_Scaling_Clamp_Divide",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 142.1
+  },
+  {
+    "name": "30_Gemm_GroupNorm_Hardtanh",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 121.6
+  },
+  {
+    "name": "31_Conv2d_Min_Add_Multiply",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 144.5
+  },
+  {
+    "name": "32_Conv2d_Scaling_Min",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 142.6
+  },
+  {
+    "name": "33_Gemm_Scale_BatchNorm",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 138.9
+  },
+  {
+    "name": "34_ConvTranspose3d_LayerNorm_GELU_Scaling",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 144.3
+  },
+  {
+    "name": "35_Conv2d_Subtract_HardSwish_MaxPool_Mish",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 144.4
+  },
+  {
+    "name": "36_ConvTranspose2d_Min_Sum_GELU_Add",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 143.3
+  },
+  {
+    "name": "37_Matmul_Swish_Sum_GroupNorm",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 124.5
+  },
+  {
+    "name": "38_ConvTranspose3d_AvgPool_Clamp_Softmax_Multiply",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 158.8
+  },
+  {
+    "name": "39_Gemm_Scale_BatchNorm",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 150.3
+  },
+  {
+    "name": "3_ConvTranspose3d_Sum_LayerNorm_AvgPool_GELU",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 144.5
+  },
+  {
+    "name": "40_Matmul_Scaling_ResidualAdd",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 159.0
+  },
+  {
+    "name": "41_Gemm_BatchNorm_GELU_ReLU",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 140.7
+  },
+  {
+    "name": "42_ConvTranspose2d_GlobalAvgPool_BiasAdd_LogSumExp_Sum_Multiply",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 143.3
+  },
+  {
+    "name": "43_Conv3d_Max_LogSumExp_ReLU",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 145.8
+  },
+  {
+    "name": "44_ConvTranspose2d_Multiply_GlobalAvgPool_GlobalAvgPool_Mean",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 141.4
+  },
+  {
+    "name": "45_Gemm_Sigmoid_LogSumExp",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 150.5
+  },
+  {
+    "name": "46_Conv2d_Subtract_Tanh_Subtract_AvgPool",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 148.1
+  },
+  {
+    "name": "47_Conv3d_Mish_Tanh",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 141.7
+  },
+  {
+    "name": "48_Conv3d_Scaling_Tanh_Multiply_Sigmoid",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 127.5
+  },
+  {
+    "name": "49_ConvTranspose3d_Softmax_Sigmoid",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 136.2
+  },
+  {
+    "name": "4_Conv2d_Mish_Mish",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 129.4
+  },
+  {
+    "name": "50_ConvTranspose3d_Scaling_AvgPool_BiasAdd_Scaling",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 144.9
+  },
+  {
+    "name": "51_Gemm_Subtract_GlobalAvgPool_LogSumExp_GELU_ResidualAdd",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 150.9
+  },
+  {
+    "name": "52_Conv2d_Activation_BatchNorm",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 145.0
+  },
+  {
+    "name": "53_Gemm_Scaling_Hardtanh_GELU",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 148.7
+  },
+  {
+    "name": "54_Conv2d_Multiply_LeakyReLU_GELU",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 211.5
+  },
+  {
+    "name": "55_Matmul_MaxPool_Sum_Scale",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 146.2
+  },
+  {
+    "name": "56_Matmul_Sigmoid_Sum",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 156.8
+  },
+  {
+    "name": "57_Conv2d_ReLU_HardSwish",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 218.4
+  },
+  {
+    "name": "58_ConvTranspose3d_LogSumExp_HardSwish_Subtract_Clamp",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 145.5
+  },
+  {
+    "name": "59_Matmul_Swish_Scaling",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 137.4
+  },
+  {
+    "name": "5_ConvTranspose2d_Subtract_Tanh",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 224.8
+  },
+  {
+    "name": "60_ConvTranspose3d_Swish_GroupNorm_HardSwish",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 149.2
+  },
+  {
+    "name": "61_ConvTranspose3d_ReLU_GroupNorm",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 151.0
+  },
+  {
+    "name": "62_Matmul_GroupNorm_LeakyReLU_Sum",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 152.0
+  },
+  {
+    "name": "63_Gemm_ReLU_Divide",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 279.4
+  },
+  {
+    "name": "64_Gemm_LogSumExp_LeakyReLU_LeakyReLU_GELU_GELU",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 148.2
+  },
+  {
+    "name": "65_Conv2d_AvgPool_Sigmoid_Sum",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 130.8
+  },
+  {
+    "name": "66_Matmul_Dropout_Softmax",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 151.4
+  },
+  {
+    "name": "67_Conv2d_GELU_GlobalAvgPool",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 145.4
+  },
+  {
+    "name": "68_Matmul_Min_Subtract",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 152.4
+  },
+  {
+    "name": "69_Conv2d_HardSwish_ReLU",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 137.6
+  },
+  {
+    "name": "6_Conv3d_Softmax_MaxPool_MaxPool",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 273.9
+  },
+  {
+    "name": "70_Gemm_Sigmoid_Scaling_ResidualAdd",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 144.7
+  },
+  {
+    "name": "71_Conv2d_Divide_LeakyReLU",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 145.8
+  },
+  {
+    "name": "72_ConvTranspose3d_BatchNorm_AvgPool_AvgPool",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 144.2
+  },
+  {
+    "name": "73_Conv2d_BatchNorm_Scaling",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 138.9
+  },
+  {
+    "name": "74_ConvTranspose3d_LeakyReLU_Multiply_LeakyReLU_Max",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 124.7
+  },
+  {
+    "name": "75_Gemm_GroupNorm_Min_BiasAdd",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 132.5
+  },
+  {
+    "name": "76_Gemm_Add_ReLU",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 153.5
+  },
+  {
+    "name": "77_ConvTranspose3d_Scale_BatchNorm_GlobalAvgPool",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 154.2
+  },
+  {
+    "name": "78_ConvTranspose3d_Max_Max_Sum",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 147.0
+  },
+  {
+    "name": "79_Conv3d_Multiply_InstanceNorm_Clamp_Multiply_Max",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 146.5
+  },
+  {
+    "name": "7_Conv3d_ReLU_LeakyReLU_GELU_Sigmoid_BiasAdd",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 142.1
+  },
+  {
+    "name": "80_Gemm_Max_Subtract_GELU",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 144.2
+  },
+  {
+    "name": "81_Gemm_Swish_Divide_Clamp_Tanh_Clamp",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 114.7
+  },
+  {
+    "name": "82_Conv2d_Tanh_Scaling_BiasAdd_Max",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 145.9
+  },
+  {
+    "name": "83_Conv3d_GroupNorm_Min_Clamp_Dropout",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 140.2
+  },
+  {
+    "name": "84_Gemm_BatchNorm_Scaling_Softmax",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 136.5
+  },
+  {
+    "name": "85_Conv2d_GroupNorm_Scale_MaxPool_Clamp",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 171.7
+  },
+  {
+    "name": "86_Matmul_Divide_GELU",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 131.8
+  },
+  {
+    "name": "87_Conv2d_Subtract_Subtract_Mish",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 175.1
+  },
+  {
+    "name": "88_Gemm_GroupNorm_Swish_Multiply_Swish",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 142.2
+  },
+  {
+    "name": "89_ConvTranspose3d_MaxPool_Softmax_Subtract_Swish_Max",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 143.0
+  },
+  {
+    "name": "8_Conv3d_Divide_Max_GlobalAvgPool_BiasAdd_Sum",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 159.9
+  },
+  {
+    "name": "90_Conv3d_LeakyReLU_Sum_Clamp_GELU",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 144.8
+  },
+  {
+    "name": "91_ConvTranspose2d_Softmax_BiasAdd_Scaling_Sigmoid",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 145.8
+  },
+  {
+    "name": "92_Conv2d_GroupNorm_Tanh_HardSwish_ResidualAdd_LogSumExp",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 144.7
+  },
+  {
+    "name": "93_ConvTranspose2d_Add_Min_GELU_Multiply",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 131.3
+  },
+  {
+    "name": "94_Gemm_BiasAdd_Hardtanh_Mish_GroupNorm",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 145.9
+  },
+  {
+    "name": "95_Matmul_Add_Swish_Tanh_GELU_Hardtanh",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 152.1
+  },
+  {
+    "name": "96_ConvTranspose3d_Multiply_Max_GlobalAvgPool_Clamp",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 161.9
+  },
+  {
+    "name": "97_Matmul_BatchNorm_BiasAdd_Divide_Swish",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 145.0
+  },
+  {
+    "name": "98_Matmul_AvgPool_GELU_Scale_Max",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 247.5
+  },
+  {
+    "name": "99_Matmul_GELU_Softmax",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 160.5
+  },
+  {
+    "name": "9_Matmul_Subtract_Multiply_ReLU",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 234.2
+  },
+  {
+    "name": "cross_entropy",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 151.4
+  },
+  {
+    "name": "flash_attention",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 144.5
+  },
+  {
+    "name": "flex_attention",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 145.0
+  },
+  {
+    "name": "gemm",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 150.8
+  },
+  {
+    "name": "gqa_attention",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 166.6
+  },
+  {
+    "name": "mamba2_ssd",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 142.9
+  },
+  {
+    "name": "megablox_gmm",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 152.0
+  },
+  {
+    "name": "mla_attention",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 142.2
+  },
+  {
+    "name": "paged_attention",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 143.3
+  },
+  {
+    "name": "ragged_dot",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 164.2
+  },
+  {
+    "name": "ragged_paged_attention",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 154.3
+  },
+  {
+    "name": "retnet_retention",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 197.2
+  },
+  {
+    "name": "rms_norm",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 93.0
+  },
+  {
+    "name": "sparse_attention",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 148.1
+  },
+  {
+    "name": "sparse_moe",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 153.7
+  },
+  {
+    "name": "swiglu_mlp",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 101.2
+  },
+  {
+    "name": "triangle_multiplication",
+    "model": "gemini3",
+    "status": "success",
+    "elapsed": 272.0
+  }
+]
