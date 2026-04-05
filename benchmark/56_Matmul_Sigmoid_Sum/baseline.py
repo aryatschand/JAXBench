@@ -1,40 +1,60 @@
-"""
-JAXBench Level 2 - Matmul_Sigmoid_Sum
-Translated from KernelBench PyTorch to JAX using bedrock/sonnet.
-"""
-
+"""56_Matmul_Sigmoid_Sum — JAXBench fused operator workload."""
 import jax
 import jax.numpy as jnp
 
-class Model:
-    def __init__(self, input_size, hidden_size):
-        self.weight = jnp.zeros((input_size, hidden_size))
-        self.bias = jnp.zeros(hidden_size)
+CONFIG = {
+    'name': '56_Matmul_Sigmoid_Sum',
+    'batch_size': 128,
+    'input_size': 32768,
+    'hidden_size': 32768,
+}
 
-    def set_weights(self, weights_dict):
-        for name, value in weights_dict.items():
-            setattr(self, name.replace('.', '_'), jnp.array(value))
 
-    def forward(self, x):
-        """
-        Args:
-            x: Input array of shape (batch_size, input_size).
-
-        Returns:
-            Output array of shape (batch_size, 1).
-        """
-        x = jnp.matmul(x, self.weight) + self.bias
-        x = jax.nn.sigmoid(x)
-        x = jnp.sum(x, axis=1, keepdims=True)
-        return x
-
-batch_size = 128
-input_size = 32768
-hidden_size = 32768
-
-def get_inputs():
+def create_inputs(dtype=jnp.float32):
+    """Create all inputs including weights."""
     key = jax.random.PRNGKey(0)
-    return [jax.random.uniform(key, shape=(batch_size, input_size))]
+    x = jax.random.uniform(key, (128, 32768), dtype=dtype)
+    weight = jnp.zeros((32768, 32768), dtype=dtype)
+    bias = jnp.zeros(32768, dtype=dtype)
+    return x, weight, bias
 
-def get_init_inputs():
-    return [input_size, hidden_size]
+
+def workload(x, weight, bias):
+    """Matmul + Sigmoid + Sum."""
+    x = jnp.matmul(x, weight) + bias
+    x = jax.nn.sigmoid(x)
+    x = jnp.sum(x, axis=1, keepdims=True)
+    return x
+
+def benchmark(num_warmup=5, num_iters=100):
+    """Benchmark and return results dict."""
+    import time
+    inputs = create_inputs()
+    fn = jax.jit(workload)
+    for _ in range(num_warmup):
+        out = fn(*inputs)
+        if hasattr(out, 'block_until_ready'):
+            out.block_until_ready()
+    times = []
+    for _ in range(num_iters):
+        t0 = time.perf_counter()
+        out = fn(*inputs)
+        if hasattr(out, 'block_until_ready'):
+            out.block_until_ready()
+        times.append(time.perf_counter() - t0)
+    import numpy as np
+    times_ms = np.array(times) * 1000
+    avg = float(np.mean(times_ms))
+    return {
+        'name': CONFIG['name'],
+        'config': {k: v for k, v in CONFIG.items() if k != 'name'},
+        'time_ms': round(avg, 4),
+        'std_ms': round(float(np.std(times_ms)), 4),
+        'output_shape': list(out.shape) if hasattr(out, 'shape') else [],
+        'status': 'success',
+    }
+
+
+if __name__ == '__main__':
+    import json
+    print(json.dumps(benchmark()))

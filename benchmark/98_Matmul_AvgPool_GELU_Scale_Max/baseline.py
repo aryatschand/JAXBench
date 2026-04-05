@@ -1,63 +1,80 @@
-"""
-JAXBench Level 2 - Matmul_AvgPool_GELU_Scale_Max
-Translated from KernelBench PyTorch to JAX using bedrock/sonnet.
-"""
-
+"""98_Matmul_AvgPool_GELU_Scale_Max — JAXBench fused operator workload."""
 import jax
 import jax.numpy as jnp
-from jax.nn import gelu
 
-class Model:
-    def __init__(self, in_features, out_features, pool_kernel_size, scale_factor):
-        self.weight = jnp.zeros((in_features, out_features))
-        self.bias = jnp.zeros(out_features)
-        self.pool_kernel_size = pool_kernel_size
-        self.scale_factor = scale_factor
+CONFIG = {
+    'name': '98_Matmul_AvgPool_GELU_Scale_Max',
+    'batch_size': 1024,
+    'in_features': 8192,
+    'out_features': 8192,
+    'pool_kernel_size': 16,
+    'scale_factor': 2.0,
+}
 
-    def set_weights(self, weights_dict):
-        for name, value in weights_dict.items():
-            setattr(self, name.replace('.', '_'), jnp.array(value))
 
-    def forward(self, x):
-        # Linear layer
-        x = jnp.matmul(x, self.weight) + self.bias
-        
-        # Reshape for 1D pooling
-        x = jnp.expand_dims(x, axis=1)
-        
-        # AvgPool1d using reduce_window
-        x = jax.lax.reduce_window(
-            x,
-            init_value=0.0,
-            computation=jax.lax.add,
-            window_dimensions=(1, 1, self.pool_kernel_size),
-            window_strides=(1, 1, self.pool_kernel_size),
-            padding='VALID'
-        ) / self.pool_kernel_size
-        
-        # Remove pooling dimension
-        x = jnp.squeeze(x, axis=1)
-        
-        # GELU activation
-        x = gelu(x)
-        
-        # Scale
-        x = x * self.scale_factor
-        
-        # Max along dim 1
-        x = jnp.max(x, axis=1)
-        
-        return x
-
-batch_size = 1024
-in_features = 8192
-out_features = 8192
-pool_kernel_size = 16
-scale_factor = 2.0
-
-def get_inputs():
+def create_inputs(dtype=jnp.float32):
+    """Create all inputs including weights."""
     key = jax.random.PRNGKey(0)
-    return [jax.random.uniform(key, shape=(batch_size, in_features))]
+    x = jax.random.uniform(key, (1024, 8192), dtype=dtype)
+    weight = jnp.zeros((8192, 8192), dtype=dtype)
+    bias = jnp.zeros(8192, dtype=dtype)
+    return x, weight, bias
 
-def get_init_inputs():
-    return [in_features, out_features, pool_kernel_size, scale_factor]
+
+def workload(x, weight, bias):
+    """Matmul + AvgPool1d + GELU + Scale + Max."""
+    pool_kernel_size = 16
+    scale_factor = 2.0
+    # Linear
+    x = jnp.matmul(x, weight) + bias
+    # AvgPool1d
+    x = jnp.expand_dims(x, axis=1)
+    x = jax.lax.reduce_window(
+        x,
+        init_value=0.0,
+        computation=jax.lax.add,
+        window_dimensions=(1, 1, pool_kernel_size),
+        window_strides=(1, 1, pool_kernel_size),
+        padding='VALID'
+    ) / pool_kernel_size
+    x = jnp.squeeze(x, axis=1)
+    # GELU
+    x = jax.nn.gelu(x)
+    # Scale
+    x = x * scale_factor
+    # Max
+    x = jnp.max(x, axis=1)
+    return x
+
+def benchmark(num_warmup=5, num_iters=100):
+    """Benchmark and return results dict."""
+    import time
+    inputs = create_inputs()
+    fn = jax.jit(workload)
+    for _ in range(num_warmup):
+        out = fn(*inputs)
+        if hasattr(out, 'block_until_ready'):
+            out.block_until_ready()
+    times = []
+    for _ in range(num_iters):
+        t0 = time.perf_counter()
+        out = fn(*inputs)
+        if hasattr(out, 'block_until_ready'):
+            out.block_until_ready()
+        times.append(time.perf_counter() - t0)
+    import numpy as np
+    times_ms = np.array(times) * 1000
+    avg = float(np.mean(times_ms))
+    return {
+        'name': CONFIG['name'],
+        'config': {k: v for k, v in CONFIG.items() if k != 'name'},
+        'time_ms': round(avg, 4),
+        'std_ms': round(float(np.std(times_ms)), 4),
+        'output_shape': list(out.shape) if hasattr(out, 'shape') else [],
+        'status': 'success',
+    }
+
+
+if __name__ == '__main__':
+    import json
+    print(json.dumps(benchmark()))

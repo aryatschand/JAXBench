@@ -1,114 +1,114 @@
-"""
-JAXBench Level 2 - ConvTranspose3d_LayerNorm_GELU_Scaling
-Translated from KernelBench PyTorch to JAX using bedrock/sonnet.
-"""
-
-"""
-JAXBench Level 2 - Task 34: ConvTranspose3d_LayerNorm_GELU_Scaling
-Manually implemented JAX version
-"""
-
+"""34_ConvTranspose3d_LayerNorm_GELU_Scaling — JAXBench fused operator workload."""
 import jax
 import jax.numpy as jnp
-from jax import lax
+import jax.lax as lax
 
-class Model:
-    """
-    Model that performs a 3D transposed convolution, layer normalization, GELU activation, and scaling.
-    """
-    def __init__(self, in_channels, out_channels, kernel_size, stride, padding, bias=True, eps=1e-5, scaling_factor=1.0):
-        self.in_channels = in_channels
-        self.out_channels = out_channels
-        self.kernel_size = kernel_size
-        self.stride = stride
-        self.padding = padding
-        self.use_bias = bias
-        self.eps = eps
-        self.scaling_factor = scaling_factor
+CONFIG = {
+    'name': '34_ConvTranspose3d_LayerNorm_GELU_Scaling',
+    'batch_size': 32,
+    'in_channels': 32,
+    'out_channels': 64,
+    'kernel_size': 4,
+    'stride': 2,
+    'padding': 1,
+    'bias': True,
+    'eps': 1e-05,
+    'scaling_factor': 1.0,
+}
 
-        # ConvTranspose3d weights - PyTorch shape: (in_channels, out_channels, kD, kH, kW)
-        key = jax.random.PRNGKey(0)
-        self.conv_transpose_weight = jax.random.normal(key, (in_channels, out_channels, kernel_size, kernel_size, kernel_size))
-        self.conv_transpose_bias = jnp.zeros((out_channels,)) if bias else None
 
-        # LayerNorm parameters (normalizes over out_channels dimension)
-        self.layer_norm_weight = jnp.ones((out_channels,))
-        self.layer_norm_bias = jnp.zeros((out_channels,))
-
-    def set_weights(self, weights_dict):
-        for name, value in weights_dict.items():
-            jax_name = name.replace('.', '_')
-            if hasattr(self, jax_name):
-                setattr(self, jax_name, jnp.array(value))
-
-    def forward(self, x):
-        # x: (N, C, D, H, W) in PyTorch format
-        # Convert to NDHWC for JAX
-        x = jnp.transpose(x, (0, 2, 3, 4, 1))  # NCDHW -> NDHWC
-
-        # ConvTranspose3d using manual approach matching level1/task77
-        kernel = jnp.transpose(self.conv_transpose_weight, (2, 3, 4, 1, 0))
-        kernel = jnp.flip(kernel, axis=(0, 1, 2))
-
-        batch_size, d_in, h_in, w_in, channels = x.shape
-        k = self.kernel_size
-
-        if self.stride > 1:
-            d_dilated = d_in + (d_in - 1) * (self.stride - 1)
-            h_dilated = h_in + (h_in - 1) * (self.stride - 1)
-            w_dilated = w_in + (w_in - 1) * (self.stride - 1)
-            x_dilated = jnp.zeros((batch_size, d_dilated, h_dilated, w_dilated, channels), dtype=x.dtype)
-            x_dilated = x_dilated.at[:, ::self.stride, ::self.stride, ::self.stride, :].set(x)
-            x = x_dilated
-
-        pad = k - 1 - self.padding
-        jax_padding = ((pad, pad), (pad, pad), (pad, pad))
-
-        x = lax.conv_general_dilated(
-            x, kernel,
-            window_strides=(1, 1, 1),
-            padding=jax_padding,
-            dimension_numbers=('NDHWC', 'DHWOI', 'NDHWC')
-        )
-
-        if self.conv_transpose_bias is not None:
-            x = x + self.conv_transpose_bias.reshape(1, 1, 1, 1, -1)
-
-        # Convert back to NCDHW
-        x = jnp.transpose(x, (0, 4, 1, 2, 3))  # NDHWC -> NCDHW
-
-        # LayerNorm: nn.LayerNorm(out_channels) normalizes over the last dimension
-        # With x shape (N, C, D, H, W), the last dim is W
-        # After ConvTranspose3d, the shape is (N, 64, 32, 64, 64) where W=64=out_channels
-        mean = jnp.mean(x, axis=-1, keepdims=True)
-        var = jnp.mean((x - mean) ** 2, axis=-1, keepdims=True)
-        x = (x - mean) / jnp.sqrt(var + self.eps)
-        # LayerNorm weight/bias are shape (out_channels,) and applied to the last dimension
-        x = x * self.layer_norm_weight + self.layer_norm_bias
-
-        # GELU activation
-        x = jax.nn.gelu(x)
-
-        # Scaling
-        x = x * self.scaling_factor
-
-        return x
-
-batch_size = 32
-in_channels = 32
-out_channels = 64
-D, H, W = 16, 32, 32
-kernel_size = 4
-stride = 2
-padding = 1
-bias = True
-eps = 1e-5
-scaling_factor = 1.0
-
-def get_inputs():
+def create_inputs(dtype=jnp.float32):
+    """Create all inputs including weights."""
     key = jax.random.PRNGKey(0)
-    x = jax.random.uniform(key, shape=(batch_size, in_channels, D, H, W))
-    return [x]
+    k1, k2 = jax.random.split(key)
+    batch_size, in_channels, out_channels, kernel_size = 32, 32, 64, 4
+    D, H, W = 16, 32, 32
+    x = jax.random.uniform(k1, (batch_size, in_channels, D, H, W), dtype=dtype)
+    conv_weight = jax.random.normal(k2, (in_channels, out_channels, kernel_size, kernel_size, kernel_size), dtype=dtype)
+    conv_bias = jnp.zeros(out_channels, dtype=dtype)
+    ln_weight = jnp.ones(out_channels, dtype=dtype)
+    ln_bias = jnp.zeros(out_channels, dtype=dtype)
+    return x, conv_weight, conv_bias, ln_weight, ln_bias
 
-def get_init_inputs():
-    return [in_channels, out_channels, kernel_size, stride, padding, bias, eps, scaling_factor]
+
+def workload(x, conv_weight, conv_bias, ln_weight, ln_bias):
+    """ConvTranspose3d + LayerNorm + GELU + Scaling."""
+    stride = 2
+    padding = 1
+    kernel_size = 4
+    eps = 1e-5
+    scaling_factor = 1.0
+
+    # NCDHW -> NDHWC
+    x = jnp.transpose(x, (0, 2, 3, 4, 1))
+    kernel = jnp.transpose(conv_weight, (2, 3, 4, 1, 0))
+    kernel = jnp.flip(kernel, axis=(0, 1, 2))
+
+    batch_size, d_in, h_in, w_in, channels = x.shape
+    k = kernel_size
+
+    # Dilate input for transposed conv
+    d_dilated = d_in + (d_in - 1) * (stride - 1)
+    h_dilated = h_in + (h_in - 1) * (stride - 1)
+    w_dilated = w_in + (w_in - 1) * (stride - 1)
+    x_dilated = jnp.zeros((batch_size, d_dilated, h_dilated, w_dilated, channels), dtype=x.dtype)
+    x_dilated = x_dilated.at[:, ::stride, ::stride, ::stride, :].set(x)
+    x = x_dilated
+
+    pad = k - 1 - padding
+    jax_padding = ((pad, pad), (pad, pad), (pad, pad))
+
+    x = lax.conv_general_dilated(
+        x, kernel,
+        window_strides=(1, 1, 1),
+        padding=jax_padding,
+        dimension_numbers=('NDHWC', 'DHWOI', 'NDHWC')
+    )
+    x = x + conv_bias.reshape(1, 1, 1, 1, -1)
+
+    # NDHWC -> NCDHW
+    x = jnp.transpose(x, (0, 4, 1, 2, 3))
+
+    # LayerNorm over last dimension
+    mean = jnp.mean(x, axis=-1, keepdims=True)
+    var = jnp.mean((x - mean) ** 2, axis=-1, keepdims=True)
+    x = (x - mean) / jnp.sqrt(var + eps)
+    x = x * ln_weight + ln_bias
+
+    # GELU + Scaling
+    x = jax.nn.gelu(x)
+    x = x * scaling_factor
+    return x
+
+def benchmark(num_warmup=5, num_iters=100):
+    """Benchmark and return results dict."""
+    import time
+    inputs = create_inputs()
+    fn = jax.jit(workload)
+    for _ in range(num_warmup):
+        out = fn(*inputs)
+        if hasattr(out, 'block_until_ready'):
+            out.block_until_ready()
+    times = []
+    for _ in range(num_iters):
+        t0 = time.perf_counter()
+        out = fn(*inputs)
+        if hasattr(out, 'block_until_ready'):
+            out.block_until_ready()
+        times.append(time.perf_counter() - t0)
+    import numpy as np
+    times_ms = np.array(times) * 1000
+    avg = float(np.mean(times_ms))
+    return {
+        'name': CONFIG['name'],
+        'config': {k: v for k, v in CONFIG.items() if k != 'name'},
+        'time_ms': round(avg, 4),
+        'std_ms': round(float(np.std(times_ms)), 4),
+        'output_shape': list(out.shape) if hasattr(out, 'shape') else [],
+        'status': 'success',
+    }
+
+
+if __name__ == '__main__':
+    import json
+    print(json.dumps(benchmark()))

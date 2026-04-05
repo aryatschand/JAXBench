@@ -1,49 +1,68 @@
-"""
-JAXBench Level 2 - Matmul_Scale_ResidualAdd_Clamp_LogSumExp_Mish
-Translated from KernelBench PyTorch to JAX using bedrock/sonnet.
-"""
-
+"""22_Matmul_Scale_ResidualAdd_Clamp_LogSumExp_Mish — JAXBench fused operator workload."""
 import jax
 import jax.numpy as jnp
 
-class Model:
-    def __init__(self, input_size, hidden_size, scale_factor, clamp_min, clamp_max):
-        self.weight = jnp.zeros((hidden_size, input_size))  # PyTorch Linear stores (out_features, in_features)
-        self.bias = jnp.zeros(hidden_size)
-        self.scale_factor = scale_factor
-        self.clamp_min = clamp_min
-        self.clamp_max = clamp_max
+CONFIG = {
+    'name': '22_Matmul_Scale_ResidualAdd_Clamp_LogSumExp_Mish',
+    'batch_size': 1024,
+    'input_size': 8192,
+    'hidden_size': 8192,
+    'scale_factor': 2.0,
+    'clamp_min': -10.0,
+    'clamp_max': 10.0,
+}
 
-    def set_weights(self, weights_dict):
-        for name, value in weights_dict.items():
-            setattr(self, name.replace('.', '_'), jnp.array(value))
 
-    def forward(self, x):
-        # PyTorch Linear: y = x @ weight.T + bias
-        # weight shape is (hidden_size, input_size), so we need to transpose
-        x = jnp.matmul(x, self.matmul_weight.T) + self.matmul_bias
-        x = x * self.scale_factor
-        x = x + x
-        x = jnp.clip(x, self.clamp_min, self.clamp_max)
-        x = jax.scipy.special.logsumexp(x, axis=1, keepdims=True)
-        # Mish activation: x * tanh(softplus(x))
-        # softplus(x) = log(1 + exp(x))
-        softplus_x = jnp.logaddexp(x, 0.0)  # More numerically stable softplus
-        mish_x = x * jnp.tanh(softplus_x)
-        # The original code does: x = x * mish(x), not just mish(x)
-        x = x * mish_x
-        return x
-
-batch_size = 1024
-input_size = 8192
-hidden_size = 8192
-scale_factor = 2.0
-clamp_min = -10.0
-clamp_max = 10.0
-
-def get_inputs():
+def create_inputs(dtype=jnp.float32):
+    """Create all inputs including weights."""
     key = jax.random.PRNGKey(0)
-    return [jax.random.uniform(key, shape=(batch_size, input_size))]
+    x = jax.random.uniform(key, (1024, 8192), dtype=dtype)
+    weight = jnp.zeros((8192, 8192), dtype=dtype)
+    bias = jnp.zeros(8192, dtype=dtype)
+    return x, weight, bias
 
-def get_init_inputs():
-    return [input_size, hidden_size, scale_factor, clamp_min, clamp_max]
+
+def workload(x, weight, bias):
+    """Matmul + Scale + ResidualAdd + Clamp + LogSumExp + Mish."""
+    x = jnp.matmul(x, weight.T) + bias
+    x = x * 2.0
+    x = x + x
+    x = jnp.clip(x, -10.0, 10.0)
+    x = jax.scipy.special.logsumexp(x, axis=1, keepdims=True)
+    softplus_x = jnp.logaddexp(x, 0.0)
+    mish_x = x * jnp.tanh(softplus_x)
+    x = x * mish_x
+    return x
+
+def benchmark(num_warmup=5, num_iters=100):
+    """Benchmark and return results dict."""
+    import time
+    inputs = create_inputs()
+    fn = jax.jit(workload)
+    for _ in range(num_warmup):
+        out = fn(*inputs)
+        if hasattr(out, 'block_until_ready'):
+            out.block_until_ready()
+    times = []
+    for _ in range(num_iters):
+        t0 = time.perf_counter()
+        out = fn(*inputs)
+        if hasattr(out, 'block_until_ready'):
+            out.block_until_ready()
+        times.append(time.perf_counter() - t0)
+    import numpy as np
+    times_ms = np.array(times) * 1000
+    avg = float(np.mean(times_ms))
+    return {
+        'name': CONFIG['name'],
+        'config': {k: v for k, v in CONFIG.items() if k != 'name'},
+        'time_ms': round(avg, 4),
+        'std_ms': round(float(np.std(times_ms)), 4),
+        'output_shape': list(out.shape) if hasattr(out, 'shape') else [],
+        'status': 'success',
+    }
+
+
+if __name__ == '__main__':
+    import json
+    print(json.dumps(benchmark()))

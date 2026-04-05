@@ -1,40 +1,64 @@
-"""
-JAXBench Level 2 - Gemm_Scaling_Hardtanh_GELU
-Translated from KernelBench PyTorch to JAX using bedrock/sonnet.
-"""
-
+"""53_Gemm_Scaling_Hardtanh_GELU — JAXBench fused operator workload."""
 import jax
 import jax.numpy as jnp
 
-class Model:
-    def __init__(self, in_features, out_features, scaling_factor, hardtanh_min, hardtanh_max):
-        self.weight = jnp.zeros((in_features, out_features))
-        self.bias = jnp.zeros(out_features)
-        self.scaling_factor = scaling_factor
-        self.hardtanh_min = hardtanh_min
-        self.hardtanh_max = hardtanh_max
+CONFIG = {
+    'name': '53_Gemm_Scaling_Hardtanh_GELU',
+    'batch_size': 2048,
+    'in_features': 8192,
+    'out_features': 8192,
+    'scaling_factor': 0.5,
+    'hardtanh_min': -2,
+    'hardtanh_max': 2,
+}
 
-    def set_weights(self, weights_dict):
-        for name, value in weights_dict.items():
-            setattr(self, name.replace('.', '_'), jnp.array(value))
 
-    def forward(self, x):
-        x = jnp.matmul(x, self.weight) + self.bias
-        x = x * self.scaling_factor
-        x = jnp.clip(x, self.hardtanh_min, self.hardtanh_max)
-        x = x * 0.5 * (1.0 + jnp.tanh(jnp.sqrt(2.0 / jnp.pi) * (x + 0.044715 * x**3)))
-        return x
-
-batch_size = 2048
-in_features = 8192
-out_features = 8192
-scaling_factor = 0.5
-hardtanh_min = -2
-hardtanh_max = 2
-
-def get_inputs():
+def create_inputs(dtype=jnp.float32):
+    """Create all inputs including weights."""
     key = jax.random.PRNGKey(0)
-    return [jax.random.uniform(key, shape=(batch_size, in_features))]
+    x = jax.random.uniform(key, (2048, 8192), dtype=dtype)
+    weight = jnp.zeros((8192, 8192), dtype=dtype)
+    bias = jnp.zeros(8192, dtype=dtype)
+    return x, weight, bias
 
-def get_init_inputs():
-    return [in_features, out_features, scaling_factor, hardtanh_min, hardtanh_max]
+
+def workload(x, weight, bias):
+    """Gemm + Scaling + Hardtanh + GELU."""
+    x = jnp.matmul(x, weight) + bias
+    x = x * 0.5
+    x = jnp.clip(x, -2, 2)
+    x = x * 0.5 * (1.0 + jnp.tanh(jnp.sqrt(2.0 / jnp.pi) * (x + 0.044715 * x**3)))
+    return x
+
+def benchmark(num_warmup=5, num_iters=100):
+    """Benchmark and return results dict."""
+    import time
+    inputs = create_inputs()
+    fn = jax.jit(workload)
+    for _ in range(num_warmup):
+        out = fn(*inputs)
+        if hasattr(out, 'block_until_ready'):
+            out.block_until_ready()
+    times = []
+    for _ in range(num_iters):
+        t0 = time.perf_counter()
+        out = fn(*inputs)
+        if hasattr(out, 'block_until_ready'):
+            out.block_until_ready()
+        times.append(time.perf_counter() - t0)
+    import numpy as np
+    times_ms = np.array(times) * 1000
+    avg = float(np.mean(times_ms))
+    return {
+        'name': CONFIG['name'],
+        'config': {k: v for k, v in CONFIG.items() if k != 'name'},
+        'time_ms': round(avg, 4),
+        'std_ms': round(float(np.std(times_ms)), 4),
+        'output_shape': list(out.shape) if hasattr(out, 'shape') else [],
+        'status': 'success',
+    }
+
+
+if __name__ == '__main__':
+    import json
+    print(json.dumps(benchmark()))

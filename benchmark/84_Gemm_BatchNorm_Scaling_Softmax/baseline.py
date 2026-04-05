@@ -1,74 +1,75 @@
-"""
-JAXBench Level 2 - Gemm_BatchNorm_Scaling_Softmax
-Translated from KernelBench PyTorch to JAX using bedrock/sonnet.
-"""
-
+"""84_Gemm_BatchNorm_Scaling_Softmax — JAXBench fused operator workload."""
 import jax
 import jax.numpy as jnp
-import numpy as np
 
-class Model:
-    def __init__(self, in_features, out_features, bn_eps=1e-5, bn_momentum=0.1, scale_shape=(1,)):
-        # Linear layer weights
-        self.weight = jnp.zeros((in_features, out_features))
-        self.bias = jnp.zeros((out_features,))
-        
-        # BatchNorm parameters
-        self.bn_scale = jnp.ones((out_features,))
-        self.bn_bias = jnp.zeros((out_features,))
-        self.bn_mean = jnp.zeros((out_features,))
-        self.bn_var = jnp.ones((out_features,))
-        self.bn_eps = bn_eps
-        
-        # Scale parameter
-        self.scale = jnp.ones(scale_shape)
+CONFIG = {
+    'name': '84_Gemm_BatchNorm_Scaling_Softmax',
+    'batch_size': 1024,
+    'in_features': 8192,
+    'out_features': 8192,
+    'bn_eps': 1e-05,
+    'bn_momentum': 0.1,
+}
 
-    def set_weights(self, weights_dict):
-        for name, value in weights_dict.items():
-            if name == 'gemm.weight':
-                # Transpose weight for JAX convention
-                setattr(self, 'weight', jnp.array(value.T))
-            elif name == 'gemm.bias':
-                setattr(self, 'bias', jnp.array(value))
-            elif name == 'bn.weight':
-                setattr(self, 'bn_scale', jnp.array(value))
-            elif name == 'bn.bias':
-                setattr(self, 'bn_bias', jnp.array(value))
-            elif name == 'bn.running_mean':
-                setattr(self, 'bn_mean', jnp.array(value))
-            elif name == 'bn.running_var':
-                setattr(self, 'bn_var', jnp.array(value))
-            elif name == 'scale':
-                setattr(self, 'scale', jnp.array(value))
 
-    def forward(self, x):
-        # Linear layer
-        x = jnp.matmul(x, self.weight) + self.bias
-
-        # BatchNorm
-        mean = self.bn_mean
-        var = self.bn_var
-        x_normalized = (x - mean) / jnp.sqrt(var + self.bn_eps)
-        x = self.bn_scale * x_normalized + self.bn_bias
-        
-        # Scale
-        x = self.scale * x
-        
-        # Softmax
-        x = jax.nn.softmax(x, axis=1)
-        
-        return x
-
-batch_size = 1024
-in_features = 8192  
-out_features = 8192
-bn_eps = 1e-5
-bn_momentum = 0.1
-scale_shape = (1,)
-
-def get_inputs():
+def create_inputs(dtype=jnp.float32):
+    """Create all inputs including weights."""
     key = jax.random.PRNGKey(0)
-    return [jax.random.uniform(key, shape=(batch_size, in_features))]
+    batch_size, in_features, out_features = 1024, 8192, 8192
+    x = jax.random.uniform(key, (batch_size, in_features), dtype=dtype)
+    weight = jnp.zeros((in_features, out_features), dtype=dtype)
+    bias = jnp.zeros(out_features, dtype=dtype)
+    bn_scale = jnp.ones(out_features, dtype=dtype)
+    bn_bias = jnp.zeros(out_features, dtype=dtype)
+    bn_mean = jnp.zeros(out_features, dtype=dtype)
+    bn_var = jnp.ones(out_features, dtype=dtype)
+    scale = jnp.ones((1,), dtype=dtype)
+    return x, weight, bias, bn_scale, bn_bias, bn_mean, bn_var, scale
 
-def get_init_inputs():
-    return [in_features, out_features, bn_eps, bn_momentum, scale_shape]
+
+def workload(x, weight, bias, bn_scale, bn_bias, bn_mean, bn_var, scale):
+    """Gemm + BatchNorm + Scaling + Softmax."""
+    bn_eps = 1e-5
+    # Linear
+    x = jnp.matmul(x, weight) + bias
+    # BatchNorm (eval mode with running stats)
+    x_normalized = (x - bn_mean) / jnp.sqrt(bn_var + bn_eps)
+    x = bn_scale * x_normalized + bn_bias
+    # Scale
+    x = scale * x
+    # Softmax
+    x = jax.nn.softmax(x, axis=1)
+    return x
+
+def benchmark(num_warmup=5, num_iters=100):
+    """Benchmark and return results dict."""
+    import time
+    inputs = create_inputs()
+    fn = jax.jit(workload)
+    for _ in range(num_warmup):
+        out = fn(*inputs)
+        if hasattr(out, 'block_until_ready'):
+            out.block_until_ready()
+    times = []
+    for _ in range(num_iters):
+        t0 = time.perf_counter()
+        out = fn(*inputs)
+        if hasattr(out, 'block_until_ready'):
+            out.block_until_ready()
+        times.append(time.perf_counter() - t0)
+    import numpy as np
+    times_ms = np.array(times) * 1000
+    avg = float(np.mean(times_ms))
+    return {
+        'name': CONFIG['name'],
+        'config': {k: v for k, v in CONFIG.items() if k != 'name'},
+        'time_ms': round(avg, 4),
+        'std_ms': round(float(np.std(times_ms)), 4),
+        'output_shape': list(out.shape) if hasattr(out, 'shape') else [],
+        'status': 'success',
+    }
+
+
+if __name__ == '__main__':
+    import json
+    print(json.dumps(benchmark()))

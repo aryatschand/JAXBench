@@ -1,61 +1,76 @@
-"""
-JAXBench Level 2 - Conv3d_Mish_Tanh
-Translated from KernelBench PyTorch to JAX using bedrock/sonnet.
-"""
-
+"""47_Conv3d_Mish_Tanh — JAXBench fused operator workload."""
 import jax
 import jax.numpy as jnp
 
-class Model:
-    def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0):
-        # Initialize with PyTorch Conv3d weight shape (out_channels, in_channels, D, H, W)
-        self.weight = jnp.zeros((out_channels, in_channels, kernel_size, kernel_size, kernel_size))
-        self.bias = jnp.zeros(out_channels)
-        self.stride = stride if isinstance(stride, tuple) else (stride, stride, stride)
-        self.padding = padding if isinstance(padding, tuple) else ((padding, padding), (padding, padding), (padding, padding))
+CONFIG = {
+    'name': '47_Conv3d_Mish_Tanh',
+    'batch_size': 16,
+    'in_channels': 32,
+    'out_channels': 64,
+    'kernel_size': 3,
+}
 
-    def set_weights(self, weights_dict):
-        for name, value in weights_dict.items():
-            setattr(self, name.replace('.', '_'), jnp.array(value))
 
-    def forward(self, x):
-        # Convert from NCDHW to NDHWC
-        x = jnp.transpose(x, (0, 2, 3, 4, 1))
-        
-        # Transpose kernel from (out,in,D,H,W) to (D,H,W,in,out)
-        kernel = jnp.transpose(self.weight, (2, 3, 4, 1, 0))
-        
-        # 3D convolution
-        x = jax.lax.conv_general_dilated(
-            x,
-            kernel,
-            window_strides=self.stride,
-            padding=self.padding,
-            dimension_numbers=('NDHWC', 'DHWIO', 'NDHWC')
-        )
-        
-        # Add bias
-        x = x + self.bias.reshape(1, 1, 1, 1, -1)
-        
-        # Mish activation: x * tanh(softplus(x))
-        x = x * jnp.tanh(jnp.log(1 + jnp.exp(x)))
-        
-        # Tanh activation
-        x = jnp.tanh(x)
-        
-        # Convert back from NDHWC to NCDHW
-        x = jnp.transpose(x, (0, 4, 1, 2, 3))
-        return x
-
-batch_size = 16
-in_channels = 32
-out_channels = 64
-D, H, W = 32, 64, 64
-kernel_size = 3
-
-def get_inputs():
+def create_inputs(dtype=jnp.float32):
+    """Create all inputs including weights."""
     key = jax.random.PRNGKey(0)
-    return [jax.random.uniform(key, (batch_size, in_channels, D, H, W))]
+    batch_size, in_channels, out_channels, kernel_size = 16, 32, 64, 3
+    D, H, W = 32, 64, 64
+    x = jax.random.uniform(key, (batch_size, in_channels, D, H, W), dtype=dtype)
+    weight = jnp.zeros((out_channels, in_channels, kernel_size, kernel_size, kernel_size), dtype=dtype)
+    bias = jnp.zeros(out_channels, dtype=dtype)
+    return x, weight, bias
 
-def get_init_inputs():
-    return [in_channels, out_channels, kernel_size]
+
+def workload(x, weight, bias):
+    """Conv3d + Mish + Tanh."""
+    # NCDHW -> NDHWC
+    x = jnp.transpose(x, (0, 2, 3, 4, 1))
+    kernel = jnp.transpose(weight, (2, 3, 4, 1, 0))
+    x = jax.lax.conv_general_dilated(
+        x, kernel,
+        window_strides=(1, 1, 1),
+        padding=((0, 0), (0, 0), (0, 0)),
+        dimension_numbers=('NDHWC', 'DHWIO', 'NDHWC')
+    )
+    x = x + bias.reshape(1, 1, 1, 1, -1)
+    # Mish
+    x = x * jnp.tanh(jnp.log(1 + jnp.exp(x)))
+    # Tanh
+    x = jnp.tanh(x)
+    # NDHWC -> NCDHW
+    x = jnp.transpose(x, (0, 4, 1, 2, 3))
+    return x
+
+def benchmark(num_warmup=5, num_iters=100):
+    """Benchmark and return results dict."""
+    import time
+    inputs = create_inputs()
+    fn = jax.jit(workload)
+    for _ in range(num_warmup):
+        out = fn(*inputs)
+        if hasattr(out, 'block_until_ready'):
+            out.block_until_ready()
+    times = []
+    for _ in range(num_iters):
+        t0 = time.perf_counter()
+        out = fn(*inputs)
+        if hasattr(out, 'block_until_ready'):
+            out.block_until_ready()
+        times.append(time.perf_counter() - t0)
+    import numpy as np
+    times_ms = np.array(times) * 1000
+    avg = float(np.mean(times_ms))
+    return {
+        'name': CONFIG['name'],
+        'config': {k: v for k, v in CONFIG.items() if k != 'name'},
+        'time_ms': round(avg, 4),
+        'std_ms': round(float(np.std(times_ms)), 4),
+        'output_shape': list(out.shape) if hasattr(out, 'shape') else [],
+        'status': 'success',
+    }
+
+
+if __name__ == '__main__':
+    import json
+    print(json.dumps(benchmark()))

@@ -1,67 +1,67 @@
-"""
-JAXBench Level 2 - Gemm_Divide_Sum_Scaling
-Translated from KernelBench PyTorch to JAX using bedrock/sonnet.
-"""
-
-"""
-JAXBench Level 2 - Task 14: Gemm_Divide_Sum_Scaling
-Manually implemented JAX version
-"""
-
+"""14_Gemm_Divide_Sum_Scaling — JAXBench fused operator workload."""
 import jax
 import jax.numpy as jnp
-from jax import lax
+import jax.lax as lax
 
-class Model:
-    """
-    Model that performs a matrix multiplication, division, summation, and scaling.
-    """
-    def __init__(self, input_size, hidden_size, scaling_factor):
-        self.input_size = input_size
-        self.hidden_size = hidden_size
-        self.scaling_factor = scaling_factor
+CONFIG = {
+    'name': '14_Gemm_Divide_Sum_Scaling',
+    'batch_size': 1024,
+    'input_size': 8192,
+    'hidden_size': 8192,
+    'scaling_factor': 1.5,
+}
 
-        # Weight matrix (hidden_size, input_size)
-        key = jax.random.PRNGKey(0)
-        self.weight = jax.random.normal(key, (hidden_size, input_size))
 
-    def set_weights(self, weights_dict):
-        for name, value in weights_dict.items():
-            jax_name = name.replace('.', '_')
-            if hasattr(self, jax_name):
-                setattr(self, jax_name, jnp.array(value))
-
-    def forward(self, x):
-        """
-        Args:
-            x: Input tensor of shape (batch_size, input_size).
-        Returns:
-            Output tensor of shape (batch_size, 1).
-        """
-        # Use highest precision matmul to match CPU computation
-        # TPU can use bfloat16 internally which causes large numerical differences
-        x = lax.dot_general(
-            x, self.weight.T,
-            dimension_numbers=(((1,), (0,)), ((), ())),
-            precision=lax.Precision.HIGHEST
-        )
-        # Divide by 2
-        x = x / 2.0
-        # Sum along dim=1 with keepdim
-        x = jnp.sum(x, axis=1, keepdims=True)
-        # Scale
-        x = x * self.scaling_factor
-        return x
-
-batch_size = 1024
-input_size = 8192
-hidden_size = 8192
-scaling_factor = 1.5
-
-def get_inputs():
+def create_inputs(dtype=jnp.float32):
+    """Create all inputs including weights."""
     key = jax.random.PRNGKey(0)
-    x = jax.random.uniform(key, shape=(batch_size, input_size))
-    return [x]
+    k1, k2 = jax.random.split(key)
+    x = jax.random.uniform(k1, (1024, 8192), dtype=dtype)
+    weight = jax.random.normal(k2, (8192, 8192), dtype=dtype)
+    return x, weight
 
-def get_init_inputs():
-    return [input_size, hidden_size, scaling_factor]
+
+def workload(x, weight):
+    """Gemm + Divide + Sum + Scaling."""
+    x = lax.dot_general(
+        x, weight.T,
+        dimension_numbers=(((1,), (0,)), ((), ())),
+        precision=lax.Precision.HIGHEST
+    )
+    x = x / 2.0
+    x = jnp.sum(x, axis=1, keepdims=True)
+    x = x * 1.5
+    return x
+
+def benchmark(num_warmup=5, num_iters=100):
+    """Benchmark and return results dict."""
+    import time
+    inputs = create_inputs()
+    fn = jax.jit(workload)
+    for _ in range(num_warmup):
+        out = fn(*inputs)
+        if hasattr(out, 'block_until_ready'):
+            out.block_until_ready()
+    times = []
+    for _ in range(num_iters):
+        t0 = time.perf_counter()
+        out = fn(*inputs)
+        if hasattr(out, 'block_until_ready'):
+            out.block_until_ready()
+        times.append(time.perf_counter() - t0)
+    import numpy as np
+    times_ms = np.array(times) * 1000
+    avg = float(np.mean(times_ms))
+    return {
+        'name': CONFIG['name'],
+        'config': {k: v for k, v in CONFIG.items() if k != 'name'},
+        'time_ms': round(avg, 4),
+        'std_ms': round(float(np.std(times_ms)), 4),
+        'output_shape': list(out.shape) if hasattr(out, 'shape') else [],
+        'status': 'success',
+    }
+
+
+if __name__ == '__main__':
+    import json
+    print(json.dumps(benchmark()))

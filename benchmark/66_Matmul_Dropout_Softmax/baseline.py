@@ -1,48 +1,61 @@
-"""
-JAXBench Level 2 - Matmul_Dropout_Softmax
-Translated from KernelBench PyTorch to JAX using bedrock/sonnet.
-"""
-
+"""66_Matmul_Dropout_Softmax — JAXBench fused operator workload."""
 import jax
 import jax.numpy as jnp
-from jax import random
 
-class Model:
-    def __init__(self, in_features, out_features, dropout_p):
-        self.in_features = in_features
-        self.out_features = out_features
-        self.dropout_p = dropout_p
-        
-        # Initialize weights and bias with zeros (will be set via set_weights)
-        # PyTorch Linear weight shape is (out_features, in_features)
-        self.matmul_weight = jnp.zeros((out_features, in_features))
-        self.matmul_bias = jnp.zeros(out_features)
+CONFIG = {
+    'name': '66_Matmul_Dropout_Softmax',
+    'batch_size': 128,
+    'in_features': 16384,
+    'out_features': 16384,
+    'dropout_p': 0.2,
+}
 
-    def set_weights(self, weights_dict):
-        for name, value in weights_dict.items():
-            setattr(self, name.replace('.', '_'), jnp.array(value))
 
-    def forward(self, x):
-        # Linear layer - PyTorch stores weight as (out_features, in_features)
-        # So we need to transpose it for x @ weight.T + bias
-        x = x @ self.matmul_weight.T + self.matmul_bias
-        
-        # Skip dropout during inference (no rng needed)
-        # In inference mode, dropout is typically disabled
-        # If training mode is needed, rng should be passed differently
-            
-        # Softmax
-        x = jax.nn.softmax(x, axis=1)
-        return x
+def create_inputs(dtype=jnp.float32):
+    """Create all inputs including weights."""
+    key = jax.random.PRNGKey(0)
+    x = jax.random.uniform(key, (128, 16384), dtype=dtype)
+    weight = jnp.zeros((16384, 16384), dtype=dtype)
+    bias = jnp.zeros(16384, dtype=dtype)
+    return x, weight, bias
 
-batch_size = 128
-in_features = 16384  
-out_features = 16384
-dropout_p = 0.2
 
-def get_inputs():
-    key = random.PRNGKey(0)
-    return [random.uniform(key, shape=(batch_size, in_features))]
+def workload(x, weight, bias):
+    """Matmul + (Dropout skipped in inference) + Softmax."""
+    x = x @ weight.T + bias
+    # Dropout skipped in inference mode
+    x = jax.nn.softmax(x, axis=1)
+    return x
 
-def get_init_inputs():
-    return [in_features, out_features, dropout_p]
+def benchmark(num_warmup=5, num_iters=100):
+    """Benchmark and return results dict."""
+    import time
+    inputs = create_inputs()
+    fn = jax.jit(workload)
+    for _ in range(num_warmup):
+        out = fn(*inputs)
+        if hasattr(out, 'block_until_ready'):
+            out.block_until_ready()
+    times = []
+    for _ in range(num_iters):
+        t0 = time.perf_counter()
+        out = fn(*inputs)
+        if hasattr(out, 'block_until_ready'):
+            out.block_until_ready()
+        times.append(time.perf_counter() - t0)
+    import numpy as np
+    times_ms = np.array(times) * 1000
+    avg = float(np.mean(times_ms))
+    return {
+        'name': CONFIG['name'],
+        'config': {k: v for k, v in CONFIG.items() if k != 'name'},
+        'time_ms': round(avg, 4),
+        'std_ms': round(float(np.std(times_ms)), 4),
+        'output_shape': list(out.shape) if hasattr(out, 'shape') else [],
+        'status': 'success',
+    }
+
+
+if __name__ == '__main__':
+    import json
+    print(json.dumps(benchmark()))
