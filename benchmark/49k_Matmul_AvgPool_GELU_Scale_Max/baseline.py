@@ -23,28 +23,29 @@ def create_inputs(dtype=jnp.float32):
 
 def workload(x, weight, bias):
     """Matmul + AvgPool1d + GELU + Scale + Max."""
-    pool_kernel_size = 16
-    scale_factor = 2.0
-    # Linear
-    x = jnp.matmul(x, weight) + bias
-    # AvgPool1d
-    x = jnp.expand_dims(x, axis=1)
-    x = jax.lax.reduce_window(
-        x,
-        init_value=0.0,
-        computation=jax.lax.add,
-        window_dimensions=(1, 1, pool_kernel_size),
-        window_strides=(1, 1, pool_kernel_size),
-        padding='VALID'
-    ) / pool_kernel_size
-    x = jnp.squeeze(x, axis=1)
-    # GELU
-    x = jax.nn.gelu(x)
-    # Scale
-    x = x * scale_factor
-    # Max
-    x = jnp.max(x, axis=1)
-    return x
+    with jax.named_scope('bench_kernel'):
+        pool_kernel_size = 16
+        scale_factor = 2.0
+        # Linear
+        x = jnp.matmul(x, weight) + bias
+        # AvgPool1d
+        x = jnp.expand_dims(x, axis=1)
+        x = jax.lax.reduce_window(
+            x,
+            init_value=0.0,
+            computation=jax.lax.add,
+            window_dimensions=(1, 1, pool_kernel_size),
+            window_strides=(1, 1, pool_kernel_size),
+            padding='VALID'
+        ) / pool_kernel_size
+        x = jnp.squeeze(x, axis=1)
+        # GELU
+        x = jax.nn.gelu(x)
+        # Scale
+        x = x * scale_factor
+        # Max
+        x = jnp.max(x, axis=1)
+        return x
 
 def benchmark(num_warmup=5, num_iters=100):
     """Benchmark and return results dict."""

@@ -968,14 +968,15 @@ def create_inputs(dtype=jnp.bfloat16):
 
 
 def workload(q, kv_pages, kv_lens, page_indices, cu_q_lens, num_seqs):
-    sm_scale = 1.0 / math.sqrt(CONFIG['head_dim'])
-    return ragged_paged_attention(
-        q, kv_pages, kv_lens, page_indices, cu_q_lens, num_seqs,
-        sm_scale=sm_scale,
-        num_kv_pages_per_block=TUNED_PARAMS['num_kv_pages_per_block'],
-        num_queries_per_block=TUNED_PARAMS['num_queries_per_block'],
-        vmem_limit_bytes=TUNED_PARAMS['vmem_limit_bytes'],
-    )
+    with jax.named_scope('bench_kernel'):
+        sm_scale = 1.0 / math.sqrt(CONFIG['head_dim'])
+        return ragged_paged_attention(
+            q, kv_pages, kv_lens, page_indices, cu_q_lens, num_seqs,
+            sm_scale=sm_scale,
+            num_kv_pages_per_block=TUNED_PARAMS['num_kv_pages_per_block'],
+            num_queries_per_block=TUNED_PARAMS['num_queries_per_block'],
+            vmem_limit_bytes=TUNED_PARAMS['vmem_limit_bytes'],
+        )
 
 
 def benchmark(num_warmup=5, num_iters=100):

@@ -32,24 +32,25 @@ def create_inputs(dtype=jnp.bfloat16):
 
 def workload(x, router_weights, expert_gate_kernels, expert_up_kernels, expert_down_kernels):
     """Sparse MoE with einsum-based batched expert computation."""
-    B, S, E = x.shape
-    N = router_weights.shape[-1]
-    K = CONFIG['num_experts_per_tok']
-    # Routing
-    logits = jnp.dot(x, router_weights)
-    top_k_logits, top_k_indices = jax.lax.top_k(logits, K)
-    router_probs = jax.nn.softmax(top_k_logits, axis=-1)
-    # All experts in parallel
-    gate_out = jax.nn.silu(jnp.einsum('bse,nem->bsnm', x, expert_gate_kernels))
-    up_out = jnp.einsum('bse,nem->bsnm', x, expert_up_kernels)
-    hidden = gate_out * up_out
-    expert_outputs = jnp.einsum('bsnm,nme->bsne', hidden, expert_down_kernels)
-    # Weighted combination
-    one_hot = jax.nn.one_hot(top_k_indices, N)
-    weighted = one_hot * router_probs[..., None]
-    expert_weights = weighted.sum(axis=2)
-    output = jnp.einsum('bsne,bsn->bse', expert_outputs, expert_weights)
-    return output
+    with jax.named_scope('bench_kernel'):
+        B, S, E = x.shape
+        N = router_weights.shape[-1]
+        K = CONFIG['num_experts_per_tok']
+        # Routing
+        logits = jnp.dot(x, router_weights)
+        top_k_logits, top_k_indices = jax.lax.top_k(logits, K)
+        router_probs = jax.nn.softmax(top_k_logits, axis=-1)
+        # All experts in parallel
+        gate_out = jax.nn.silu(jnp.einsum('bse,nem->bsnm', x, expert_gate_kernels))
+        up_out = jnp.einsum('bse,nem->bsnm', x, expert_up_kernels)
+        hidden = gate_out * up_out
+        expert_outputs = jnp.einsum('bsnm,nme->bsne', hidden, expert_down_kernels)
+        # Weighted combination
+        one_hot = jax.nn.one_hot(top_k_indices, N)
+        weighted = one_hot * router_probs[..., None]
+        expert_weights = weighted.sum(axis=2)
+        output = jnp.einsum('bsne,bsn->bse', expert_outputs, expert_weights)
+        return output
 
 
 def benchmark(num_warmup=5, num_iters=100):

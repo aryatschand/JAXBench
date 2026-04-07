@@ -46,39 +46,40 @@ def workload(query, key, value):
     Each head has a different decay rate γ_h, creating a multi-scale
     representation: some heads attend locally, others globally.
     """
-    B, H, S, D = query.shape
+    with jax.named_scope('bench_kernel'):
+        B, H, S, D = query.shape
 
-    # Multi-scale decay rates (from RetNet paper)
-    # γ_h = 1 - 2^(-5 - arange(H))
-    gammas = 1.0 - jnp.exp2(-5.0 - jnp.arange(H, dtype=jnp.float32))  # (H,)
-    # Gammas range from ~0.97 (long range) to ~1.0 (very long range)
+        # Multi-scale decay rates (from RetNet paper)
+        # γ_h = 1 - 2^(-5 - arange(H))
+        gammas = 1.0 - jnp.exp2(-5.0 - jnp.arange(H, dtype=jnp.float32))  # (H,)
+        # Gammas range from ~0.97 (long range) to ~1.0 (very long range)
 
-    # Build causal decay matrix D[i,j] = γ^(i-j) for i >= j
-    positions = jnp.arange(S, dtype=jnp.float32)
-    # distance[i,j] = i - j
-    distance = positions[:, None] - positions[None, :]  # (S, S)
-    # D[h,i,j] = γ_h^(i-j) * (i >= j)
-    causal_mask = (distance >= 0).astype(jnp.float32)
-    # γ^distance: (H, S, S)
-    log_gamma = jnp.log(gammas)  # (H,)
-    decay = jnp.exp(log_gamma[:, None, None] * distance[None, :, :])  # (H, S, S)
-    decay = decay * causal_mask[None, :, :]  # apply causal mask
+        # Build causal decay matrix D[i,j] = γ^(i-j) for i >= j
+        positions = jnp.arange(S, dtype=jnp.float32)
+        # distance[i,j] = i - j
+        distance = positions[:, None] - positions[None, :]  # (S, S)
+        # D[h,i,j] = γ_h^(i-j) * (i >= j)
+        causal_mask = (distance >= 0).astype(jnp.float32)
+        # γ^distance: (H, S, S)
+        log_gamma = jnp.log(gammas)  # (H,)
+        decay = jnp.exp(log_gamma[:, None, None] * distance[None, :, :])  # (H, S, S)
+        decay = decay * causal_mask[None, :, :]  # apply causal mask
 
-    # Retention: (Q K^T ⊙ D) V
-    # QK^T: (B, H, S, S)
-    qk = jnp.einsum('bhsd,bhtd->bhst', query.astype(jnp.float32), key.astype(jnp.float32))
+        # Retention: (Q K^T ⊙ D) V
+        # QK^T: (B, H, S, S)
+        qk = jnp.einsum('bhsd,bhtd->bhst', query.astype(jnp.float32), key.astype(jnp.float32))
 
-    # Apply decay mask
-    qk = qk * decay[None, :, :, :]  # (B, H, S, S)
+        # Apply decay mask
+        qk = qk * decay[None, :, :, :]  # (B, H, S, S)
 
-    # Normalize by retention sum (per-query normalization)
-    retention_sum = jnp.sum(jnp.abs(qk), axis=-1, keepdims=True)
-    retention_sum = jnp.maximum(retention_sum, 1.0)
-    qk = qk / retention_sum
+        # Normalize by retention sum (per-query normalization)
+        retention_sum = jnp.sum(jnp.abs(qk), axis=-1, keepdims=True)
+        retention_sum = jnp.maximum(retention_sum, 1.0)
+        qk = qk / retention_sum
 
-    # Output
-    output = jnp.einsum('bhst,bhtd->bhsd', qk.astype(query.dtype), value)
-    return output
+        # Output
+        output = jnp.einsum('bhst,bhtd->bhsd', qk.astype(query.dtype), value)
+        return output
 
 
 def benchmark(num_warmup=5, num_iters=100):

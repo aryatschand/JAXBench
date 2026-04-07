@@ -27,32 +27,33 @@ def create_inputs(dtype=jnp.float32):
 
 def workload(x, weight, conv_bias, gamma, beta):
     """Conv3d + GroupNorm + Mean."""
-    num_groups = 8
-    # Conv3d: NCDHW -> NDHWC
-    x = jnp.transpose(x, (0, 2, 3, 4, 1))
-    kernel = jnp.transpose(weight, (2, 3, 4, 1, 0))
-    x = jax.lax.conv_general_dilated(
-        x, kernel,
-        window_strides=(1, 1, 1),
-        padding='VALID',
-        dimension_numbers=('NDHWC', 'DHWIO', 'NDHWC')
-    )
-    x = x + conv_bias.reshape(1, 1, 1, 1, -1)
-    x = jnp.transpose(x, (0, 4, 1, 2, 3))  # NDHWC -> NCDHW
+    with jax.named_scope('bench_kernel'):
+        num_groups = 8
+        # Conv3d: NCDHW -> NDHWC
+        x = jnp.transpose(x, (0, 2, 3, 4, 1))
+        kernel = jnp.transpose(weight, (2, 3, 4, 1, 0))
+        x = jax.lax.conv_general_dilated(
+            x, kernel,
+            window_strides=(1, 1, 1),
+            padding='VALID',
+            dimension_numbers=('NDHWC', 'DHWIO', 'NDHWC')
+        )
+        x = x + conv_bias.reshape(1, 1, 1, 1, -1)
+        x = jnp.transpose(x, (0, 4, 1, 2, 3))  # NDHWC -> NCDHW
 
-    # Group Normalization
-    N, C, D, H, W = x.shape
-    G = num_groups
-    x = x.reshape(N, G, C // G, D, H, W)
-    mean = jnp.mean(x, axis=(2, 3, 4, 5), keepdims=True)
-    var = jnp.var(x, axis=(2, 3, 4, 5), keepdims=True)
-    x = (x - mean) / jnp.sqrt(var + 1e-5)
-    x = x.reshape(N, C, D, H, W)
-    x = x * gamma.reshape(1, -1, 1, 1, 1) + beta.reshape(1, -1, 1, 1, 1)
+        # Group Normalization
+        N, C, D, H, W = x.shape
+        G = num_groups
+        x = x.reshape(N, G, C // G, D, H, W)
+        mean = jnp.mean(x, axis=(2, 3, 4, 5), keepdims=True)
+        var = jnp.var(x, axis=(2, 3, 4, 5), keepdims=True)
+        x = (x - mean) / jnp.sqrt(var + 1e-5)
+        x = x.reshape(N, C, D, H, W)
+        x = x * gamma.reshape(1, -1, 1, 1, 1) + beta.reshape(1, -1, 1, 1, 1)
 
-    # Mean across all dims except batch
-    x = jnp.mean(x, axis=(1, 2, 3, 4))
-    return x
+        # Mean across all dims except batch
+        x = jnp.mean(x, axis=(1, 2, 3, 4))
+        return x
 
 def benchmark(num_warmup=5, num_iters=100):
     """Benchmark and return results dict."""

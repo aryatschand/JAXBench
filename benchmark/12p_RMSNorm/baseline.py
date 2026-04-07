@@ -31,11 +31,12 @@ def create_inputs(dtype=jnp.bfloat16):
 
 def workload(x, scale):
     """RMSNorm: x * rsqrt(mean(x^2) + eps) * scale"""
-    x_f32 = jnp.asarray(x, jnp.float32)
-    mean2 = jnp.mean(lax.square(x_f32), axis=-1, keepdims=True)
-    normed = x_f32 * lax.rsqrt(mean2 + CONFIG['epsilon'])
-    normed = jnp.asarray(normed, x.dtype)
-    return normed * scale
+    with jax.named_scope('bench_kernel'):
+        x_f32 = jnp.asarray(x, jnp.float32)
+        mean2 = jnp.mean(lax.square(x_f32), axis=-1, keepdims=True)
+        normed = x_f32 * lax.rsqrt(mean2 + CONFIG['epsilon'])
+        normed = jnp.asarray(normed, x.dtype)
+        return normed * scale
 
 
 def get_flops():

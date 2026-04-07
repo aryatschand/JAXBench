@@ -842,7 +842,8 @@ def create_inputs(dtype=jnp.bfloat16):
 
 
 def workload(lhs, rhs, group_sizes):
-    return gmm(lhs, rhs, group_sizes, tiling=tuple(TUNED_PARAMS['tiling']))
+    with jax.named_scope('bench_kernel'):
+        return gmm(lhs, rhs, group_sizes, tiling=tuple(TUNED_PARAMS['tiling']))
 
 
 def benchmark(num_warmup=5, num_iters=100):

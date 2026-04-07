@@ -22,13 +22,14 @@ def create_inputs(dtype=jnp.float32):
 
 def workload(x, weight, bias, add_value):
     """Matmul + Add + Swish + Tanh + GELU + Hardtanh."""
-    x = x @ weight + bias
-    x = x + add_value
-    x = jax.nn.swish(x)
-    x = jnp.tanh(x)
-    x = jax.nn.gelu(x)
-    x = jnp.clip(x, -1.0, 1.0)
-    return x
+    with jax.named_scope('bench_kernel'):
+        x = x @ weight + bias
+        x = x + add_value
+        x = jax.nn.swish(x)
+        x = jnp.tanh(x)
+        x = jax.nn.gelu(x)
+        x = jnp.clip(x, -1.0, 1.0)
+        return x
 
 def benchmark(num_warmup=5, num_iters=100):
     """Benchmark and return results dict."""

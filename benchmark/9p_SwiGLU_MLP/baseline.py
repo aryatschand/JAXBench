@@ -28,9 +28,10 @@ def create_inputs(dtype=jnp.bfloat16):
 
 def workload(x, gate_kernel, up_kernel, down_kernel):
     """SwiGLU: output = (SiLU(x @ gate) * (x @ up)) @ down"""
-    gate = jax.nn.silu(jnp.dot(x, gate_kernel))
-    up = jnp.dot(x, up_kernel)
-    return jnp.dot(gate * up, down_kernel)
+    with jax.named_scope('bench_kernel'):
+        gate = jax.nn.silu(jnp.dot(x, gate_kernel))
+        up = jnp.dot(x, up_kernel)
+        return jnp.dot(gate * up, down_kernel)
 
 
 def benchmark(num_warmup=5, num_iters=100):

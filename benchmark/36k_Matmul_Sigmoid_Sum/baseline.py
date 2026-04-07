@@ -21,10 +21,11 @@ def create_inputs(dtype=jnp.float32):
 
 def workload(x, weight, bias):
     """Matmul + Sigmoid + Sum."""
-    x = jnp.matmul(x, weight) + bias
-    x = jax.nn.sigmoid(x)
-    x = jnp.sum(x, axis=1, keepdims=True)
-    return x
+    with jax.named_scope('bench_kernel'):
+        x = jnp.matmul(x, weight) + bias
+        x = jax.nn.sigmoid(x)
+        x = jnp.sum(x, axis=1, keepdims=True)
+        return x
 
 def benchmark(num_warmup=5, num_iters=100):
     """Benchmark and return results dict."""

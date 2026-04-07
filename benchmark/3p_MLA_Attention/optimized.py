@@ -1779,70 +1779,71 @@ def create_inputs(dtype=jnp.bfloat16):
 
 def workload(x, q_down, q_up, kv_down, k_up, v_up, o_proj):
     """MLA with Pallas flash attention (padded head_dim=256)."""
-    C = CONFIG
-    B, S, E, H = C['batch'], C['seq_len'], C['emb_dim'], C['num_heads']
-    nope, rope, vd = C['qk_nope_head_dim'], C['qk_rope_head_dim'], C['v_head_dim']
-    d_qk = nope + rope  # 192
-    kvl = C['kv_lora_rank']
+    with jax.named_scope('bench_kernel'):
+        C = CONFIG
+        B, S, E, H = C['batch'], C['seq_len'], C['emb_dim'], C['num_heads']
+        nope, rope, vd = C['qk_nope_head_dim'], C['qk_rope_head_dim'], C['v_head_dim']
+        d_qk = nope + rope  # 192
+        kvl = C['kv_lora_rank']
 
-    # LoRA projections
-    q_compressed = jnp.dot(x, q_down)
-    q_full = jnp.dot(q_compressed, q_up).reshape(B, S, H, d_qk)
-    q_nope, q_rope_part = q_full[..., :nope], q_full[..., nope:]
+        # LoRA projections
+        q_compressed = jnp.dot(x, q_down)
+        q_full = jnp.dot(q_compressed, q_up).reshape(B, S, H, d_qk)
+        q_nope, q_rope_part = q_full[..., :nope], q_full[..., nope:]
 
-    kv_compressed = jnp.dot(x, kv_down)  # (B, S, kvl + rope)
-    k_nope = jnp.dot(kv_compressed[:, :, :kvl], k_up).reshape(B, S, H, nope)
-    v = jnp.dot(kv_compressed[:, :, :kvl], v_up).reshape(B, S, H, vd)
+        kv_compressed = jnp.dot(x, kv_down)  # (B, S, kvl + rope)
+        k_nope = jnp.dot(kv_compressed[:, :, :kvl], k_up).reshape(B, S, H, nope)
+        v = jnp.dot(kv_compressed[:, :, :kvl], v_up).reshape(B, S, H, vd)
 
-    # RoPE
-    pos = jnp.arange(S)
-    freqs = 1.0 / (C['rope_theta'] ** (jnp.arange(0, rope, 2, dtype=jnp.float32) / rope))
-    angles = jnp.outer(pos, freqs)
-    cos, sin = jnp.cos(angles), jnp.sin(angles)
-    q_rope_part = _apply_rope(q_rope_part, cos[None, :, None, :], sin[None, :, None, :])
-    rope_input = kv_compressed[:, :, kvl:]  # (B, S, rope)
-    rope_input = jnp.broadcast_to(rope_input[:, :, None, :], (B, S, H, rope))
-    k_rope_part = _apply_rope(
-        rope_input,
-        cos[None, :, None, :], sin[None, :, None, :]
-    )
+        # RoPE
+        pos = jnp.arange(S)
+        freqs = 1.0 / (C['rope_theta'] ** (jnp.arange(0, rope, 2, dtype=jnp.float32) / rope))
+        angles = jnp.outer(pos, freqs)
+        cos, sin = jnp.cos(angles), jnp.sin(angles)
+        q_rope_part = _apply_rope(q_rope_part, cos[None, :, None, :], sin[None, :, None, :])
+        rope_input = kv_compressed[:, :, kvl:]  # (B, S, rope)
+        rope_input = jnp.broadcast_to(rope_input[:, :, None, :], (B, S, H, rope))
+        k_rope_part = _apply_rope(
+            rope_input,
+            cos[None, :, None, :], sin[None, :, None, :]
+        )
 
-    # Concatenate Q/K, pad V to match
-    q = jnp.concatenate([q_nope, q_rope_part], axis=-1)  # (B, S, H, 192)
-    k = jnp.concatenate([k_nope, k_rope_part], axis=-1)  # (B, S, H, 192)
+        # Concatenate Q/K, pad V to match
+        q = jnp.concatenate([q_nope, q_rope_part], axis=-1)  # (B, S, H, 192)
+        k = jnp.concatenate([k_nope, k_rope_part], axis=-1)  # (B, S, H, 192)
 
-    # Pad to 256 for flash attention
-    pad_size = _PAD_HEAD_DIM - d_qk  # 64
-    q = jnp.pad(q, ((0,0), (0,0), (0,0), (0, pad_size)))  # (B, S, H, 256)
-    k = jnp.pad(k, ((0,0), (0,0), (0,0), (0, pad_size)))
-    v_padded = jnp.pad(v, ((0,0), (0,0), (0,0), (0, _PAD_HEAD_DIM - vd)))  # (B, S, H, 256)
+        # Pad to 256 for flash attention
+        pad_size = _PAD_HEAD_DIM - d_qk  # 64
+        q = jnp.pad(q, ((0,0), (0,0), (0,0), (0, pad_size)))  # (B, S, H, 256)
+        k = jnp.pad(k, ((0,0), (0,0), (0,0), (0, pad_size)))
+        v_padded = jnp.pad(v, ((0,0), (0,0), (0,0), (0, _PAD_HEAD_DIM - vd)))  # (B, S, H, 256)
 
-    # Transpose to BHSD for flash_attention
-    q = q.transpose(0, 2, 1, 3)  # (B, H, S, 256)
-    k = k.transpose(0, 2, 1, 3)
-    v_padded = v_padded.transpose(0, 2, 1, 3)
+        # Transpose to BHSD for flash_attention
+        q = q.transpose(0, 2, 1, 3)  # (B, H, S, 256)
+        k = k.transpose(0, 2, 1, 3)
+        v_padded = v_padded.transpose(0, 2, 1, 3)
 
-    # Pallas flash attention
-    sm_scale = d_qk ** -0.5
-    block_sizes = BlockSizes(
-        block_q=TUNED_PARAMS['block_q'],
-        block_k_major=TUNED_PARAMS['block_k_major'],
-        block_k=TUNED_PARAMS['block_k'],
-        block_b=TUNED_PARAMS['block_b'],
-        block_q_major_dkv=TUNED_PARAMS['block_q_major_dkv'],
-        block_k_major_dkv=TUNED_PARAMS['block_k_major_dkv'],
-        block_k_dkv=TUNED_PARAMS['block_k_dkv'],
-        block_q_dkv=TUNED_PARAMS['block_q_dkv'],
-        block_k_major_dq=TUNED_PARAMS['block_k_major_dq'],
-        block_k_dq=TUNED_PARAMS['block_k_dq'],
-        block_q_dq=TUNED_PARAMS['block_q_dq'],
-    )
-    attn_out = flash_attention(q, k, v_padded, causal=True, sm_scale=sm_scale, block_sizes=block_sizes)
+        # Pallas flash attention
+        sm_scale = d_qk ** -0.5
+        block_sizes = BlockSizes(
+            block_q=TUNED_PARAMS['block_q'],
+            block_k_major=TUNED_PARAMS['block_k_major'],
+            block_k=TUNED_PARAMS['block_k'],
+            block_b=TUNED_PARAMS['block_b'],
+            block_q_major_dkv=TUNED_PARAMS['block_q_major_dkv'],
+            block_k_major_dkv=TUNED_PARAMS['block_k_major_dkv'],
+            block_k_dkv=TUNED_PARAMS['block_k_dkv'],
+            block_q_dkv=TUNED_PARAMS['block_q_dkv'],
+            block_k_major_dq=TUNED_PARAMS['block_k_major_dq'],
+            block_k_dq=TUNED_PARAMS['block_k_dq'],
+            block_q_dq=TUNED_PARAMS['block_q_dq'],
+        )
+        attn_out = flash_attention(q, k, v_padded, causal=True, sm_scale=sm_scale, block_sizes=block_sizes)
 
-    # Slice back to d_v and output projection
-    attn_out = attn_out[..., :vd]  # (B, H, S, d_v=128)
-    attn_out = attn_out.transpose(0, 2, 1, 3).reshape(B, S, H * vd)
-    return jnp.dot(attn_out, o_proj)
+        # Slice back to d_v and output projection
+        attn_out = attn_out[..., :vd]  # (B, H, S, d_v=128)
+        attn_out = attn_out.transpose(0, 2, 1, 3).reshape(B, S, H * vd)
+        return jnp.dot(attn_out, o_proj)
 
 
 def benchmark(num_warmup=5, num_iters=100):

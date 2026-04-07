@@ -26,22 +26,23 @@ def create_inputs(dtype=jnp.float32):
 
 def workload(x, y, bmm_weight, bmm_bias, in_weight, in_bias):
     """BMM + InstanceNorm + Sum + ResidualAdd + Multiply."""
-    eps = 1e-5
-    # Linear
-    x = x @ bmm_weight.T + bmm_bias
+    with jax.named_scope('bench_kernel'):
+        eps = 1e-5
+        # Linear
+        x = x @ bmm_weight.T + bmm_bias
 
-    # InstanceNorm2d on (N, C, 1, 1)
-    x = jnp.expand_dims(jnp.expand_dims(x, 2), 3)
-    mean = jnp.mean(x, axis=(2, 3), keepdims=True)
-    var = jnp.var(x, axis=(2, 3), keepdims=True)
-    x = (x - mean) / jnp.sqrt(var + eps)
-    x = x * jnp.reshape(in_weight, (1, -1, 1, 1)) + jnp.reshape(in_bias, (1, -1, 1, 1))
-    x = jnp.squeeze(jnp.squeeze(x, axis=3), axis=2)
+        # InstanceNorm2d on (N, C, 1, 1)
+        x = jnp.expand_dims(jnp.expand_dims(x, 2), 3)
+        mean = jnp.mean(x, axis=(2, 3), keepdims=True)
+        var = jnp.var(x, axis=(2, 3), keepdims=True)
+        x = (x - mean) / jnp.sqrt(var + eps)
+        x = x * jnp.reshape(in_weight, (1, -1, 1, 1)) + jnp.reshape(in_bias, (1, -1, 1, 1))
+        x = jnp.squeeze(jnp.squeeze(x, axis=3), axis=2)
 
-    # Residual add and multiply
-    x = x + y
-    x = x * y
-    return x
+        # Residual add and multiply
+        x = x + y
+        x = x * y
+        return x
 
 def benchmark(num_warmup=5, num_iters=100):
     """Benchmark and return results dict."""

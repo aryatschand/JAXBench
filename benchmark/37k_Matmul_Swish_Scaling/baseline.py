@@ -22,10 +22,11 @@ def create_inputs(dtype=jnp.float32):
 
 def workload(x, weight, bias):
     """Matmul + Swish + Scaling."""
-    x = jnp.matmul(x, weight) + bias
-    x = x * jax.nn.sigmoid(x)
-    x = x * 2.0
-    return x
+    with jax.named_scope('bench_kernel'):
+        x = jnp.matmul(x, weight) + bias
+        x = x * jax.nn.sigmoid(x)
+        x = x * 2.0
+        return x
 
 def benchmark(num_warmup=5, num_iters=100):
     """Benchmark and return results dict."""

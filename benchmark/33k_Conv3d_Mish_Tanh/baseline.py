@@ -24,23 +24,24 @@ def create_inputs(dtype=jnp.float32):
 
 def workload(x, weight, bias):
     """Conv3d + Mish + Tanh."""
-    # NCDHW -> NDHWC
-    x = jnp.transpose(x, (0, 2, 3, 4, 1))
-    kernel = jnp.transpose(weight, (2, 3, 4, 1, 0))
-    x = jax.lax.conv_general_dilated(
-        x, kernel,
-        window_strides=(1, 1, 1),
-        padding=((0, 0), (0, 0), (0, 0)),
-        dimension_numbers=('NDHWC', 'DHWIO', 'NDHWC')
-    )
-    x = x + bias.reshape(1, 1, 1, 1, -1)
-    # Mish
-    x = x * jnp.tanh(jnp.log(1 + jnp.exp(x)))
-    # Tanh
-    x = jnp.tanh(x)
-    # NDHWC -> NCDHW
-    x = jnp.transpose(x, (0, 4, 1, 2, 3))
-    return x
+    with jax.named_scope('bench_kernel'):
+        # NCDHW -> NDHWC
+        x = jnp.transpose(x, (0, 2, 3, 4, 1))
+        kernel = jnp.transpose(weight, (2, 3, 4, 1, 0))
+        x = jax.lax.conv_general_dilated(
+            x, kernel,
+            window_strides=(1, 1, 1),
+            padding=((0, 0), (0, 0), (0, 0)),
+            dimension_numbers=('NDHWC', 'DHWIO', 'NDHWC')
+        )
+        x = x + bias.reshape(1, 1, 1, 1, -1)
+        # Mish
+        x = x * jnp.tanh(jnp.log(1 + jnp.exp(x)))
+        # Tanh
+        x = jnp.tanh(x)
+        # NDHWC -> NCDHW
+        x = jnp.transpose(x, (0, 4, 1, 2, 3))
+        return x
 
 def benchmark(num_warmup=5, num_iters=100):
     """Benchmark and return results dict."""

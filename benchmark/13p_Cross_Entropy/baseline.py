@@ -25,11 +25,12 @@ def create_inputs(dtype=jnp.bfloat16):
 
 def workload(hidden, weight, labels):
     """Fused linear projection + softmax cross-entropy loss."""
-    logits = jnp.dot(hidden, weight)
-    log_probs = jax.nn.log_softmax(logits, axis=-1)
-    one_hot = jax.nn.one_hot(labels, logits.shape[-1])
-    loss = -jnp.sum(one_hot * log_probs, axis=-1)
-    return jnp.mean(loss)
+    with jax.named_scope('bench_kernel'):
+        logits = jnp.dot(hidden, weight)
+        log_probs = jax.nn.log_softmax(logits, axis=-1)
+        one_hot = jax.nn.one_hot(labels, logits.shape[-1])
+        loss = -jnp.sum(one_hot * log_probs, axis=-1)
+        return jnp.mean(loss)
 
 
 def benchmark(num_warmup=5, num_iters=100):

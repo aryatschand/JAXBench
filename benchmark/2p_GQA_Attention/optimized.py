@@ -2573,42 +2573,43 @@ def create_inputs(dtype=jnp.bfloat16):
 
 def workload(query, key, value):
     """GQA with Pallas splash attention (autotuned block sizes)."""
-    # Transpose from BSHD to BHSD for splash attention
-    q = query.transpose(0, 2, 1, 3)   # (B, H_q, S, D)
-    k = key.transpose(0, 2, 1, 3)     # (B, H_kv, S, D)
-    v = value.transpose(0, 2, 1, 3)   # (B, H_kv, S, D)
+    with jax.named_scope('bench_kernel'):
+        # Transpose from BSHD to BHSD for splash attention
+        q = query.transpose(0, 2, 1, 3)   # (B, H_q, S, D)
+        k = key.transpose(0, 2, 1, 3)     # (B, H_kv, S, D)
+        v = value.transpose(0, 2, 1, 3)   # (B, H_kv, S, D)
 
-    B, H_q, S, D = q.shape
-    H_kv = v.shape[1]
-    heads_per_group = H_q // H_kv
-    mask = mask_lib.CausalMask(shape=(S, S))
-    multi_head_mask = mask_lib.MultiHeadMask([mask] * H_q)
-    block_sizes = BlockSizes(
-        block_q=TUNED_PARAMS['block_q'],
-        block_kv=TUNED_PARAMS['block_kv'],
-        block_kv_compute=TUNED_PARAMS['block_kv_compute'],
-        q_layout=QKVLayout(TUNED_PARAMS['q_layout']),
-        k_layout=QKVLayout(TUNED_PARAMS['k_layout']),
-        v_layout=QKVLayout(TUNED_PARAMS['v_layout']),
-        block_q_dkv=TUNED_PARAMS['block_q_dkv'],
-        block_kv_dkv=TUNED_PARAMS['block_kv_dkv'],
-        block_kv_dkv_compute=TUNED_PARAMS['block_kv_dkv_compute'],
-        block_q_dq=TUNED_PARAMS['block_q_dq'],
-        block_kv_dq=TUNED_PARAMS['block_kv_dq'],
-    )
-    splash_kernel = _make_splash_attention(
-        multi_head_mask, block_sizes=block_sizes,
-        is_mqa=False,
-        head_shards=TUNED_PARAMS['head_shards'],
-        q_seq_shards=TUNED_PARAMS['q_seq_shards'],
-    )
-    @jax.vmap
-    def _attend(q_batch, k_batch, v_batch):
-        k_repeated = jnp.repeat(k_batch, heads_per_group, axis=0)
-        v_repeated = jnp.repeat(v_batch, heads_per_group, axis=0)
-        return splash_kernel(q_batch, k_repeated, v_repeated)
-    out = _attend(q, k, v)  # (B, H_q, S, D)
-    return out.transpose(0, 2, 1, 3)  # (B, S, H_q, D) to match baseline
+        B, H_q, S, D = q.shape
+        H_kv = v.shape[1]
+        heads_per_group = H_q // H_kv
+        mask = mask_lib.CausalMask(shape=(S, S))
+        multi_head_mask = mask_lib.MultiHeadMask([mask] * H_q)
+        block_sizes = BlockSizes(
+            block_q=TUNED_PARAMS['block_q'],
+            block_kv=TUNED_PARAMS['block_kv'],
+            block_kv_compute=TUNED_PARAMS['block_kv_compute'],
+            q_layout=QKVLayout(TUNED_PARAMS['q_layout']),
+            k_layout=QKVLayout(TUNED_PARAMS['k_layout']),
+            v_layout=QKVLayout(TUNED_PARAMS['v_layout']),
+            block_q_dkv=TUNED_PARAMS['block_q_dkv'],
+            block_kv_dkv=TUNED_PARAMS['block_kv_dkv'],
+            block_kv_dkv_compute=TUNED_PARAMS['block_kv_dkv_compute'],
+            block_q_dq=TUNED_PARAMS['block_q_dq'],
+            block_kv_dq=TUNED_PARAMS['block_kv_dq'],
+        )
+        splash_kernel = _make_splash_attention(
+            multi_head_mask, block_sizes=block_sizes,
+            is_mqa=False,
+            head_shards=TUNED_PARAMS['head_shards'],
+            q_seq_shards=TUNED_PARAMS['q_seq_shards'],
+        )
+        @jax.vmap
+        def _attend(q_batch, k_batch, v_batch):
+            k_repeated = jnp.repeat(k_batch, heads_per_group, axis=0)
+            v_repeated = jnp.repeat(v_batch, heads_per_group, axis=0)
+            return splash_kernel(q_batch, k_repeated, v_repeated)
+        out = _attend(q, k, v)  # (B, H_q, S, D)
+        return out.transpose(0, 2, 1, 3)  # (B, S, H_q, D) to match baseline
 
 
 def benchmark(num_warmup=5, num_iters=100):

@@ -24,11 +24,12 @@ def create_inputs(dtype=jnp.float32):
 
 def workload(x, weight, bias):
     """Gemm + Scaling + Hardtanh + GELU."""
-    x = jnp.matmul(x, weight) + bias
-    x = x * 0.5
-    x = jnp.clip(x, -2, 2)
-    x = x * 0.5 * (1.0 + jnp.tanh(jnp.sqrt(2.0 / jnp.pi) * (x + 0.044715 * x**3)))
-    return x
+    with jax.named_scope('bench_kernel'):
+        x = jnp.matmul(x, weight) + bias
+        x = x * 0.5
+        x = jnp.clip(x, -2, 2)
+        x = x * 0.5 * (1.0 + jnp.tanh(jnp.sqrt(2.0 / jnp.pi) * (x + 0.044715 * x**3)))
+        return x
 
 def benchmark(num_warmup=5, num_iters=100):
     """Benchmark and return results dict."""

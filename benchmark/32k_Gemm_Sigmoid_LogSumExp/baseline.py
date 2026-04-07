@@ -25,11 +25,12 @@ def create_inputs(dtype=jnp.float32):
 
 def workload(x, w1, b1, w2, b2):
     """Gemm + Sigmoid + Gemm + LogSumExp."""
-    x = jnp.matmul(x, w1.T) + b1
-    x = jax.nn.sigmoid(x)
-    x = jnp.matmul(x, w2.T) + b2
-    x = jax.nn.logsumexp(x, axis=1)
-    return x
+    with jax.named_scope('bench_kernel'):
+        x = jnp.matmul(x, w1.T) + b1
+        x = jax.nn.sigmoid(x)
+        x = jnp.matmul(x, w2.T) + b2
+        x = jax.nn.logsumexp(x, axis=1)
+        return x
 
 def benchmark(num_warmup=5, num_iters=100):
     """Benchmark and return results dict."""

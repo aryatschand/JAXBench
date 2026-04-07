@@ -21,10 +21,11 @@ def create_inputs(dtype=jnp.float32):
 
 def workload(x, weight, bias):
     """Matmul + GELU + Softmax."""
-    x = jnp.matmul(x, weight) + bias
-    x = jax.nn.gelu(x)
-    x = jax.nn.softmax(x, axis=1)
-    return x
+    with jax.named_scope('bench_kernel'):
+        x = jnp.matmul(x, weight) + bias
+        x = jax.nn.gelu(x)
+        x = jax.nn.softmax(x, axis=1)
+        return x
 
 def benchmark(num_warmup=5, num_iters=100):
     """Benchmark and return results dict."""

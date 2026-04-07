@@ -28,30 +28,31 @@ def create_inputs(dtype=jnp.float32):
 
 def workload(x, conv_weight, conv_bias, bn_weight, bn_bias):
     """Conv2d + Mish activation + BatchNorm."""
-    eps = 1e-5
-    # Conv2d NCHW -> NHWC
-    x = jnp.transpose(x, (0, 2, 3, 1))
-    weight = jnp.transpose(conv_weight, (2, 3, 1, 0))
-    x = lax.conv_general_dilated(
-        x, weight,
-        window_strides=(1, 1),
-        padding='VALID',
-        dimension_numbers=('NHWC', 'HWIO', 'NHWC')
-    )
-    x = x + conv_bias.reshape(1, 1, 1, -1)
-    x = jnp.transpose(x, (0, 3, 1, 2))  # NHWC -> NCHW
+    with jax.named_scope('bench_kernel'):
+        eps = 1e-5
+        # Conv2d NCHW -> NHWC
+        x = jnp.transpose(x, (0, 2, 3, 1))
+        weight = jnp.transpose(conv_weight, (2, 3, 1, 0))
+        x = lax.conv_general_dilated(
+            x, weight,
+            window_strides=(1, 1),
+            padding='VALID',
+            dimension_numbers=('NHWC', 'HWIO', 'NHWC')
+        )
+        x = x + conv_bias.reshape(1, 1, 1, -1)
+        x = jnp.transpose(x, (0, 3, 1, 2))  # NHWC -> NCHW
 
-    # Mish activation: multiply(tanh(softplus(x)), x)
-    softplus_x = jax.nn.softplus(x)
-    x = jnp.multiply(jnp.tanh(softplus_x), x)
+        # Mish activation: multiply(tanh(softplus(x)), x)
+        softplus_x = jax.nn.softplus(x)
+        x = jnp.multiply(jnp.tanh(softplus_x), x)
 
-    # BatchNorm2d (training mode)
-    mean = jnp.mean(x, axis=(0, 2, 3), keepdims=True)
-    var = jnp.mean((x - mean) ** 2, axis=(0, 2, 3), keepdims=True)
-    w = bn_weight.reshape(1, -1, 1, 1)
-    b = bn_bias.reshape(1, -1, 1, 1)
-    x = (x - mean) / jnp.sqrt(var + eps) * w + b
-    return x
+        # BatchNorm2d (training mode)
+        mean = jnp.mean(x, axis=(0, 2, 3), keepdims=True)
+        var = jnp.mean((x - mean) ** 2, axis=(0, 2, 3), keepdims=True)
+        w = bn_weight.reshape(1, -1, 1, 1)
+        b = bn_bias.reshape(1, -1, 1, 1)
+        x = (x - mean) / jnp.sqrt(var + eps) * w + b
+        return x
 
 def benchmark(num_warmup=5, num_iters=100):
     """Benchmark and return results dict."""

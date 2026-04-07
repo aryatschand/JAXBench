@@ -49,38 +49,39 @@ def workload(query, key, value, A_log):
     where L[i,j] = Π_{k=j+1}^{i} a_k for i > j, 1 for i=j, 0 for i<j
     and a_k = exp(A_log_k) is the selective (input-dependent) decay.
     """
-    B, H, S, D = query.shape
+    with jax.named_scope('bench_kernel'):
+        B, H, S, D = query.shape
 
-    # Compute per-position decay: a = sigmoid(A_log) to keep in (0, 1)
-    a = jax.nn.sigmoid(A_log.astype(jnp.float32))  # (B, H, S)
+        # Compute per-position decay: a = sigmoid(A_log) to keep in (0, 1)
+        a = jax.nn.sigmoid(A_log.astype(jnp.float32))  # (B, H, S)
 
-    # Build causal mask L with cumulative decay
-    # log(a) cumsum then exponentiate: L[i,j] = exp(Σ_{k=j+1}^{i} log(a_k))
-    log_a = jnp.log(a + 1e-8)  # (B, H, S)
-    log_a_cumsum = jnp.cumsum(log_a, axis=-1)  # (B, H, S)
+        # Build causal mask L with cumulative decay
+        # log(a) cumsum then exponentiate: L[i,j] = exp(Σ_{k=j+1}^{i} log(a_k))
+        log_a = jnp.log(a + 1e-8)  # (B, H, S)
+        log_a_cumsum = jnp.cumsum(log_a, axis=-1)  # (B, H, S)
 
-    # L[i,j] = exp(cumsum[i] - cumsum[j]) for i >= j, 0 for i < j
-    diff = log_a_cumsum[:, :, :, None] - log_a_cumsum[:, :, None, :]
-    causal = jnp.tril(jnp.ones((S, S), dtype=jnp.bool_))
-    L = jnp.exp(jnp.where(causal[None, None, :, :], diff, -1e30))
+        # L[i,j] = exp(cumsum[i] - cumsum[j]) for i >= j, 0 for i < j
+        diff = log_a_cumsum[:, :, :, None] - log_a_cumsum[:, :, None, :]
+        causal = jnp.tril(jnp.ones((S, S), dtype=jnp.bool_))
+        L = jnp.exp(jnp.where(causal[None, None, :, :], diff, -1e30))
 
-    # SSD attention: (L ⊙ CB^T) x
-    # CB^T: (B, H, S, S) — "attention scores"
-    scores = jnp.einsum('bhsd,bhtd->bhst',
-                        query.astype(jnp.float32),
-                        key.astype(jnp.float32))
+        # SSD attention: (L ⊙ CB^T) x
+        # CB^T: (B, H, S, S) — "attention scores"
+        scores = jnp.einsum('bhsd,bhtd->bhst',
+                            query.astype(jnp.float32),
+                            key.astype(jnp.float32))
 
-    # Apply selective decay mask
-    scores = scores * L
+        # Apply selective decay mask
+        scores = scores * L
 
-    # Normalize
-    scores_sum = jnp.sum(scores, axis=-1, keepdims=True)
-    scores_sum = jnp.where(jnp.abs(scores_sum) < 1e-6, 1.0, scores_sum)
-    scores = scores / jnp.maximum(jnp.abs(scores_sum), 1.0)
+        # Normalize
+        scores_sum = jnp.sum(scores, axis=-1, keepdims=True)
+        scores_sum = jnp.where(jnp.abs(scores_sum) < 1e-6, 1.0, scores_sum)
+        scores = scores / jnp.maximum(jnp.abs(scores_sum), 1.0)
 
-    # Output
-    output = jnp.einsum('bhst,bhtd->bhsd', scores.astype(query.dtype), value)
-    return output
+        # Output
+        output = jnp.einsum('bhst,bhtd->bhsd', scores.astype(query.dtype), value)
+        return output
 
 
 def benchmark(num_warmup=5, num_iters=100):

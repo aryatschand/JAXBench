@@ -52,40 +52,41 @@ def create_inputs(dtype=jnp.bfloat16):
 
 def workload(queries, k_pages, v_pages, kv_lens, page_indices, cu_q_lens):
     """Ragged paged attention: gather pages, compute GQA attention per sequence."""
-    num_seqs = CONFIG['num_seqs']
-    num_q_heads = CONFIG['num_query_heads']
-    num_kv_heads = CONFIG['num_kv_heads']
-    head_dim = CONFIG['head_dim']
-    page_size = CONFIG['page_size']
-    max_seq_len = CONFIG['pages_per_seq'] * page_size
-    pages_per_seq = CONFIG['pages_per_seq']
-    num_q_per_kv = num_q_heads // num_kv_heads
-    sm_scale = head_dim ** -0.5
+    with jax.named_scope('bench_kernel'):
+        num_seqs = CONFIG['num_seqs']
+        num_q_heads = CONFIG['num_query_heads']
+        num_kv_heads = CONFIG['num_kv_heads']
+        head_dim = CONFIG['head_dim']
+        page_size = CONFIG['page_size']
+        max_seq_len = CONFIG['pages_per_seq'] * page_size
+        pages_per_seq = CONFIG['pages_per_seq']
+        num_q_per_kv = num_q_heads // num_kv_heads
+        sm_scale = head_dim ** -0.5
 
-    def attend_one_seq(seq_idx):
-        q_start = cu_q_lens[seq_idx]
-        q_end = cu_q_lens[seq_idx + 1]
-        q = jax.lax.dynamic_slice(queries, (q_start, 0, 0), (1, num_q_heads, head_dim))  # (1, H_q, D)
-        # Gather KV pages
-        seq_pages = page_indices[seq_idx]  # (pages_per_seq,)
-        k = k_pages[seq_pages].reshape(max_seq_len, num_kv_heads, head_dim)  # (S, H_kv, D)
-        v = v_pages[seq_pages].reshape(max_seq_len, num_kv_heads, head_dim)
-        # Repeat KV heads for GQA
-        k = jnp.repeat(k, num_q_per_kv, axis=1)  # (S, H_q, D)
-        v = jnp.repeat(v, num_q_per_kv, axis=1)
-        # Attention: (1, H_q, D) x (S, H_q, D) -> (H_q, 1, S)
-        attn = jnp.einsum('qhd,khd->hqk', q, k) * sm_scale
-        # Causal mask: query at position kv_len-1, keys at 0..kv_len-1
-        kv_len = kv_lens[seq_idx]
-        mask = jnp.arange(max_seq_len) < kv_len
-        attn = jnp.where(mask[None, None, :], attn, -1e30)
-        attn = jax.nn.softmax(attn, axis=-1)
-        out = jnp.einsum('hqk,khd->qhd', attn, v)  # (1, H_q, D)
-        return out.squeeze(0)  # (H_q, D)
+        def attend_one_seq(seq_idx):
+            q_start = cu_q_lens[seq_idx]
+            q_end = cu_q_lens[seq_idx + 1]
+            q = jax.lax.dynamic_slice(queries, (q_start, 0, 0), (1, num_q_heads, head_dim))  # (1, H_q, D)
+            # Gather KV pages
+            seq_pages = page_indices[seq_idx]  # (pages_per_seq,)
+            k = k_pages[seq_pages].reshape(max_seq_len, num_kv_heads, head_dim)  # (S, H_kv, D)
+            v = v_pages[seq_pages].reshape(max_seq_len, num_kv_heads, head_dim)
+            # Repeat KV heads for GQA
+            k = jnp.repeat(k, num_q_per_kv, axis=1)  # (S, H_q, D)
+            v = jnp.repeat(v, num_q_per_kv, axis=1)
+            # Attention: (1, H_q, D) x (S, H_q, D) -> (H_q, 1, S)
+            attn = jnp.einsum('qhd,khd->hqk', q, k) * sm_scale
+            # Causal mask: query at position kv_len-1, keys at 0..kv_len-1
+            kv_len = kv_lens[seq_idx]
+            mask = jnp.arange(max_seq_len) < kv_len
+            attn = jnp.where(mask[None, None, :], attn, -1e30)
+            attn = jax.nn.softmax(attn, axis=-1)
+            out = jnp.einsum('hqk,khd->qhd', attn, v)  # (1, H_q, D)
+            return out.squeeze(0)  # (H_q, D)
 
-    # Process all sequences
-    outputs = jax.vmap(attend_one_seq)(jnp.arange(num_seqs))  # (num_seqs, H_q, D)
-    return outputs
+        # Process all sequences
+        outputs = jax.vmap(attend_one_seq)(jnp.arange(num_seqs))  # (num_seqs, H_q, D)
+        return outputs
 
 
 def get_flops():

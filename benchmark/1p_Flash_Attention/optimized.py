@@ -1766,23 +1766,24 @@ def create_inputs(dtype=jnp.bfloat16):
 
 
 def workload(q, k, v):
-    sm_scale = 1.0 / math.sqrt(CONFIG['head_dim'])
-    block_sizes = BlockSizes(
-        block_q=TUNED_PARAMS['block_q'],
-        block_k_major=TUNED_PARAMS['block_k_major'],
-        block_k=TUNED_PARAMS['block_k'],
-        block_b=TUNED_PARAMS['block_b'],
-        block_q_major_dkv=TUNED_PARAMS['block_q_major_dkv'],
-        block_k_major_dkv=TUNED_PARAMS['block_k_major_dkv'],
-        block_k_dkv=TUNED_PARAMS['block_k_dkv'],
-        block_q_dkv=TUNED_PARAMS['block_q_dkv'],
-        block_k_major_dq=TUNED_PARAMS['block_k_major_dq'],
-        block_k_dq=TUNED_PARAMS['block_k_dq'],
-        block_q_dq=TUNED_PARAMS['block_q_dq'],
-    )
-    return flash_attention(
-        q, k, v, causal=True, sm_scale=sm_scale, block_sizes=block_sizes,
-    )
+    with jax.named_scope('bench_kernel'):
+        sm_scale = 1.0 / math.sqrt(CONFIG['head_dim'])
+        block_sizes = BlockSizes(
+            block_q=TUNED_PARAMS['block_q'],
+            block_k_major=TUNED_PARAMS['block_k_major'],
+            block_k=TUNED_PARAMS['block_k'],
+            block_b=TUNED_PARAMS['block_b'],
+            block_q_major_dkv=TUNED_PARAMS['block_q_major_dkv'],
+            block_k_major_dkv=TUNED_PARAMS['block_k_major_dkv'],
+            block_k_dkv=TUNED_PARAMS['block_k_dkv'],
+            block_q_dkv=TUNED_PARAMS['block_q_dkv'],
+            block_k_major_dq=TUNED_PARAMS['block_k_major_dq'],
+            block_k_dq=TUNED_PARAMS['block_k_dq'],
+            block_q_dq=TUNED_PARAMS['block_q_dq'],
+        )
+        return flash_attention(
+            q, k, v, causal=True, sm_scale=sm_scale, block_sizes=block_sizes,
+        )
 
 
 def benchmark(num_warmup=5, num_iters=100):

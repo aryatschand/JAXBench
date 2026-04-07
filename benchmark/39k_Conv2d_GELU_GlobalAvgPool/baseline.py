@@ -24,20 +24,21 @@ def create_inputs(dtype=jnp.float32):
 
 def workload(x, weight, bias):
     """Conv2d + GELU + GlobalAvgPool."""
-    # NCHW -> NHWC
-    x = jnp.transpose(x, (0, 2, 3, 1))
-    kernel = jnp.transpose(weight, (2, 3, 1, 0))
-    x = jax.lax.conv_general_dilated(
-        x, kernel,
-        window_strides=(1, 1),
-        padding='VALID',
-        dimension_numbers=('NHWC', 'HWIO', 'NHWC')
-    )
-    x = x + bias.reshape(1, 1, 1, -1)
-    x = jax.nn.gelu(x)
-    # Global average pooling over H, W
-    x = jnp.mean(x, axis=(1, 2))
-    return x
+    with jax.named_scope('bench_kernel'):
+        # NCHW -> NHWC
+        x = jnp.transpose(x, (0, 2, 3, 1))
+        kernel = jnp.transpose(weight, (2, 3, 1, 0))
+        x = jax.lax.conv_general_dilated(
+            x, kernel,
+            window_strides=(1, 1),
+            padding='VALID',
+            dimension_numbers=('NHWC', 'HWIO', 'NHWC')
+        )
+        x = x + bias.reshape(1, 1, 1, -1)
+        x = jax.nn.gelu(x)
+        # Global average pooling over H, W
+        x = jnp.mean(x, axis=(1, 2))
+        return x
 
 def benchmark(num_warmup=5, num_iters=100):
     """Benchmark and return results dict."""

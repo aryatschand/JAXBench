@@ -25,23 +25,24 @@ def create_inputs(dtype=jnp.float32):
 
 def workload(x, weight, bias, gn_weight, gn_bias):
     """Matmul + Swish + Sum(bias) + GroupNorm."""
-    num_groups = 64
-    out_features = 4096
-    # Linear
-    x = jnp.matmul(x, weight)
-    # Swish
-    x = jax.nn.sigmoid(x) * x
-    # Add bias
-    x = x + bias
-    # GroupNorm
-    group_size = out_features // num_groups
-    x = x.reshape(-1, num_groups, group_size)
-    mean = jnp.mean(x, axis=-1, keepdims=True)
-    var = jnp.var(x, axis=-1, keepdims=True)
-    x = (x - mean) / jnp.sqrt(var + 1e-5)
-    x = x.reshape(-1, out_features)
-    x = x * gn_weight + gn_bias
-    return x
+    with jax.named_scope('bench_kernel'):
+        num_groups = 64
+        out_features = 4096
+        # Linear
+        x = jnp.matmul(x, weight)
+        # Swish
+        x = jax.nn.sigmoid(x) * x
+        # Add bias
+        x = x + bias
+        # GroupNorm
+        group_size = out_features // num_groups
+        x = x.reshape(-1, num_groups, group_size)
+        mean = jnp.mean(x, axis=-1, keepdims=True)
+        var = jnp.var(x, axis=-1, keepdims=True)
+        x = (x - mean) / jnp.sqrt(var + 1e-5)
+        x = x.reshape(-1, out_features)
+        x = x * gn_weight + gn_bias
+        return x
 
 def benchmark(num_warmup=5, num_iters=100):
     """Benchmark and return results dict."""

@@ -30,21 +30,22 @@ def create_inputs(dtype=jnp.bfloat16):
 
 def workload(query, key, value):
     """GQA attention: expand KV heads, scaled dot-product with causal mask."""
-    B, S, Hq, D = query.shape
-    Hkv = key.shape[2]
-    G = Hq // Hkv
-    key = jnp.repeat(key[:, :, :, None, :], G, axis=3).reshape(B, S, Hq, D)
-    value = jnp.repeat(value[:, :, :, None, :], G, axis=3).reshape(B, S, Hq, D)
-    q = query.transpose(0, 2, 1, 3)
-    k = key.transpose(0, 2, 1, 3)
-    v = value.transpose(0, 2, 1, 3)
-    scale = D ** -0.5
-    attn = jnp.einsum('bhqd,bhkd->bhqk', q, k) * scale
-    mask = jnp.tril(jnp.ones((S, S)))
-    attn = jnp.where(mask, attn, -1e9)
-    attn = jax.nn.softmax(attn, axis=-1)
-    out = jnp.einsum('bhqk,bhkd->bhqd', attn, v)
-    return out.transpose(0, 2, 1, 3)
+    with jax.named_scope('bench_kernel'):
+        B, S, Hq, D = query.shape
+        Hkv = key.shape[2]
+        G = Hq // Hkv
+        key = jnp.repeat(key[:, :, :, None, :], G, axis=3).reshape(B, S, Hq, D)
+        value = jnp.repeat(value[:, :, :, None, :], G, axis=3).reshape(B, S, Hq, D)
+        q = query.transpose(0, 2, 1, 3)
+        k = key.transpose(0, 2, 1, 3)
+        v = value.transpose(0, 2, 1, 3)
+        scale = D ** -0.5
+        attn = jnp.einsum('bhqd,bhkd->bhqk', q, k) * scale
+        mask = jnp.tril(jnp.ones((S, S)))
+        attn = jnp.where(mask, attn, -1e9)
+        attn = jax.nn.softmax(attn, axis=-1)
+        out = jnp.einsum('bhqk,bhkd->bhqd', attn, v)
+        return out.transpose(0, 2, 1, 3)
 
 
 def benchmark(num_warmup=5, num_iters=100):

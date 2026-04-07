@@ -32,18 +32,19 @@ def create_inputs(dtype=jnp.bfloat16):
 
 def workload(query, key, value):
     """Standard causal multi-head attention: QK^T -> mask -> softmax -> AV."""
-    B, H, S, D = query.shape
-    scale = D ** -0.5
-    # QK^T
-    attn = jnp.einsum('bhqd,bhkd->bhqk', query, key) * scale
-    # Causal mask
-    mask = jnp.tril(jnp.ones((S, S)))
-    attn = jnp.where(mask, attn, -1e9)
-    # Softmax
-    attn = jax.nn.softmax(attn, axis=-1)
-    # AV
-    output = jnp.einsum('bhqk,bhkd->bhqd', attn, value)
-    return output
+    with jax.named_scope('bench_kernel'):
+        B, H, S, D = query.shape
+        scale = D ** -0.5
+        # QK^T
+        attn = jnp.einsum('bhqd,bhkd->bhqk', query, key) * scale
+        # Causal mask
+        mask = jnp.tril(jnp.ones((S, S)))
+        attn = jnp.where(mask, attn, -1e9)
+        # Softmax
+        attn = jax.nn.softmax(attn, axis=-1)
+        # AV
+        output = jnp.einsum('bhqk,bhkd->bhqd', attn, value)
+        return output
 
 
 def benchmark(num_warmup=5, num_iters=100):

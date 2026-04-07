@@ -24,15 +24,16 @@ def create_inputs(dtype=jnp.float32):
 
 def workload(x, weight, bias):
     """Matmul + Scale + ResidualAdd + Clamp + LogSumExp + Mish."""
-    x = jnp.matmul(x, weight.T) + bias
-    x = x * 2.0
-    x = x + x
-    x = jnp.clip(x, -10.0, 10.0)
-    x = jax.scipy.special.logsumexp(x, axis=1, keepdims=True)
-    softplus_x = jnp.logaddexp(x, 0.0)
-    mish_x = x * jnp.tanh(softplus_x)
-    x = x * mish_x
-    return x
+    with jax.named_scope('bench_kernel'):
+        x = jnp.matmul(x, weight.T) + bias
+        x = x * 2.0
+        x = x + x
+        x = jnp.clip(x, -10.0, 10.0)
+        x = jax.scipy.special.logsumexp(x, axis=1, keepdims=True)
+        softplus_x = jnp.logaddexp(x, 0.0)
+        mish_x = x * jnp.tanh(softplus_x)
+        x = x * mish_x
+        return x
 
 def benchmark(num_warmup=5, num_iters=100):
     """Benchmark and return results dict."""

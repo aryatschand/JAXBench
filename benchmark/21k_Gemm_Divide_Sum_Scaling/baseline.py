@@ -23,15 +23,16 @@ def create_inputs(dtype=jnp.float32):
 
 def workload(x, weight):
     """Gemm + Divide + Sum + Scaling."""
-    x = lax.dot_general(
-        x, weight.T,
-        dimension_numbers=(((1,), (0,)), ((), ())),
-        precision=lax.Precision.HIGHEST
-    )
-    x = x / 2.0
-    x = jnp.sum(x, axis=1, keepdims=True)
-    x = x * 1.5
-    return x
+    with jax.named_scope('bench_kernel'):
+        x = lax.dot_general(
+            x, weight.T,
+            dimension_numbers=(((1,), (0,)), ((), ())),
+            precision=lax.Precision.HIGHEST
+        )
+        x = x / 2.0
+        x = jnp.sum(x, axis=1, keepdims=True)
+        x = x * 1.5
+        return x
 
 def benchmark(num_warmup=5, num_iters=100):
     """Benchmark and return results dict."""

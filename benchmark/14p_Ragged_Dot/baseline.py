@@ -26,8 +26,9 @@ def create_inputs(dtype=jnp.bfloat16):
 
 def workload(x, weights):
     """Grouped matmul: each group does independent matmul. Equivalent to ragged dot."""
-    # x: (G, M/G, K), weights: (G, K, N) -> out: (G, M/G, N)
-    return jnp.einsum('gmk,gkn->gmn', x, weights)
+    with jax.named_scope('bench_kernel'):
+        # x: (G, M/G, K), weights: (G, K, N) -> out: (G, M/G, N)
+        return jnp.einsum('gmk,gkn->gmn', x, weights)
 
 
 def benchmark(num_warmup=5, num_iters=100):

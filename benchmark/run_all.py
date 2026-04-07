@@ -52,13 +52,16 @@ def get_xla_flops(fn, inputs):
         return 0
 
 
-def extract_device_times_from_trace(trace_dir):
+def extract_device_times_from_trace(trace_dir, num_iters, is_eager=False):
     """Parse Perfetto JSON trace and extract per-iteration device kernel times.
 
-    Matches jit_<name>(<hash>) events in the Perfetto trace. These events wrap
-    the complete device-side execution for each JIT-compiled call, including all
-    sub-kernels (XLA fusions, Pallas kernels, etc.). This gives the true total
-    device execution time per iteration, excluding host dispatch overhead.
+    For JIT workloads: matches jit_workload(...) events which wrap the complete
+    device execution per iteration (including all sub-fusions/Pallas kernels).
+
+    For eager (_skip_jit) workloads: collects all jit_*() device events and
+    groups them into per-iteration batches by dividing total events by num_iters.
+
+    All workloads use jax.named_scope('bench_kernel') to annotate the computation.
 
     Returns list of durations in milliseconds, or None if no events found.
     """
@@ -71,16 +74,39 @@ def extract_device_times_from_trace(trace_dir):
 
     events = data.get('traceEvents', data) if isinstance(data, dict) else data
 
-    kernel_times_ms = []
-    for e in events:
-        if not isinstance(e, dict) or e.get('dur', 0) <= 0:
-            continue
-        name = e.get('name', '')
-        # jit_workload(...) or jit_<fn_name>(<hash>) events wrap entire device execution
-        if name.startswith('jit_') and '(' in name:
-            kernel_times_ms.append(e['dur'] / 1000.0)  # us -> ms
+    if not is_eager:
+        # JIT workloads: match jit_workload(...) or jit_<fn>(<hash>) wrapper events
+        kernel_times_ms = []
+        for e in events:
+            if not isinstance(e, dict) or e.get('dur', 0) <= 0:
+                continue
+            name = e.get('name', '')
+            if name.startswith('jit_') and '(' in name:
+                kernel_times_ms.append(e['dur'] / 1000.0)
+        return kernel_times_ms if kernel_times_ms else None
+    else:
+        # Eager workloads: collect all individual jit device ops and group per iteration
+        all_jit_times = []
+        for e in events:
+            if not isinstance(e, dict) or e.get('dur', 0) <= 0:
+                continue
+            name = e.get('name', '')
+            if name.startswith('jit_') and '(' in name:
+                all_jit_times.append(e['dur'] / 1000.0)
 
-    return kernel_times_ms if kernel_times_ms else None
+        if not all_jit_times:
+            return None
+
+        # Group into per-iteration batches
+        ops_per_iter = len(all_jit_times) // num_iters if num_iters > 0 else 0
+        if ops_per_iter <= 0:
+            return None
+
+        iter_times = []
+        for i in range(num_iters):
+            batch = all_jit_times[i * ops_per_iter:(i + 1) * ops_per_iter]
+            iter_times.append(sum(batch))
+        return iter_times
 
 
 def run_one(workload_dir, variant='baseline'):
@@ -139,62 +165,50 @@ def run_one(workload_dir, variant='baseline'):
             xla_flops = get_xla_flops(workload_fn, inputs)
         result['xla_flops'] = xla_flops
 
-        # Benchmark
-        if skip_jit:
-            # Eager benchmarking — no JIT, can't use profiler, wall-clock only
-            for _ in range(NUM_WARMUP):
-                out = workload_fn(*inputs)
+        # Benchmark — all workloads use jax.profiler for device-side timing
+        num_bench_iters = 10 if skip_jit else NUM_ITERS
+        run_fn = workload_fn if skip_jit else jax.jit(workload_fn)
+
+        # Warmup
+        for _ in range(NUM_WARMUP):
+            out = run_fn(*inputs)
+            if hasattr(out, 'block_until_ready'):
+                out.block_until_ready()
+
+        # Wall-clock timing (for comparison)
+        wall_times = []
+        for _ in range(num_bench_iters):
+            t0 = time.perf_counter()
+            out = run_fn(*inputs)
+            if hasattr(out, 'block_until_ready'):
+                out.block_until_ready()
+            wall_times.append((time.perf_counter() - t0) * 1000)
+
+        # Device-side profiler timing via jax.profiler.trace()
+        trace_dir = f'/tmp/jax_profile_{name}_{variant}'
+        if os.path.exists(trace_dir):
+            shutil.rmtree(trace_dir)
+        os.makedirs(trace_dir, exist_ok=True)
+
+        with jax.profiler.trace(trace_dir, create_perfetto_link=False, create_perfetto_trace=True):
+            for _ in range(num_bench_iters):
+                out = run_fn(*inputs)
                 if hasattr(out, 'block_until_ready'):
                     out.block_until_ready()
-            times = []
-            for _ in range(10):
-                t0 = time.perf_counter()
-                out = workload_fn(*inputs)
-                if hasattr(out, 'block_until_ready'):
-                    out.block_until_ready()
-                times.append((time.perf_counter() - t0) * 1000)
-            timing_method = 'wall_clock'
+
+        device_times = extract_device_times_from_trace(
+            trace_dir, num_bench_iters, is_eager=skip_jit
+        )
+        shutil.rmtree(trace_dir, ignore_errors=True)
+
+        if device_times and len(device_times) >= num_bench_iters:
+            times = device_times[:num_bench_iters]
+            timing_method = 'device_profiler'
         else:
-            jitted = jax.jit(workload_fn)
+            times = wall_times
+            timing_method = 'wall_clock_fallback'
 
-            # Warmup
-            for _ in range(NUM_WARMUP):
-                out = jitted(*inputs)
-                if hasattr(out, 'block_until_ready'):
-                    out.block_until_ready()
-
-            # Wall-clock timing (for comparison / fallback)
-            wall_times = []
-            for _ in range(NUM_ITERS):
-                t0 = time.perf_counter()
-                out = jitted(*inputs)
-                if hasattr(out, 'block_until_ready'):
-                    out.block_until_ready()
-                wall_times.append((time.perf_counter() - t0) * 1000)
-
-            # Device-side profiler timing
-            trace_dir = f'/tmp/jax_profile_{name}_{variant}'
-            if os.path.exists(trace_dir):
-                shutil.rmtree(trace_dir)
-            os.makedirs(trace_dir, exist_ok=True)
-
-            with jax.profiler.trace(trace_dir, create_perfetto_link=False, create_perfetto_trace=True):
-                for _ in range(NUM_ITERS):
-                    out = jitted(*inputs)
-                    if hasattr(out, 'block_until_ready'):
-                        out.block_until_ready()
-
-            device_times = extract_device_times_from_trace(trace_dir)
-            shutil.rmtree(trace_dir, ignore_errors=True)
-
-            if device_times and len(device_times) >= NUM_ITERS:
-                times = device_times[:NUM_ITERS]
-                timing_method = 'device_profiler'
-            else:
-                times = wall_times
-                timing_method = 'wall_clock_fallback'
-
-            result['wall_clock_median_ms'] = round(float(np.median(wall_times)), 4)
+        result['wall_clock_median_ms'] = round(float(np.median(wall_times)), 4)
 
         # Compute stats
         times_arr = np.array(times)

@@ -722,10 +722,11 @@ def create_inputs(dtype=jnp.bfloat16):
 
 
 def workload(q, k_pages, v_pages, lengths, page_indices):
-    return paged_attention(
-        q, k_pages, v_pages, lengths, page_indices,
-        pages_per_compute_block=TUNED_PARAMS['pages_per_compute_block'],
-    )
+    with jax.named_scope('bench_kernel'):
+        return paged_attention(
+            q, k_pages, v_pages, lengths, page_indices,
+            pages_per_compute_block=TUNED_PARAMS['pages_per_compute_block'],
+        )
 
 
 def benchmark(num_warmup=5, num_iters=100):
