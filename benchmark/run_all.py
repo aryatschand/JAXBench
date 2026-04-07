@@ -20,9 +20,10 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 
-# TPU v6e-1 peak TFLOPS (bf16, single chip, both MXU paths)
-# Source: Google Cloud TPU v6e spec sheet
-TPU_PEAK_TFLOPS_BF16 = 460.0
+# TPU v6e peak TFLOPS (bf16, single chip, both MXUs)
+# Source: Google Cloud TPU v6e (Trillium) spec — 918 TFLOPS bf16 per chip
+# (each chip has 2x MXU with 256x256 systolic arrays)
+TPU_PEAK_TFLOPS_BF16 = 918.0
 
 BENCHMARK_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.dirname(BENCHMARK_DIR))  # project root
@@ -75,11 +76,12 @@ def run_one(workload_dir, variant='baseline'):
     }
 
     try:
-        # Dynamic import
+        # Dynamic import — register in sys.modules so dataclasses can resolve __module__
         spec = importlib.util.spec_from_file_location(
             f'{name}.{variant}', module_path
         )
         mod = importlib.util.module_from_spec(spec)
+        sys.modules[spec.name] = mod
         spec.loader.exec_module(mod)
 
         # Get CONFIG
@@ -105,10 +107,13 @@ def run_one(workload_dir, variant='baseline'):
             for x in inputs
         ]
 
-        # Get XLA FLOP count (skip for non-jittable)
+        # Get FLOP count: prefer module's get_flops(), fall back to XLA cost_analysis
         workload_fn = getattr(mod, 'workload')
         xla_flops = 0
-        if not skip_jit:
+        get_flops_fn = getattr(mod, 'get_flops', None)
+        if get_flops_fn is not None:
+            xla_flops = int(get_flops_fn())
+        elif not skip_jit:
             xla_flops = get_xla_flops(workload_fn, inputs)
         result['xla_flops'] = xla_flops
 
