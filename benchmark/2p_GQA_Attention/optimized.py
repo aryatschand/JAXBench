@@ -2536,9 +2536,9 @@ CONFIG = {
 # Tuned by autotune_block_sizes.py. Re-run to update.
 TUNED_PARAMS = {
     # Autotuned for 128 query heads / 8 KV heads.
-    'block_q': 1024,
-    'block_kv': 1024,
-    'block_kv_compute': 512,
+    'block_q': 2048,
+    'block_kv': 2048,
+    'block_kv_compute': 1024,
     'q_layout': 1,  # QKVLayout.HEAD_DIM_MINOR=1, SEQ_MINOR=2
     'k_layout': 1,
     'v_layout': 1,

@@ -1733,7 +1733,7 @@ TUNED_PARAMS = {
     # Autotuned (forward pass).
     'block_q': 2048,
     'block_k_major': 2048,
-    'block_k': 512,
+    'block_k': 1024,
     # Not autotuned (batch=1, backward-only).
     'block_b': 1,
     'block_q_major_dkv': 128,

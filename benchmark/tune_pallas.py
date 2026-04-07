@@ -160,8 +160,41 @@ SEARCH_SPACES = {
             for q in [32, 64, 128]
         ],
     },
-    # Attention kernels have many params - search the most impactful ones
+    # Attention kernels — search the most impactful forward-pass params
     '1p_Flash_Attention': {
+        'param_name': ['block_q', 'block_k_major', 'block_k'],
+        'configs': [
+            {
+                'block_q': bq, 'block_k_major': bkm, 'block_k': bk,
+                'block_b': 1,
+                'block_q_major_dkv': 128, 'block_k_major_dkv': 128,
+                'block_k_dkv': 128, 'block_q_dkv': 128,
+                'block_k_major_dq': 128, 'block_k_dq': 128, 'block_q_dq': 128,
+            }
+            for bq in [512, 1024, 2048, 4096]
+            for bkm in [512, 1024, 2048, 4096]
+            for bk in [256, 512, 1024]
+            if bkm >= bk  # block_k_major >= block_k
+            and bq <= 4096 and bkm <= 4096  # seq_len constraint
+        ],
+    },
+    '2p_GQA_Attention': {
+        'param_name': ['block_q', 'block_kv', 'block_kv_compute'],
+        'configs': [
+            {
+                'block_q': bq, 'block_kv': bkv, 'block_kv_compute': bkvc,
+                'q_layout': 1, 'k_layout': 1, 'v_layout': 1,
+                'head_shards': 1, 'q_seq_shards': 1,
+                'block_q_dkv': None, 'block_kv_dkv': None, 'block_kv_dkv_compute': None,
+                'block_q_dq': None, 'block_kv_dq': None,
+            }
+            for bq in [512, 1024, 2048]
+            for bkv in [512, 1024, 2048]
+            for bkvc in [256, 512, 1024]
+            if bkv >= bkvc
+        ],
+    },
+    '3p_MLA_Attention': {
         'param_name': ['block_q', 'block_k_major', 'block_k'],
         'configs': [
             {
@@ -174,7 +207,23 @@ SEARCH_SPACES = {
             for bq in [512, 1024, 2048]
             for bkm in [512, 1024, 2048]
             for bk in [256, 512, 1024]
-            if bkm >= bk  # block_k_major >= block_k
+            if bkm >= bk
+        ],
+    },
+    '4p_Sparse_Attention': {
+        'param_name': ['block_q', 'block_kv', 'block_kv_compute'],
+        'configs': [
+            {
+                'block_q': bq, 'block_kv': bkv, 'block_kv_compute': bkvc,
+                'q_layout': 1, 'k_layout': 1, 'v_layout': 1,
+                'head_shards': 1, 'q_seq_shards': 1,
+                'block_q_dkv': None, 'block_kv_dkv': None, 'block_kv_dkv_compute': None,
+                'block_q_dq': None, 'block_kv_dq': None,
+            }
+            for bq in [512, 1024, 2048, 4096]
+            for bkv in [512, 1024, 2048, 4096]
+            for bkvc in [256, 512, 1024]
+            if bkv >= bkvc
         ],
     },
 }

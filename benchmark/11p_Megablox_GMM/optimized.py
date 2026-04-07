@@ -813,7 +813,7 @@ CONFIG = {
 }
 
 # Tuned by autotune_block_sizes.py. Re-run to update.
-TUNED_PARAMS = {'tiling': [128, 512, 512]}
+TUNED_PARAMS = {'tiling': [256, 1024, 1024]}
 
 
 def get_flops():

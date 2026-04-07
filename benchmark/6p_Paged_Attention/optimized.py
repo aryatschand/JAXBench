@@ -691,7 +691,7 @@ CONFIG = {
 }
 
 # Tuned by autotune_block_sizes.py. Re-run to update.
-TUNED_PARAMS = {'pages_per_compute_block': 64}
+TUNED_PARAMS = {'pages_per_compute_block': 128}
 
 
 def get_flops():
