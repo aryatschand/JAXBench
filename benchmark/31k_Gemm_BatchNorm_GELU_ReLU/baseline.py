@@ -12,7 +12,7 @@ CONFIG = {
 
 def create_inputs(dtype=jnp.float32):
     """Create all inputs including weights."""
-    key = jax.random.PRNGKey(0)
+    key = jax.random.key(0)
     k1, k2, k3 = jax.random.split(key, 3)
     batch_size, in_features, out_features = 16384, 8192, 8192
     x = jax.random.uniform(k1, (batch_size, in_features), dtype=dtype)
@@ -25,18 +25,17 @@ def create_inputs(dtype=jnp.float32):
 
 def workload(x, gemm_weight, gemm_bias, bn_weight, bn_bias):
     """Gemm + BatchNorm + GELU + ReLU."""
-    with jax.named_scope('bench_kernel'):
-        eps = 1e-5
-        # Linear
-        x = jnp.matmul(x, gemm_weight.T) + gemm_bias
-        # BatchNorm1d (training mode)
-        mean = jnp.mean(x, axis=0, keepdims=True)
-        var = jnp.mean((x - mean) ** 2, axis=0, keepdims=True)
-        x = (x - mean) / jnp.sqrt(var + eps) * bn_weight + bn_bias
-        # GELU + ReLU
-        x = jax.nn.gelu(x)
-        x = jax.nn.relu(x)
-        return x
+    eps = 1e-5
+    # Linear
+    x = jnp.matmul(x, gemm_weight.T) + gemm_bias
+    # BatchNorm1d (training mode)
+    mean = jnp.mean(x, axis=0, keepdims=True)
+    var = jnp.mean((x - mean) ** 2, axis=0, keepdims=True)
+    x = (x - mean) / jnp.sqrt(var + eps) * bn_weight + bn_bias
+    # GELU + ReLU
+    x = jax.nn.gelu(x)
+    x = jax.nn.relu(x)
+    return x
 
 def benchmark(num_warmup=5, num_iters=100):
     """Benchmark and return results dict."""

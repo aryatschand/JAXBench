@@ -310,7 +310,8 @@ def _attention_reference_custom_bwd(
 
 
 _attention_reference_custom = jax.custom_vjp(
-    _attention_reference, nondiff_argnums=(5, 6, 7, 8)
+    _attention_reference, nondiff_argnames=(
+    "mask_value", "save_residuals", "custom_type", "attn_logits_soft_cap")
 )
 _attention_reference_custom.defvjp(_attention_reference_custom_fwd,
                                    _attention_reference_custom_bwd)
@@ -621,8 +622,8 @@ def _apply_mask_and_soft_cap(
 
       repeats, rem = divmod(k_slice.size, NUM_LANES)
       assert rem == 0
-      q_sequence = pltpu.repeat(
-          q_sequence_ref[...], repeats, axis=1
+      q_sequence = jnp.tile(
+          q_sequence_ref[...], (1, repeats)
       )  # [bq, k_slice.size]
     else:
       assert q_sequence_ref.shape == (NUM_SUBLANES, bq)
@@ -648,14 +649,14 @@ def _apply_mask_and_soft_cap(
       repeats, rem = divmod(kv_ids.shape[1], NUM_LANES)
       if rem:
         raise NotImplementedError(f"block_kv must be a multiple of {NUM_LANES}")
-      q_ids = pltpu.repeat(q_segment_ids_ref[:], repeats, axis=1)  # [bq, bkv]
+      q_ids = jnp.tile(q_segment_ids_ref[:], (1, repeats))  # [bq, bkv]
     else:
       assert bq == q_segment_ids_ref.shape[-1]
       repeats, rem = divmod(bq, NUM_LANES)
       if rem:
         raise NotImplementedError(f"block_q must be a multiple of {NUM_LANES}")
-      kv_ids = pltpu.repeat(
-          kv_segment_ids_ref[k_slice, :], repeats, axis=1
+      kv_ids = jnp.tile(
+          kv_segment_ids_ref[k_slice, :], (1, repeats)
       )  # [k_slice, bq]
       q_ids = q_segment_ids_ref[:1, :]  # [1, bq]
     masks.append(q_ids == kv_ids)
@@ -782,7 +783,7 @@ def flash_attention_kernel(
           f"{bkv_compute=} should be a multiple of {NUM_LANES}"
       )
 
-    s_curr = jnp.exp(qk - pltpu.repeat(m_next, bkv_repeats, axis=1))
+    s_curr = jnp.exp(qk - jnp.tile(m_next, (1, bkv_repeats)))
     assert s_curr.shape == (bq, bkv_compute)
 
     l_curr = jax.lax.broadcast_in_dim(s_curr.sum(axis=-1), l_prev.shape, (0,))
@@ -800,7 +801,7 @@ def flash_attention_kernel(
     v = v.astype(float32)
     o_curr = lax.dot_general(s_curr, v, sv_dims)
 
-    alpha_o = pltpu.repeat(alpha, head_dim_v_repeats, axis=1)
+    alpha_o = jnp.tile(alpha, (1, head_dim_v_repeats))
     o_scratch_ref[:] = alpha_o * o_scratch_ref[:] + o_curr
 
   @pl.when(should_run)
@@ -814,7 +815,7 @@ def flash_attention_kernel(
   @pl.when(j == grid_width - 1)
   def end():
     l = l_scratch_ref[...]
-    l_inv = pltpu.repeat(1.0 / l, head_dim_v_repeats, axis=1)
+    l_inv = jnp.tile(1.0 / l, (1, head_dim_v_repeats))
     o_ref[...] = (o_scratch_ref[...] * l_inv).astype(o_ref.dtype)
     if logsumexp_ref is not None:
       assert logsumexp_ref.shape == (bq, NUM_LANES)
@@ -1160,7 +1161,11 @@ def _splash_attention_forward(
   return out
 
 
-@partial(jax.custom_vjp, nondiff_argnums=(7, 8, 9, 10, 11, 12, 13, 14))
+@partial(jax.custom_vjp, nondiff_argnames=(
+  "save_residuals", "mask_value", "is_mqa", "block_sizes",
+  "residual_checkpoint_name", "mask_function", "attn_logits_soft_cap",
+  "interpret")
+)
 def _splash_attention_custom(
     fwd_mask_info: mask_info_lib.MaskInfo,
     dq_mask_info: mask_info_lib.MaskInfo | None,
@@ -2577,37 +2582,36 @@ def create_inputs(dtype=jnp.bfloat16):
 
 
 def workload(q, k, v):
-    with jax.named_scope('bench_kernel'):
-        B, H_q, S, D = q.shape
-        H_kv = v.shape[1]
-        heads_per_group = H_q // H_kv
-        mask = mask_lib.CausalMask(shape=(S, S))
-        multi_head_mask = mask_lib.MultiHeadMask([mask] * H_q)
-        block_sizes = BlockSizes(
-            block_q=TUNED_PARAMS['block_q'],
-            block_kv=TUNED_PARAMS['block_kv'],
-            block_kv_compute=TUNED_PARAMS['block_kv_compute'],
-            q_layout=QKVLayout(TUNED_PARAMS['q_layout']),
-            k_layout=QKVLayout(TUNED_PARAMS['k_layout']),
-            v_layout=QKVLayout(TUNED_PARAMS['v_layout']),
-            block_q_dkv=TUNED_PARAMS['block_q_dkv'],
-            block_kv_dkv=TUNED_PARAMS['block_kv_dkv'],
-            block_kv_dkv_compute=TUNED_PARAMS['block_kv_dkv_compute'],
-            block_q_dq=TUNED_PARAMS['block_q_dq'],
-            block_kv_dq=TUNED_PARAMS['block_kv_dq'],
-        )
-        splash_kernel = _make_splash_attention(
-            multi_head_mask, block_sizes=block_sizes,
-            is_mqa=False,
-            head_shards=TUNED_PARAMS['head_shards'],
-            q_seq_shards=TUNED_PARAMS['q_seq_shards'],
-        )
-        @jax.vmap
-        def _attend(q_batch, k_batch, v_batch):
-            k_repeated = jnp.repeat(k_batch, heads_per_group, axis=0)
-            v_repeated = jnp.repeat(v_batch, heads_per_group, axis=0)
-            return splash_kernel(q_batch, k_repeated, v_repeated)
-        return _attend(q, k, v)
+    B, H_q, S, D = q.shape
+    H_kv = v.shape[1]
+    heads_per_group = H_q // H_kv
+    mask = mask_lib.CausalMask(shape=(S, S))
+    multi_head_mask = mask_lib.MultiHeadMask([mask] * H_q)
+    block_sizes = BlockSizes(
+        block_q=TUNED_PARAMS['block_q'],
+        block_kv=TUNED_PARAMS['block_kv'],
+        block_kv_compute=TUNED_PARAMS['block_kv_compute'],
+        q_layout=QKVLayout(TUNED_PARAMS['q_layout']),
+        k_layout=QKVLayout(TUNED_PARAMS['k_layout']),
+        v_layout=QKVLayout(TUNED_PARAMS['v_layout']),
+        block_q_dkv=TUNED_PARAMS['block_q_dkv'],
+        block_kv_dkv=TUNED_PARAMS['block_kv_dkv'],
+        block_kv_dkv_compute=TUNED_PARAMS['block_kv_dkv_compute'],
+        block_q_dq=TUNED_PARAMS['block_q_dq'],
+        block_kv_dq=TUNED_PARAMS['block_kv_dq'],
+    )
+    splash_kernel = _make_splash_attention(
+        multi_head_mask, block_sizes=block_sizes,
+        is_mqa=False,
+        head_shards=TUNED_PARAMS['head_shards'],
+        q_seq_shards=TUNED_PARAMS['q_seq_shards'],
+    )
+    @jax.vmap
+    def _attend(q_batch, k_batch, v_batch):
+        k_repeated = jnp.repeat(k_batch, heads_per_group, axis=0)
+        v_repeated = jnp.repeat(v_batch, heads_per_group, axis=0)
+        return splash_kernel(q_batch, k_repeated, v_repeated)
+    return _attend(q, k, v)
 
 
 def benchmark(num_warmup=5, num_iters=100):

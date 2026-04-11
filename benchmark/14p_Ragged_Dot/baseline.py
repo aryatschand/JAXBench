@@ -15,7 +15,7 @@ CONFIG = {
 
 def create_inputs(dtype=jnp.bfloat16):
     """Returns (x, weights, group_sizes) for grouped matmul."""
-    key = jax.random.PRNGKey(42)
+    key = jax.random.key(42)
     k1, k2 = jax.random.split(key, 2)
     G, M, K, N = CONFIG['num_groups'], CONFIG['M'], CONFIG['K'], CONFIG['N']
     # Each group gets M/G rows
@@ -26,9 +26,8 @@ def create_inputs(dtype=jnp.bfloat16):
 
 def workload(x, weights):
     """Grouped matmul: each group does independent matmul. Equivalent to ragged dot."""
-    with jax.named_scope('bench_kernel'):
-        # x: (G, M/G, K), weights: (G, K, N) -> out: (G, M/G, N)
-        return jnp.einsum('gmk,gkn->gmn', x, weights)
+    # x: (G, M/G, K), weights: (G, K, N) -> out: (G, M/G, N)
+    return jnp.einsum('gmk,gkn->gmn', x, weights)
 
 
 def benchmark(num_warmup=5, num_iters=100):

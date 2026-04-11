@@ -13,7 +13,7 @@ CONFIG = {
 
 def create_inputs(dtype=jnp.float32):
     """Create all inputs including weights."""
-    key = jax.random.PRNGKey(0)
+    key = jax.random.key(0)
     batch_size, in_features, out_features, num_groups = 4096, 8192, 8192, 256
     x = jax.random.uniform(key, (batch_size, in_features), dtype=dtype)
     gemm_weight = jnp.zeros((out_features, in_features), dtype=dtype)
@@ -26,27 +26,26 @@ def create_inputs(dtype=jnp.float32):
 
 def workload(x, gemm_weight, gemm_bias, gn_weight, gn_bias, multiply_weight):
     """Gemm + GroupNorm + Swish + Multiply + Swish."""
-    with jax.named_scope('bench_kernel'):
-        num_groups = 256
-        out_features = 8192
-        # Linear
-        x = jnp.matmul(x, gemm_weight.T) + gemm_bias
-        # GroupNorm
-        batch_size = x.shape[0]
-        group_size = out_features // num_groups
-        x_grouped = x.reshape(batch_size, num_groups, group_size)
-        mean = jnp.mean(x_grouped, axis=-1, keepdims=True)
-        var = jnp.var(x_grouped, axis=-1, keepdims=True)
-        x_normalized = (x_grouped - mean) / jnp.sqrt(var + 1e-5)
-        x = x_normalized.reshape(batch_size, out_features)
-        x = x * gn_weight + gn_bias
-        # Swish
-        x = x * jax.nn.sigmoid(x)
-        # Multiply
-        x = x * multiply_weight
-        # Swish
-        x = x * jax.nn.sigmoid(x)
-        return x
+    num_groups = 256
+    out_features = 8192
+    # Linear
+    x = jnp.matmul(x, gemm_weight.T) + gemm_bias
+    # GroupNorm
+    batch_size = x.shape[0]
+    group_size = out_features // num_groups
+    x_grouped = x.reshape(batch_size, num_groups, group_size)
+    mean = jnp.mean(x_grouped, axis=-1, keepdims=True)
+    var = jnp.var(x_grouped, axis=-1, keepdims=True)
+    x_normalized = (x_grouped - mean) / jnp.sqrt(var + 1e-5)
+    x = x_normalized.reshape(batch_size, out_features)
+    x = x * gn_weight + gn_bias
+    # Swish
+    x = x * jax.nn.sigmoid(x)
+    # Multiply
+    x = x * multiply_weight
+    # Swish
+    x = x * jax.nn.sigmoid(x)
+    return x
 
 def benchmark(num_warmup=5, num_iters=100):
     """Benchmark and return results dict."""

@@ -13,7 +13,7 @@ CONFIG = {
 
 def create_inputs(dtype=jnp.float32):
     """Create all inputs including weights."""
-    key = jax.random.PRNGKey(0)
+    key = jax.random.key(0)
     k1, k2 = jax.random.split(key)
     batch_size, in_channels, out_channels, kernel_size = 128, 64, 128, 3
     height = width = 128
@@ -26,21 +26,20 @@ def create_inputs(dtype=jnp.float32):
 
 def workload(x, weight, conv_bias, bias):
     """Conv2D + ReLU + BiasAdd."""
-    with jax.named_scope('bench_kernel'):
-        # NCHW -> NHWC
-        x = jnp.transpose(x, (0, 2, 3, 1))
-        kernel = jnp.transpose(weight, (2, 3, 1, 0))  # OIHW -> HWIO
-        x = jax.lax.conv_general_dilated(
-            x, kernel,
-            window_strides=(1, 1),
-            padding='VALID',
-            dimension_numbers=('NHWC', 'HWIO', 'NHWC')
-        )
-        x = x + conv_bias.reshape(1, 1, 1, -1)
-        x = jax.nn.relu(x)
-        x = jnp.transpose(x, (0, 3, 1, 2))  # NHWC -> NCHW
-        x = x + bias
-        return x
+    # NCHW -> NHWC
+    x = jnp.transpose(x, (0, 2, 3, 1))
+    kernel = jnp.transpose(weight, (2, 3, 1, 0))  # OIHW -> HWIO
+    x = jax.lax.conv_general_dilated(
+        x, kernel,
+        window_strides=(1, 1),
+        padding='VALID',
+        dimension_numbers=('NHWC', 'HWIO', 'NHWC')
+    )
+    x = x + conv_bias.reshape(1, 1, 1, -1)
+    x = jax.nn.relu(x)
+    x = jnp.transpose(x, (0, 3, 1, 2))  # NHWC -> NCHW
+    x = x + bias
+    return x
 
 def benchmark(num_warmup=5, num_iters=100):
     """Benchmark and return results dict."""

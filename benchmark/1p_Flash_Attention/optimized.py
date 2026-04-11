@@ -201,7 +201,7 @@ def flash_attention(
   )
 
 
-@functools.partial(jax.custom_vjp, nondiff_argnums=range(5, 10))
+@functools.partial(jax.custom_vjp, nondiff_argnames=("save_residuals", "causal", "sm_scale", "block_sizes", "debug"))
 def _flash_attention(
     q,
     k,
@@ -383,12 +383,11 @@ def _flash_attention_kernel_single_batch(
 
   @pl.when(should_run)
   def run():
-    @pl.loop(0, block_k_major // block_k, unroll=True)
-    def _body(i):
+    @pl.loop(0, block_k_major, step=block_k, unroll=True)
+    def _body(start_k):
       m_prev = m_scratch_ref[batch_idx]
       l_prev = l_scratch_ref[batch_idx]
       q = q_tile_ref[batch_idx]  # [block_q, head_dim]
-      start_k = i * block_k
       k = k_tile_ref[
           (*batch_idx, pl.dslice(start_k, block_k), slice(None))
       ]  # [block_k, head_dim]
@@ -416,8 +415,8 @@ def _flash_attention_kernel_single_batch(
           raise NotImplementedError(
               f"kv block size must be a multiple of {NUM_LANES}"
           )
-        q_segment_ids = pltpu.repeat(
-            q_segment_ids_tile_ref[batch_idx[0]], repeats, axis=1
+        q_segment_ids = jnp.tile(
+            q_segment_ids_tile_ref[batch_idx[0]], (1, repeats)
         )  # [block_q, block_k].
         kv_segment_ids = kv_segment_ids_tile_ref[
             batch_idx[0], :1, pl.dslice(start_k, block_k)
@@ -445,7 +444,7 @@ def _flash_attention_kernel_single_batch(
         raise NotImplementedError(
             f"{block_k=} should be a multiple of {MIN_BLOCK_SIZE}"
         )
-      p = jnp.exp(s - pltpu.repeat(m_next, block_k_repeats, 1))
+      p = jnp.exp(s - jnp.tile(m_next, (1, block_k_repeats)))
 
       alpha = jnp.exp(m_prev - m_next)  # Shape [block_q, 128].
 
@@ -454,7 +453,7 @@ def _flash_attention_kernel_single_batch(
       l_next = jnp.sum(p, axis=1)[:, None] + l_corr  # Shape [block_q, 128]
 
       head_dim_repeats, rem = divmod(head_dim, MIN_BLOCK_SIZE)
-      l_broadcast = lambda l: pltpu.repeat(l, head_dim_repeats, 1)
+      l_broadcast = lambda l: jnp.tile(l, (1, head_dim_repeats))
       if rem:
         if head_dim_repeats == 0:
           l_broadcast = lambda l: l[:, :head_dim]
@@ -526,8 +525,8 @@ def _flash_attention_kernel_single_batch_single_step(
     q_segment_ids = q_segment_ids_tile_ref[
         batch_idx[0]
     ]  # [block_q, NUM_LANES].
-    q_segment_ids = pltpu.repeat(
-        q_segment_ids, repeats, axis=1
+    q_segment_ids = jnp.tile(
+        q_segment_ids, (1, repeats)
     )  # [block_q, block_k].
     kv_segment_ids = kv_segment_ids_tile_ref[batch_idx[0], :1]  # [1, block_k].
     mask = jnp.equal(q_segment_ids, kv_segment_ids).astype(jnp.bool_)
@@ -867,8 +866,8 @@ def _flash_attention_dkv_kernel(
         q_segment_ids = q_segment_ids_tile_ref[
             0, pl.ds(start_q, block_q), :
         ]  # [block_q, NUM_LANES].
-        q_segment_ids = pltpu.repeat(
-            q_segment_ids, repeats, axis=1
+        q_segment_ids = jnp.tile(
+            q_segment_ids, (1, repeats)
         )  # [block_q, block_k].
         kv_segment_ids = kv_segment_ids_tile_ref[
             :, 0, pl.ds(start_k, block_k)
@@ -893,10 +892,10 @@ def _flash_attention_dkv_kernel(
       )
 
       p = jnp.exp(
-          capped_logits - pltpu.repeat(m, block_k // MIN_BLOCK_SIZE, axis=1)
+          capped_logits - jnp.tile(m, (1, block_k // MIN_BLOCK_SIZE))
       )
-      p = p * pltpu.repeat(
-          1 / l, block_k // MIN_BLOCK_SIZE, axis=1
+      p = p * jnp.tile(
+          1 / l, (1, block_k // MIN_BLOCK_SIZE)
       )  # [block_q_major, block_k_major]
       dv = lax.dot(p.T.astype(do.dtype), do, preferred_element_type=jnp.float32)
       dv_scratch_ref[pl.ds(start_k, block_k), :] += dv.astype(
@@ -909,7 +908,7 @@ def _flash_attention_dkv_kernel(
       dp = lax.dot_general(
           do, v, TRANS_B_DIM_NUMBERS, preferred_element_type=jnp.float32
       )
-      ds = (dp - pltpu.repeat(di, block_k // MIN_BLOCK_SIZE, axis=1)) * p
+      ds = (dp - jnp.tile(di, (1, block_k // MIN_BLOCK_SIZE))) * p
 
       if sm_scale != 1.0:
         ds = ds * sm_scale
@@ -1205,8 +1204,8 @@ def _flash_attention_dq_kernel(
         raise NotImplementedError(
             f"kv block size must be a multiple of {NUM_LANES}"
         )
-      q_segment_ids = pltpu.repeat(
-          q_segment_ids_tile_ref[0], repeats, axis=1
+      q_segment_ids = jnp.tile(
+          q_segment_ids_tile_ref[0], (1, repeats)
       )  # [block_q, block_k].
       kv_segment_ids = kv_segment_ids_tile_ref[:, 0, k_slice]  # [1, block_k].
       mask = jnp.equal(q_segment_ids, kv_segment_ids).astype(jnp.bool_)
@@ -1226,10 +1225,10 @@ def _flash_attention_dq_kernel(
     )
 
     p = jnp.exp(
-        capped_logits - pltpu.repeat(m, block_k // MIN_BLOCK_SIZE, axis=1)
+        capped_logits - jnp.tile(m, (1, block_k // MIN_BLOCK_SIZE))
     )
-    p = p * pltpu.repeat(
-        1 / l, block_k // MIN_BLOCK_SIZE, axis=1
+    p = p * jnp.tile(
+        1 / l, (1, block_k // MIN_BLOCK_SIZE)
     )  # [block_q_major, block_k]
 
     # di: [block_q_major, 128]
@@ -1241,7 +1240,7 @@ def _flash_attention_dq_kernel(
         TRANS_B_DIM_NUMBERS,
         preferred_element_type=jnp.float32,
     )
-    ds = (dp - pltpu.repeat(di, block_k // MIN_BLOCK_SIZE, axis=1)) * p
+    ds = (dp - jnp.tile(di, (1, block_k // MIN_BLOCK_SIZE))) * p
     # dp = jnp.dot(do, v.T)
     # ds = (dp - (dp * p).sum(axis=1)[:, None]) * p
 
@@ -1551,7 +1550,7 @@ def mha_reference(
   )
 
 
-@functools.partial(jax.custom_vjp, nondiff_argnums=(5, 6, 7, 8))
+@functools.partial(jax.custom_vjp, nondiff_argnames=("causal", "mask_value", "sm_scale", "save_residuals"))
 def _mha_reference(
     q,
     k,
@@ -1766,24 +1765,23 @@ def create_inputs(dtype=jnp.bfloat16):
 
 
 def workload(q, k, v):
-    with jax.named_scope('bench_kernel'):
-        sm_scale = 1.0 / math.sqrt(CONFIG['head_dim'])
-        block_sizes = BlockSizes(
-            block_q=TUNED_PARAMS['block_q'],
-            block_k_major=TUNED_PARAMS['block_k_major'],
-            block_k=TUNED_PARAMS['block_k'],
-            block_b=TUNED_PARAMS['block_b'],
-            block_q_major_dkv=TUNED_PARAMS['block_q_major_dkv'],
-            block_k_major_dkv=TUNED_PARAMS['block_k_major_dkv'],
-            block_k_dkv=TUNED_PARAMS['block_k_dkv'],
-            block_q_dkv=TUNED_PARAMS['block_q_dkv'],
-            block_k_major_dq=TUNED_PARAMS['block_k_major_dq'],
-            block_k_dq=TUNED_PARAMS['block_k_dq'],
-            block_q_dq=TUNED_PARAMS['block_q_dq'],
-        )
-        return flash_attention(
-            q, k, v, causal=True, sm_scale=sm_scale, block_sizes=block_sizes,
-        )
+    sm_scale = 1.0 / math.sqrt(CONFIG['head_dim'])
+    block_sizes = BlockSizes(
+        block_q=TUNED_PARAMS['block_q'],
+        block_k_major=TUNED_PARAMS['block_k_major'],
+        block_k=TUNED_PARAMS['block_k'],
+        block_b=TUNED_PARAMS['block_b'],
+        block_q_major_dkv=TUNED_PARAMS['block_q_major_dkv'],
+        block_k_major_dkv=TUNED_PARAMS['block_k_major_dkv'],
+        block_k_dkv=TUNED_PARAMS['block_k_dkv'],
+        block_q_dkv=TUNED_PARAMS['block_q_dkv'],
+        block_k_major_dq=TUNED_PARAMS['block_k_major_dq'],
+        block_k_dq=TUNED_PARAMS['block_k_dq'],
+        block_q_dq=TUNED_PARAMS['block_q_dq'],
+    )
+    return flash_attention(
+        q, k, v, causal=True, sm_scale=sm_scale, block_sizes=block_sizes,
+    )
 
 
 def benchmark(num_warmup=5, num_iters=100):

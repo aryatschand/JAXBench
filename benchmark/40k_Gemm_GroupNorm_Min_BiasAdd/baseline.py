@@ -13,7 +13,7 @@ CONFIG = {
 
 def create_inputs(dtype=jnp.float32):
     """Create all inputs including weights."""
-    key = jax.random.PRNGKey(0)
+    key = jax.random.key(0)
     batch_size, in_features, out_features, num_groups = 4096, 8192, 8192, 512
     x = jax.random.uniform(key, (batch_size, in_features), dtype=dtype)
     weight = jnp.zeros((out_features, in_features), dtype=dtype)
@@ -26,26 +26,25 @@ def create_inputs(dtype=jnp.float32):
 
 def workload(x, weight, linear_bias, gn_weight, gn_bias, bias):
     """Gemm + GroupNorm + Min + BiasAdd."""
-    with jax.named_scope('bench_kernel'):
-        num_groups = 512
-        eps = 1e-5
-        # Linear
-        x = jnp.matmul(x, weight.T) + linear_bias
-        # GroupNorm
-        N, C = x.shape
-        G = num_groups
-        x = x.reshape(N, G, C // G)
-        mean = jnp.mean(x, axis=2, keepdims=True)
-        var = jnp.var(x, axis=2, keepdims=True)
-        x = (x - mean) / jnp.sqrt(var + eps)
-        x = x.reshape(N, C)
-        x = x * gn_weight + gn_bias
-        # Min along features
-        x = jnp.min(x, axis=1, keepdims=True)
-        # Reshape and bias add
-        x = x.reshape(1, 1, N, 1)
-        x = x + bias
-        return x
+    num_groups = 512
+    eps = 1e-5
+    # Linear
+    x = jnp.matmul(x, weight.T) + linear_bias
+    # GroupNorm
+    N, C = x.shape
+    G = num_groups
+    x = x.reshape(N, G, C // G)
+    mean = jnp.mean(x, axis=2, keepdims=True)
+    var = jnp.var(x, axis=2, keepdims=True)
+    x = (x - mean) / jnp.sqrt(var + eps)
+    x = x.reshape(N, C)
+    x = x * gn_weight + gn_bias
+    # Min along features
+    x = jnp.min(x, axis=1, keepdims=True)
+    # Reshape and bias add
+    x = x.reshape(1, 1, N, 1)
+    x = x + bias
+    return x
 
 def benchmark(num_warmup=5, num_iters=100):
     """Benchmark and return results dict."""

@@ -116,8 +116,7 @@ def create_inputs(dtype=jnp.bfloat16):
 
 
 def workload(x, y):
-    with jax.named_scope('bench_kernel'):
-        return matmul(x, y, block_shape=tuple(TUNED_PARAMS['block_shape']), block_k=TUNED_PARAMS['block_k'])
+    return matmul(x, y, block_shape=tuple(TUNED_PARAMS['block_shape']), block_k=TUNED_PARAMS['block_k'])
 
 
 def benchmark(num_warmup=5, num_iters=100):

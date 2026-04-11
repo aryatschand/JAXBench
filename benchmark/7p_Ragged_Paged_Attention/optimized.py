@@ -192,7 +192,7 @@ def dynamic_validate_inputs(
   if num_seqs[0] > max_num_seqs:
     raise ValueError(f"{num_seqs[0]=} must be less or equal to {max_num_seqs=}")
   max_kv_len = jnp.max(kv_lens)
-  min_pages_per_seq = cdiv(max_kv_len, page_size)
+  min_pages_per_seq = pl.cdiv(max_kv_len, page_size)
   if pages_per_seq < min_pages_per_seq:
     raise ValueError(
         f"{pages_per_seq=} must be greater or equal to"
@@ -340,7 +340,7 @@ def ragged_paged_attention_kernel(
   ):
     start_kv_page_idx = kv_blk_idx * num_kv_pages_per_blk
     end_kv_page_idx = jnp.minimum(
-        pages_per_seq, cdiv(kv_lens_ref[seq_idx], page_size)
+        pages_per_seq, pl.cdiv(kv_lens_ref[seq_idx], page_size)
     )
     metadata = (seq_idx, start_kv_page_idx, end_kv_page_idx)
     heads_start = heads_blk_idx * num_combined_kv_heads_per_blk
@@ -676,13 +676,9 @@ def ragged_paged_attention_kernel(
   o_ref[...] = acc_ref[...].astype(q_ref.dtype)
 
 
-def cdiv(a, b):
-  assert b != 0
-  return (a + b - 1) // b
-
 
 def get_dtype_packing(dtype):
-  bits = dtypes.bit_width(dtype)
+  bits = dtypes.itemsize_bits(dtype)
   return 32 // bits
 
 
@@ -821,7 +817,7 @@ def ragged_paged_attention(
         pages_per_seq,
     )
   num_q_heads_per_kv_head = num_q_heads // num_kv_heads
-  num_q_blks = cdiv(num_q_tokens, num_q_per_blk)
+  num_q_blks = pl.cdiv(num_q_tokens, num_q_per_blk)
   assert num_combined_kv_heads_per_blk % 2 == 0
   num_kv_heads_per_blk = num_combined_kv_heads_per_blk // 2
   assert num_q_heads_per_blk % num_q_heads_per_kv_head == 0
@@ -968,15 +964,14 @@ def create_inputs(dtype=jnp.bfloat16):
 
 
 def workload(q, kv_pages, kv_lens, page_indices, cu_q_lens, num_seqs):
-    with jax.named_scope('bench_kernel'):
-        sm_scale = 1.0 / math.sqrt(CONFIG['head_dim'])
-        return ragged_paged_attention(
-            q, kv_pages, kv_lens, page_indices, cu_q_lens, num_seqs,
-            sm_scale=sm_scale,
-            num_kv_pages_per_block=TUNED_PARAMS['num_kv_pages_per_block'],
-            num_queries_per_block=TUNED_PARAMS['num_queries_per_block'],
-            vmem_limit_bytes=TUNED_PARAMS['vmem_limit_bytes'],
-        )
+    sm_scale = 1.0 / math.sqrt(CONFIG['head_dim'])
+    return ragged_paged_attention(
+        q, kv_pages, kv_lens, page_indices, cu_q_lens, num_seqs,
+        sm_scale=sm_scale,
+        num_kv_pages_per_block=TUNED_PARAMS['num_kv_pages_per_block'],
+        num_queries_per_block=TUNED_PARAMS['num_queries_per_block'],
+        vmem_limit_bytes=TUNED_PARAMS['vmem_limit_bytes'],
+    )
 
 
 def benchmark(num_warmup=5, num_iters=100):

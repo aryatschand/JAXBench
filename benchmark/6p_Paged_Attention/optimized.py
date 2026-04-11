@@ -553,10 +553,10 @@ def paged_attention(
   if k_scales_pages is not None and v_scales_pages is not None:
     in_specs = [
         q_block_spec,
-        pl.BlockSpec(memory_space=pl.ANY),
-        pl.BlockSpec(memory_space=pl.ANY),
-        pl.BlockSpec(memory_space=pl.ANY),
-        pl.BlockSpec(memory_space=pl.ANY),
+        pl.BlockSpec(memory_space=pltpu.ANY),
+        pl.BlockSpec(memory_space=pltpu.ANY),
+        pl.BlockSpec(memory_space=pltpu.ANY),
+        pl.BlockSpec(memory_space=pltpu.ANY),
     ]
     scratch_shapes = (
         pltpu.VMEM(
@@ -601,9 +601,9 @@ def paged_attention(
   else:
     in_specs = [
         q_block_spec,
-        pl.BlockSpec(memory_space=pl.ANY),
+        pl.BlockSpec(memory_space=pltpu.ANY),
         None,  # type: ignore[list-item]
-        pl.BlockSpec(memory_space=pl.ANY),
+        pl.BlockSpec(memory_space=pltpu.ANY),
         None,  # type: ignore[list-item]
     ]
     scratch_shapes = (
@@ -722,11 +722,10 @@ def create_inputs(dtype=jnp.bfloat16):
 
 
 def workload(q, k_pages, v_pages, lengths, page_indices):
-    with jax.named_scope('bench_kernel'):
-        return paged_attention(
-            q, k_pages, v_pages, lengths, page_indices,
-            pages_per_compute_block=TUNED_PARAMS['pages_per_compute_block'],
-        )
+    return paged_attention(
+        q, k_pages, v_pages, lengths, page_indices,
+        pages_per_compute_block=TUNED_PARAMS['pages_per_compute_block'],
+    )
 
 
 def benchmark(num_warmup=5, num_iters=100):

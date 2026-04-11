@@ -16,7 +16,7 @@ CONFIG = {
 
 def create_inputs(dtype=jnp.bfloat16):
     """Returns (x, gate_kernel, up_kernel, down_kernel)."""
-    key = jax.random.PRNGKey(42)
+    key = jax.random.key(42)
     k1, k2, k3, k4 = jax.random.split(key, 4)
     B, S, E, M = CONFIG['batch'], CONFIG['seq_len'], CONFIG['emb_dim'], CONFIG['mlp_dim']
     x = jax.random.normal(k1, (B, S, E), dtype=dtype)
@@ -28,10 +28,9 @@ def create_inputs(dtype=jnp.bfloat16):
 
 def workload(x, gate_kernel, up_kernel, down_kernel):
     """SwiGLU: output = (SiLU(x @ gate) * (x @ up)) @ down"""
-    with jax.named_scope('bench_kernel'):
-        gate = jax.nn.silu(jnp.dot(x, gate_kernel))
-        up = jnp.dot(x, up_kernel)
-        return jnp.dot(gate * up, down_kernel)
+    gate = jax.nn.silu(jnp.dot(x, gate_kernel))
+    up = jnp.dot(x, up_kernel)
+    return jnp.dot(gate * up, down_kernel)
 
 
 def benchmark(num_warmup=5, num_iters=100):
