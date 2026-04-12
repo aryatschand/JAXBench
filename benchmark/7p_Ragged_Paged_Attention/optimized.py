@@ -491,8 +491,7 @@ def ragged_paged_attention_kernel(
 
       def masked_store(ref, val, start, end, group=1):
         iota = lax.broadcasted_iota(jnp.int32, ref.shape, 0) // group
-        mask = jnp.logical_and(iota >= start, iota < end)
-        pl.store(ref, idx=tuple(slice(None) for _ in ref.shape), val=val, mask=mask)
+        pltpu.store(ref, val, mask=jnp.logical_and(iota >= start, iota < end))
 
       def load_with_init(ref, init_val):
         return jnp.where(
@@ -921,7 +920,7 @@ CONFIG = {
 
 # Tuned by autotune_block_sizes.py. Re-run to update.
 TUNED_PARAMS = {
-    'num_kv_pages_per_block': 32,  # autotuned
+    'num_kv_pages_per_block': 64,  # autotuned (was 32)
     'num_queries_per_block': 64,  # autotuned
     'vmem_limit_bytes': 33554432,  # not autotuned (hardware constraint)
 }
@@ -937,7 +936,7 @@ def get_flops():
 
 
 def create_inputs(dtype=jnp.bfloat16):
-    key = jax.random.PRNGKey(42)
+    key = jax.random.key(42)
     k1, k2 = jax.random.split(key, 2)
     max_tokens = CONFIG['max_num_batched_tokens']
     max_seqs = CONFIG['max_num_seqs']

@@ -107,7 +107,7 @@ def get_flops():
 
 
 def create_inputs(dtype=jnp.bfloat16):
-    key = jax.random.PRNGKey(42)
+    key = jax.random.key(42)
     k1, k2 = jax.random.split(key, 2)
     M, K, N = CONFIG['M'], CONFIG['K'], CONFIG['N']
     x = jax.random.normal(k1, (M, K), dtype=dtype)

@@ -2566,7 +2566,7 @@ def get_flops():
 
 def create_inputs(dtype=jnp.bfloat16):
     """Returns (query, key, value) matching GQA baseline: (B, S, H, D) layout."""
-    key = jax.random.PRNGKey(42)
+    key = jax.random.key(42)
     k1, k2, k3 = jax.random.split(key, 3)
     B, S = CONFIG['batch'], CONFIG['seq_len']
     Hq, Hkv, D = CONFIG['num_query_heads'], CONFIG['num_kv_heads'], CONFIG['head_dim']

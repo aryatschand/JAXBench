@@ -1752,7 +1752,7 @@ def get_flops():
 
 
 def create_inputs(dtype=jnp.bfloat16):
-    key = jax.random.PRNGKey(42)
+    key = jax.random.key(42)
     k1, k2, k3 = jax.random.split(key, 3)
     B = CONFIG['batch']
     H = CONFIG['num_heads']

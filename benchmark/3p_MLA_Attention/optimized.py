@@ -1759,7 +1759,7 @@ def _apply_rope(x, cos, sin):
 
 def create_inputs(dtype=jnp.bfloat16):
     """Returns MLA inputs matching the baseline."""
-    key = jax.random.PRNGKey(42)
+    key = jax.random.key(42)
     keys = jax.random.split(key, 9)
     C = CONFIG
     B, S, E = C['batch'], C['seq_len'], C['emb_dim']
