@@ -192,7 +192,8 @@ def run_one(workload_dir, variant='baseline'):
 
         with jax.profiler.trace(trace_dir, create_perfetto_link=False, create_perfetto_trace=True):
             for _ in range(num_bench_iters):
-                out = run_fn(*inputs)
+                with jax.named_scope('bench_kernel'):
+                    out = run_fn(*inputs)
                 if hasattr(out, 'block_until_ready'):
                     out.block_until_ready()
 

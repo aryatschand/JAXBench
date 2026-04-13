@@ -15,7 +15,7 @@ CONFIG = {
 
 def create_inputs(dtype=jnp.float32):
     """Create all inputs including weights."""
-    key = jax.random.PRNGKey(0)
+    key = jax.random.key(0)
     x = jax.random.uniform(key, (4096, 8192), dtype=dtype)
     weight = jnp.zeros((8192, 8192), dtype=dtype)
     bias = jnp.zeros(8192, dtype=dtype)
@@ -24,16 +24,15 @@ def create_inputs(dtype=jnp.float32):
 
 def workload(x, weight, bias):
     """Matmul + Scale + ResidualAdd + Clamp + LogSumExp + Mish."""
-    with jax.named_scope('bench_kernel'):
-        x = jnp.matmul(x, weight.T) + bias
-        x = x * 2.0
-        x = x + x
-        x = jnp.clip(x, -10.0, 10.0)
-        x = jax.scipy.special.logsumexp(x, axis=1, keepdims=True)
-        softplus_x = jnp.logaddexp(x, 0.0)
-        mish_x = x * jnp.tanh(softplus_x)
-        x = x * mish_x
-        return x
+    x = jnp.matmul(x, weight.T) + bias
+    x = x * 2.0
+    x = x + x
+    x = jnp.clip(x, -10.0, 10.0)
+    x = jax.scipy.special.logsumexp(x, axis=1, keepdims=True)
+    softplus_x = jnp.logaddexp(x, 0.0)
+    mish_x = x * jnp.tanh(softplus_x)
+    x = x * mish_x
+    return x
 
 def benchmark(num_warmup=5, num_iters=100):
     """Benchmark and return results dict."""

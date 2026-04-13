@@ -13,7 +13,7 @@ CONFIG = {
 
 def create_inputs(dtype=jnp.float32):
     """Create all inputs including weights."""
-    key = jax.random.PRNGKey(0)
+    key = jax.random.key(0)
     batch_size, input_size, hidden_size, output_size = 16384, 2048, 4096, 1024
     x = jax.random.uniform(key, (batch_size, input_size), dtype=dtype)
     w1 = jnp.zeros((hidden_size, input_size), dtype=dtype)
@@ -25,12 +25,11 @@ def create_inputs(dtype=jnp.float32):
 
 def workload(x, w1, b1, w2, b2):
     """Gemm + Sigmoid + Gemm + LogSumExp."""
-    with jax.named_scope('bench_kernel'):
-        x = jnp.matmul(x, w1.T) + b1
-        x = jax.nn.sigmoid(x)
-        x = jnp.matmul(x, w2.T) + b2
-        x = jax.nn.logsumexp(x, axis=1)
-        return x
+    x = jnp.matmul(x, w1.T) + b1
+    x = jax.nn.sigmoid(x)
+    x = jnp.matmul(x, w2.T) + b2
+    x = jax.scipy.special.logsumexp(x, axis=1)
+    return x
 
 def benchmark(num_warmup=5, num_iters=100):
     """Benchmark and return results dict."""

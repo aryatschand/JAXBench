@@ -21,7 +21,7 @@ CONFIG = {
 
 def create_inputs(dtype=jnp.bfloat16):
     """Returns (q, k, v) tensors in [num_heads, seq_len, head_dim] layout."""
-    key = jax.random.PRNGKey(42)
+    key = jax.random.key(42)
     k1, k2, k3 = jax.random.split(key, 3)
     S = CONFIG['seq_len']
     H_q = CONFIG['num_query_heads']
@@ -35,28 +35,27 @@ def create_inputs(dtype=jnp.bfloat16):
 
 def workload(q, k, v):
     """Causal GQA attention: splash attention baseline."""
-    with jax.named_scope('bench_kernel'):
-        S = CONFIG['seq_len']
-        H_q = CONFIG['num_query_heads']
-        H_kv = CONFIG['num_kv_heads']
-        num_q_per_kv = H_q // H_kv
+    S = CONFIG['seq_len']
+    H_q = CONFIG['num_query_heads']
+    H_kv = CONFIG['num_kv_heads']
+    num_q_per_kv = H_q // H_kv
 
-        # Repeat KV heads for GQA
-        k = jnp.repeat(k, num_q_per_kv, axis=0)  # (H_q, S, D)
-        v = jnp.repeat(v, num_q_per_kv, axis=0)  # (H_q, S, D)
+    # Repeat KV heads for GQA
+    k = jnp.repeat(k, num_q_per_kv, axis=0)  # (H_q, S, D)
+    v = jnp.repeat(v, num_q_per_kv, axis=0)  # (H_q, S, D)
 
-        # Attention scores: (H_q, S, D) x (H_q, S, D) -> (H_q, S, S)
-        attn = jnp.einsum('hqd,hkd->hqk', q, k)
+    # Attention scores: (H_q, S, D) x (H_q, S, D) -> (H_q, S, S)
+    attn = jnp.einsum('hqd,hkd->hqk', q, k)
 
-        # Causal mask
-        causal = jnp.tril(jnp.ones((S, S), dtype=jnp.bool_))
-        attn = jnp.where(causal[None, :, :], attn, -1e30)
+    # Causal mask
+    causal = jnp.tril(jnp.ones((S, S), dtype=jnp.bool_))
+    attn = jnp.where(causal[None, :, :], attn, -1e30)
 
-        attn = jax.nn.softmax(attn, axis=-1)
+    attn = jax.nn.softmax(attn, axis=-1)
 
-        # Output: (H_q, S, S) x (H_q, S, D) -> (H_q, S, D)
-        out = jnp.einsum('hqk,hkd->hqd', attn, v)
-        return out
+    # Output: (H_q, S, S) x (H_q, S, D) -> (H_q, S, D)
+    out = jnp.einsum('hqk,hkd->hqd', attn, v)
+    return out
 
 
 def benchmark(num_warmup=5, num_iters=100):

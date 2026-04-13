@@ -21,7 +21,7 @@ CONFIG = {
 
 def create_inputs(dtype=jnp.bfloat16):
     """Returns (q, k, v, rel_pos_bias) tensors."""
-    key = jax.random.PRNGKey(42)
+    key = jax.random.key(42)
     k1, k2, k3, k4 = jax.random.split(key, 4)
     B = CONFIG['batch']
     S = CONFIG['seq_len']
@@ -37,26 +37,25 @@ def create_inputs(dtype=jnp.bfloat16):
 
 def workload(q, k, v, rel_pos_bias):
     """Flex attention: dot-product attention with score modification."""
-    with jax.named_scope('bench_kernel'):
-        D = CONFIG['head_dim']
-        S = CONFIG['seq_len']
-        sm_scale = D ** -0.5
+    D = CONFIG['head_dim']
+    S = CONFIG['seq_len']
+    sm_scale = D ** -0.5
 
-        # Attention scores
-        attn = jnp.einsum('bhqd,bhkd->bhqk', q, k) * sm_scale
+    # Attention scores
+    attn = jnp.einsum('bhqd,bhkd->bhqk', q, k) * sm_scale
 
-        # Score modification: add relative position bias
-        attn = attn + rel_pos_bias[None, :, :, :]
+    # Score modification: add relative position bias
+    attn = attn + rel_pos_bias[None, :, :, :]
 
-        # Causal mask
-        causal = jnp.tril(jnp.ones((S, S), dtype=jnp.bool_))
-        attn = jnp.where(causal[None, None, :, :], attn, -1e30)
+    # Causal mask
+    causal = jnp.tril(jnp.ones((S, S), dtype=jnp.bool_))
+    attn = jnp.where(causal[None, None, :, :], attn, -1e30)
 
-        attn = jax.nn.softmax(attn, axis=-1)
+    attn = jax.nn.softmax(attn, axis=-1)
 
-        # Output
-        out = jnp.einsum('bhqk,bhkd->bhqd', attn, v)
-        return out
+    # Output
+    out = jnp.einsum('bhqk,bhkd->bhqd', attn, v)
+    return out
 
 
 def benchmark(num_warmup=5, num_iters=100):

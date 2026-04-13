@@ -144,7 +144,8 @@ def profile_workload(workload_dir, variant='baseline', num_warmup=5, num_profile
 
             with jax.profiler.trace(trace_dir, create_perfetto_link=False, create_perfetto_trace=True):
                 for _ in range(num_profile_iters):
-                    out = jitted(*inputs)
+                    with jax.named_scope('bench_kernel'):
+                        out = jitted(*inputs)
                     out.block_until_ready()
 
             # Extract device-side times

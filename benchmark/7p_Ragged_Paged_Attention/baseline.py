@@ -31,7 +31,7 @@ _skip_jit = True
 
 
 def create_inputs(dtype=jnp.bfloat16):
-    key = jax.random.PRNGKey(42)
+    key = jax.random.key(42)
     k1, k2 = jax.random.split(key, 2)
     max_tokens = CONFIG['max_num_batched_tokens']
     max_seqs = CONFIG['max_num_seqs']
@@ -63,46 +63,45 @@ def workload(queries, kv_pages, kv_lens, page_indices, cu_q_lens, num_seqs):
     Processes each sequence independently with data-dependent slicing.
     Must be run eagerly (not under jax.jit).
     """
-    with jax.named_scope('bench_kernel'):
-        sm_scale = 1.0 / math.sqrt(CONFIG['head_dim'])
-        mask_value = DEFAULT_MASK_VALUE
-        _, _, num_combined_kv_heads, head_dim = kv_pages.shape
-        num_kv_heads = num_combined_kv_heads // 2
-        num_q_heads = queries.shape[1]
-        num_query_per_kv = num_q_heads // num_kv_heads
+    sm_scale = 1.0 / math.sqrt(CONFIG['head_dim'])
+    mask_value = DEFAULT_MASK_VALUE
+    _, _, num_combined_kv_heads, head_dim = kv_pages.shape
+    num_kv_heads = num_combined_kv_heads // 2
+    num_q_heads = queries.shape[1]
+    num_query_per_kv = num_q_heads // num_kv_heads
 
-        outputs = []
-        for i in range(num_seqs[0]):
-            q_start = cu_q_lens[i]
-            q_end = cu_q_lens[i + 1]
-            q_len = q_end - q_start
-            kv_len = kv_lens[i]
-            indices = page_indices[i]
+    outputs = []
+    for i in range(num_seqs[0]):
+        q_start = cu_q_lens[i]
+        q_end = cu_q_lens[i + 1]
+        q_len = q_end - q_start
+        kv_len = kv_lens[i]
+        indices = page_indices[i]
 
-            q = queries[q_start:q_end]
-            k = kv_pages[indices, :, 0::2, :].reshape(-1, num_kv_heads, head_dim)[:kv_len]
-            v = kv_pages[indices, :, 1::2, :].reshape(-1, num_kv_heads, head_dim)[:kv_len]
+        q = queries[q_start:q_end]
+        k = kv_pages[indices, :, 0::2, :].reshape(-1, num_kv_heads, head_dim)[:kv_len]
+        v = kv_pages[indices, :, 1::2, :].reshape(-1, num_kv_heads, head_dim)[:kv_len]
 
-            k = jnp.repeat(k, num_query_per_kv, axis=1)
-            v = jnp.repeat(v, num_query_per_kv, axis=1)
+        k = jnp.repeat(k, num_query_per_kv, axis=1)
+        v = jnp.repeat(v, num_query_per_kv, axis=1)
 
-            attn = jnp.einsum(
-                "qhd,khd->hqk", q, k, preferred_element_type=jnp.float32
-            )
-            attn *= sm_scale
+        attn = jnp.einsum(
+            "qhd,khd->hqk", q, k, preferred_element_type=jnp.float32
+        )
+        attn *= sm_scale
 
-            q_span = (kv_len - q_len) + jax.lax.broadcasted_iota(
-                jnp.int32, attn.shape, 1
-            )
-            kv_span = jax.lax.broadcasted_iota(jnp.int32, attn.shape, 2)
-            mask = q_span < kv_span
-            attn += jnp.where(mask, mask_value, 0.0)
+        q_span = (kv_len - q_len) + jax.lax.broadcasted_iota(
+            jnp.int32, attn.shape, 1
+        )
+        kv_span = jax.lax.broadcasted_iota(jnp.int32, attn.shape, 2)
+        mask = q_span < kv_span
+        attn += jnp.where(mask, mask_value, 0.0)
 
-            attn = jax.nn.softmax(attn, axis=-1).astype(v.dtype)
-            out = jnp.einsum("hqk,khd->qhd", attn, v).astype(queries.dtype)
-            outputs.append(out)
+        attn = jax.nn.softmax(attn, axis=-1).astype(v.dtype)
+        out = jnp.einsum("hqk,khd->qhd", attn, v).astype(queries.dtype)
+        outputs.append(out)
 
-        return jnp.concatenate(outputs, axis=0)
+    return jnp.concatenate(outputs, axis=0)
 
 
 def get_flops():

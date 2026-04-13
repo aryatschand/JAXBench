@@ -21,7 +21,7 @@ CONFIG = {
 
 def create_inputs(dtype=jnp.bfloat16):
     """Returns (x, scale) tensors."""
-    key = jax.random.PRNGKey(42)
+    key = jax.random.key(42)
     k1, k2 = jax.random.split(key, 2)
     B, S, D = CONFIG['batch'], CONFIG['seq_len'], CONFIG['emb_dim']
     x = jax.random.normal(k1, (B, S, D), dtype=dtype)
@@ -31,12 +31,11 @@ def create_inputs(dtype=jnp.bfloat16):
 
 def workload(x, scale):
     """RMSNorm: x * rsqrt(mean(x^2) + eps) * scale"""
-    with jax.named_scope('bench_kernel'):
-        x_f32 = jnp.asarray(x, jnp.float32)
-        mean2 = jnp.mean(lax.square(x_f32), axis=-1, keepdims=True)
-        normed = x_f32 * lax.rsqrt(mean2 + CONFIG['epsilon'])
-        normed = jnp.asarray(normed, x.dtype)
-        return normed * scale
+    x_f32 = jnp.asarray(x, jnp.float32)
+    mean2 = jnp.mean(lax.square(x_f32), axis=-1, keepdims=True)
+    normed = x_f32 * lax.rsqrt(mean2 + CONFIG['epsilon'])
+    normed = jnp.asarray(normed, x.dtype)
+    return normed * scale
 
 
 def get_flops():

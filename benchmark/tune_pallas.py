@@ -99,7 +99,8 @@ def benchmark_config(workload_dir, config_override, num_warmup=3, num_iters=20):
 
         with jax.profiler.trace(trace_dir, create_perfetto_link=False, create_perfetto_trace=True):
             for _ in range(num_iters):
-                out = jitted(*inputs)
+                with jax.named_scope('bench_kernel'):
+                    out = jitted(*inputs)
                 out.block_until_ready()
 
         times = extract_device_times(trace_dir)

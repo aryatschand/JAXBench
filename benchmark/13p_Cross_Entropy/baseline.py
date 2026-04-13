@@ -14,7 +14,7 @@ CONFIG = {
 
 def create_inputs(dtype=jnp.bfloat16):
     """Returns (hidden_states, lm_head_weight, labels)."""
-    key = jax.random.PRNGKey(42)
+    key = jax.random.key(42)
     k1, k2, k3 = jax.random.split(key, 3)
     B, H, V = CONFIG['batch_tokens'], CONFIG['hidden_dim'], CONFIG['vocab_size']
     hidden = jax.random.normal(k1, (B, H), dtype=dtype)
@@ -25,12 +25,11 @@ def create_inputs(dtype=jnp.bfloat16):
 
 def workload(hidden, weight, labels):
     """Fused linear projection + softmax cross-entropy loss."""
-    with jax.named_scope('bench_kernel'):
-        logits = jnp.dot(hidden, weight)
-        log_probs = jax.nn.log_softmax(logits, axis=-1)
-        one_hot = jax.nn.one_hot(labels, logits.shape[-1])
-        loss = -jnp.sum(one_hot * log_probs, axis=-1)
-        return jnp.mean(loss)
+    logits = jnp.dot(hidden, weight)
+    log_probs = jax.nn.log_softmax(logits, axis=-1)
+    one_hot = jax.nn.one_hot(labels, logits.shape[-1])
+    loss = -jnp.sum(one_hot * log_probs, axis=-1)
+    return jnp.mean(loss)
 
 
 def benchmark(num_warmup=5, num_iters=100):

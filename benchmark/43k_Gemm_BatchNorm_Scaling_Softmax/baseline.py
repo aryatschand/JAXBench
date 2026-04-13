@@ -14,7 +14,7 @@ CONFIG = {
 
 def create_inputs(dtype=jnp.float32):
     """Create all inputs including weights."""
-    key = jax.random.PRNGKey(0)
+    key = jax.random.key(0)
     batch_size, in_features, out_features = 4096, 8192, 8192
     x = jax.random.uniform(key, (batch_size, in_features), dtype=dtype)
     weight = jnp.zeros((in_features, out_features), dtype=dtype)
@@ -29,18 +29,17 @@ def create_inputs(dtype=jnp.float32):
 
 def workload(x, weight, bias, bn_scale, bn_bias, bn_mean, bn_var, scale):
     """Gemm + BatchNorm + Scaling + Softmax."""
-    with jax.named_scope('bench_kernel'):
-        bn_eps = 1e-5
-        # Linear
-        x = jnp.matmul(x, weight) + bias
-        # BatchNorm (eval mode with running stats)
-        x_normalized = (x - bn_mean) / jnp.sqrt(bn_var + bn_eps)
-        x = bn_scale * x_normalized + bn_bias
-        # Scale
-        x = scale * x
-        # Softmax
-        x = jax.nn.softmax(x, axis=1)
-        return x
+    bn_eps = 1e-5
+    # Linear
+    x = jnp.matmul(x, weight) + bias
+    # BatchNorm (eval mode with running stats)
+    x_normalized = (x - bn_mean) / jnp.sqrt(bn_var + bn_eps)
+    x = bn_scale * x_normalized + bn_bias
+    # Scale
+    x = scale * x
+    # Softmax
+    x = jax.nn.softmax(x, axis=1)
+    return x
 
 def benchmark(num_warmup=5, num_iters=100):
     """Benchmark and return results dict."""

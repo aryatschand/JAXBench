@@ -7,12 +7,18 @@
 
 ## Quick Start
 
+Requires **Python 3.11** with **JAX 0.9.2**. On `v2-alpha-tpuv6e` TPU VMs, install first:
+
+```bash
+python3.11 -m pip install 'jax[tpu]==0.9.2' -f https://storage.googleapis.com/jax-releases/libtpu_releases.html
+```
+
 ```bash
 # Run a single workload
-PJRT_DEVICE=TPU python3 benchmark/gemm/baseline.py
+PJRT_DEVICE=TPU python3.11 benchmark/1p_Flash_Attention/baseline.py
 
 # Run Pallas-optimized variant (where available)
-PJRT_DEVICE=TPU python3 benchmark/flash_attention/pallas.py
+PJRT_DEVICE=TPU python3.11 benchmark/1p_Flash_Attention/optimized.py
 ```
 
 ## Workload Format

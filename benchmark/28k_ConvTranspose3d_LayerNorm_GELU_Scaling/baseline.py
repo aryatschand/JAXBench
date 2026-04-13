@@ -19,7 +19,7 @@ CONFIG = {
 
 def create_inputs(dtype=jnp.float32):
     """Create all inputs including weights."""
-    key = jax.random.PRNGKey(0)
+    key = jax.random.key(0)
     k1, k2 = jax.random.split(key)
     batch_size, in_channels, out_channels, kernel_size = 32, 32, 64, 4
     D, H, W = 16, 32, 32
@@ -33,53 +33,52 @@ def create_inputs(dtype=jnp.float32):
 
 def workload(x, conv_weight, conv_bias, ln_weight, ln_bias):
     """ConvTranspose3d + LayerNorm + GELU + Scaling."""
-    with jax.named_scope('bench_kernel'):
-        stride = 2
-        padding = 1
-        kernel_size = 4
-        eps = 1e-5
-        scaling_factor = 1.0
+    stride = 2
+    padding = 1
+    kernel_size = 4
+    eps = 1e-5
+    scaling_factor = 1.0
 
-        # NCDHW -> NDHWC
-        x = jnp.transpose(x, (0, 2, 3, 4, 1))
-        kernel = jnp.transpose(conv_weight, (2, 3, 4, 1, 0))
-        kernel = jnp.flip(kernel, axis=(0, 1, 2))
+    # NCDHW -> NDHWC
+    x = jnp.transpose(x, (0, 2, 3, 4, 1))
+    kernel = jnp.transpose(conv_weight, (2, 3, 4, 1, 0))
+    kernel = jnp.flip(kernel, axis=(0, 1, 2))
 
-        batch_size, d_in, h_in, w_in, channels = x.shape
-        k = kernel_size
+    batch_size, d_in, h_in, w_in, channels = x.shape
+    k = kernel_size
 
-        # Dilate input for transposed conv
-        d_dilated = d_in + (d_in - 1) * (stride - 1)
-        h_dilated = h_in + (h_in - 1) * (stride - 1)
-        w_dilated = w_in + (w_in - 1) * (stride - 1)
-        x_dilated = jnp.zeros((batch_size, d_dilated, h_dilated, w_dilated, channels), dtype=x.dtype)
-        x_dilated = x_dilated.at[:, ::stride, ::stride, ::stride, :].set(x)
-        x = x_dilated
+    # Dilate input for transposed conv
+    d_dilated = d_in + (d_in - 1) * (stride - 1)
+    h_dilated = h_in + (h_in - 1) * (stride - 1)
+    w_dilated = w_in + (w_in - 1) * (stride - 1)
+    x_dilated = jnp.zeros((batch_size, d_dilated, h_dilated, w_dilated, channels), dtype=x.dtype)
+    x_dilated = x_dilated.at[:, ::stride, ::stride, ::stride, :].set(x)
+    x = x_dilated
 
-        pad = k - 1 - padding
-        jax_padding = ((pad, pad), (pad, pad), (pad, pad))
+    pad = k - 1 - padding
+    jax_padding = ((pad, pad), (pad, pad), (pad, pad))
 
-        x = lax.conv_general_dilated(
-            x, kernel,
-            window_strides=(1, 1, 1),
-            padding=jax_padding,
-            dimension_numbers=('NDHWC', 'DHWOI', 'NDHWC')
-        )
-        x = x + conv_bias.reshape(1, 1, 1, 1, -1)
+    x = lax.conv_general_dilated(
+        x, kernel,
+        window_strides=(1, 1, 1),
+        padding=jax_padding,
+        dimension_numbers=('NDHWC', 'DHWOI', 'NDHWC')
+    )
+    x = x + conv_bias.reshape(1, 1, 1, 1, -1)
 
-        # NDHWC -> NCDHW
-        x = jnp.transpose(x, (0, 4, 1, 2, 3))
+    # NDHWC -> NCDHW
+    x = jnp.transpose(x, (0, 4, 1, 2, 3))
 
-        # LayerNorm over last dimension
-        mean = jnp.mean(x, axis=-1, keepdims=True)
-        var = jnp.mean((x - mean) ** 2, axis=-1, keepdims=True)
-        x = (x - mean) / jnp.sqrt(var + eps)
-        x = x * ln_weight + ln_bias
+    # LayerNorm over last dimension
+    mean = jnp.mean(x, axis=-1, keepdims=True)
+    var = jnp.mean((x - mean) ** 2, axis=-1, keepdims=True)
+    x = (x - mean) / jnp.sqrt(var + eps)
+    x = x * ln_weight + ln_bias
 
-        # GELU + Scaling
-        x = jax.nn.gelu(x)
-        x = x * scaling_factor
-        return x
+    # GELU + Scaling
+    x = jax.nn.gelu(x)
+    x = x * scaling_factor
+    return x
 
 def benchmark(num_warmup=5, num_iters=100):
     """Benchmark and return results dict."""

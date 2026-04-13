@@ -25,7 +25,7 @@ _skip_jit = True
 
 
 def create_inputs(dtype=jnp.bfloat16):
-    key = jax.random.PRNGKey(42)
+    key = jax.random.key(42)
     k1, k2 = jax.random.split(key, 2)
     G = CONFIG['num_experts']
     top_k = CONFIG['num_experts_per_tok']
@@ -49,18 +49,17 @@ def workload(lhs, rhs, group_sizes):
     For each group i, slices lhs[start:start+size] and computes dot with rhs[i].
     Uses data-dependent slicing so must be run eagerly (not under jax.jit).
     """
-    with jax.named_scope('bench_kernel'):
-        start = 0
-        out = []
-        for i, size in enumerate(group_sizes):
-            result = jax.lax.dot(
-                lhs[start:start + size, :],
-                rhs[i, :, :],
-                preferred_element_type=jnp.float32,
-            )
-            out.append(result)
-            start += group_sizes[i]
-        return jnp.concatenate(out, axis=0)
+    start = 0
+    out = []
+    for i, size in enumerate(group_sizes):
+        result = jax.lax.dot(
+            lhs[start:start + size, :],
+            rhs[i, :, :],
+            preferred_element_type=jnp.float32,
+        )
+        out.append(result)
+        start += group_sizes[i]
+    return jnp.concatenate(out, axis=0)
 
 
 def get_flops():

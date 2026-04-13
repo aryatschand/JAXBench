@@ -826,7 +826,7 @@ def get_flops():
 
 
 def create_inputs(dtype=jnp.bfloat16):
-    key = jax.random.PRNGKey(42)
+    key = jax.random.key(42)
     k1, k2 = jax.random.split(key, 2)
     G = CONFIG['num_experts']
     top_k = CONFIG['num_experts_per_tok']
@@ -842,8 +842,7 @@ def create_inputs(dtype=jnp.bfloat16):
 
 
 def workload(lhs, rhs, group_sizes):
-    with jax.named_scope('bench_kernel'):
-        return gmm(lhs, rhs, group_sizes, tiling=tuple(TUNED_PARAMS['tiling']))
+    return gmm(lhs, rhs, group_sizes, tiling=tuple(TUNED_PARAMS['tiling']))
 
 
 def benchmark(num_warmup=5, num_iters=100):
