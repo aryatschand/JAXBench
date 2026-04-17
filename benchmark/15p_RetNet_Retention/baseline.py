@@ -59,10 +59,12 @@ def workload(query, key, value):
     distance = positions[:, None] - positions[None, :]  # (S, S)
     # D[h,i,j] = γ_h^(i-j) * (i >= j)
     causal_mask = (distance >= 0).astype(jnp.float32)
-    # γ^distance: (H, S, S)
+    # γ^distance: (H, S, S) — clamp to non-negative before exp to avoid
+    # float32 overflow on the upper triangle (exp(log_γ * negative) → inf,
+    # then inf * 0 from the causal mask → NaN).
     log_gamma = jnp.log(gammas)  # (H,)
-    decay = jnp.exp(log_gamma[:, None, None] * distance[None, :, :])  # (H, S, S)
-    decay = decay * causal_mask[None, :, :]  # apply causal mask
+    decay = jnp.exp(log_gamma[:, None, None] * jnp.maximum(distance, 0.0)[None, :, :])
+    decay = decay * causal_mask[None, :, :]  # zero out upper triangle
 
     # Retention: (Q K^T ⊙ D) V
     # QK^T: (B, H, S, S)
